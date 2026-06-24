@@ -1,0 +1,12 @@
+{
+  "name": "formda",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "폼다 - 입력하면 바로 완성되는 무료 문서 자동작성 도구",
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "check": "node scripts/check-engine.mjs",
+    "serve": "node scripts/build.mjs && python3 -m http.server 8080"
+  }
+}

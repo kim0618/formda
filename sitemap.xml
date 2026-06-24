@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url><loc>https://formda.kr/</loc><priority>1.0</priority></url>
+  <url><loc>https://formda.kr/category/business.html</loc><priority>0.7</priority></url>
+  <url><loc>https://formda.kr/category/job.html</loc><priority>0.7</priority></url>
+  <url><loc>https://formda.kr/category/life.html</loc><priority>0.7</priority></url>
+  <url><loc>https://formda.kr/category/text.html</loc><priority>0.7</priority></url>
+  <url><loc>https://formda.kr/tools/estimate.html</loc><priority>0.9</priority></url>
+  <url><loc>https://formda.kr/pages/about.html</loc><priority>0.3</priority></url>
+  <url><loc>https://formda.kr/pages/terms.html</loc><priority>0.3</priority></url>
+  <url><loc>https://formda.kr/pages/privacy.html</loc><priority>0.3</priority></url>
+  <url><loc>https://formda.kr/pages/contact.html</loc><priority>0.3</priority></url>
+</urlset>
