@@ -1,63 +1,157 @@
-// 폼다 엔진 - 문서 미리보기 렌더 (docType별)
-// 새 문서 타입 = 이 객체에 함수 하나 추가. business-invoice가 견적서/거래명세서/영수증/발주서/청구서 공통.
+// 폼다 엔진 - 문서 미리보기 렌더 (docType별, A4 페이지 단위 + 표준 양식 + 자동 페이지네이션)
+// 기본: 여러 .doc-page (품목 많으면 2페이지+). opts.single=true: 썸네일용 1페이지.
 (function (root) {
   'use strict';
   root.Formda = root.Formda || {};
   var calc = root.Formda.calc;
 
+  var PAGE_ROWS = 14;  // 무료: 한 페이지(=14행)로 고정. 멀티페이지는 추후 프리미엄
+  var THUMB_MIN = 9;   // 썸네일 최소 채움 행
+
+  function esc(s) { return calc.esc(s); }
+  function comma(n) { return calc.comma(n); }
+
   function sealHTML(state, cfg) {
     if (!cfg.showSeal) return '';
-    if (state.sealImg) return '<img class="seal-img" src="' + state.sealImg + '" alt="도장">';
-    return '<span class="seal">(인)</span>';
+    if (state.sealImg) return '<img class="qt-seal-img" src="' + state.sealImg + '" alt="도장">';
+    return '<span class="qt-seal">(인)</span>';
   }
 
-  // 거래 문서 공통 렌더 (견적서/거래명세서/영수증/발주서/청구서)
-  function businessInvoice(state, cfg) {
-    var esc = calc.esc, won = calc.won, comma = calc.comma, korAmount = calc.korAmount;
-    var t = calc.totals(state.items, state.vat);
+  // 품목 1행. 거래명세서(cfg.taxColumns): 월일 + 공급가액·세액 분리(표준)
+  function row(items, gi, cfg, vat, mmdd) {
+    var tax = !!cfg.taxColumns;
+    var cols = tax ? 7 : 6;
+    var it = items[gi];
+    if (!it) {
+      var e = ''; for (var j = 0; j < cols; j++) e += '<td></td>';
+      return '<tr class="qt-er">' + e + '</tr>';
+    }
+    var qty = it.qty || 0, price = it.price || 0, line = qty * price;
+    // 첫 열: 거래명세서=월일, 그 외=No
+    var common =
+      '<td class="c">' + (tax ? mmdd : (gi + 1)) + '</td>' +
+      '<td class="l">' + (esc(it.name) || '') + '</td>' +
+      '<td class="c">' + (esc(it.spec) || '') + '</td>' +
+      '<td class="c">' + (qty || '') + '</td>' +
+      '<td class="r">' + (price ? comma(price) : '') + '</td>';
+    if (tax) {
+      var supply, svat;
+      if (vat === '0.1') { supply = line; svat = Math.round(line * 0.1); }
+      else if (vat === 'incl') { supply = Math.round(line / 1.1); svat = line - supply; }
+      else { supply = line; svat = 0; }
+      return '<tr>' + common +
+        '<td class="r">' + (line ? comma(supply) : '') + '</td>' +
+        '<td class="r">' + (line ? comma(svat) : '') + '</td></tr>';
+    }
+    return '<tr>' + common + '<td class="r">' + (line ? comma(line) : '') + '</td></tr>';
+  }
 
-    var rows = state.items.map(function (it, i) {
-      return '<tr>' +
-        '<td class="c">' + (i + 1) + '</td>' +
-        '<td class="l">' + (esc(it.name) || '-') + '</td>' +
-        '<td class="c">' + (it.qty || 0) + '</td>' +
-        '<td>' + won(it.price || 0) + '</td>' +
-        '<td>' + won((it.qty || 0) * (it.price || 0)) + '</td>' +
-        '</tr>';
-    }).join('');
+  function rowsFor(items, start, count, cfg, vat, mmdd) {
+    var h = '';
+    for (var k = 0; k < count; k++) h += row(items, start + k, cfg, vat, mmdd);
+    return h;
+  }
 
-    var subHTML =
-      '<span>' + (state.no ? cfg.numberLabel + ': ' + esc(state.no) : '') + '</span>' +
-      '<span>' + (state.date ? cfg.dateLabel + ': ' + esc(state.date) : '') + '</span>';
+  // 정보 박스 (공급자 / 공급받는자 공통). rows: 5행(등록번호·상호·대표자·주소·전화)
+  function partyBox(label, f, seal) {
+    return '<table class="qt-supplier"><tbody>' +
+      '<tr><th class="qt-side" rowspan="5">' + label + '</th><td class="k">등록번호</td><td class="v">' + (esc(f.reg) || '&nbsp;') + '</td></tr>' +
+      '<tr><td class="k">상　호</td><td class="v">' + (esc(f.name) || '&nbsp;') + '</td></tr>' +
+      '<tr><td class="k">대표자</td><td class="v"><span>' + (esc(f.ceo) || '&nbsp;') + '</span>' + (seal || '') + '</td></tr>' +
+      '<tr><td class="k">주　소</td><td class="v">' + (esc(f.addr) || '&nbsp;') + '</td></tr>' +
+      '<tr><td class="k">전　화</td><td class="v">' + (esc(f.tel) || '&nbsp;') + '</td></tr>' +
+      '</tbody></table>';
+  }
 
-    var vatRow = cfg.showVat
-      ? '<div class="tot"><span>부가세</span><span class="v">' + won(t.vat) + '</span></div>'
-      : '';
+  function amountBox(t) {
+    return '<div class="qt-amount">' +
+      '<div class="k">합계금액</div>' +
+      '<div class="v"><b>' + (t.total > 0 ? '一金 ' + calc.korAmount(t.total) + '원整' : '') + '</b>' +
+      '<span>' + (t.total > 0 ? '(₩' + comma(t.total) + ')' : '') + '</span></div>' +
+    '</div>';
+  }
 
-    return '' +
-      '<div class="doc-title">' + esc(cfg.docTitle) + '</div>' +
-      '<div class="doc-sub">' + subHTML + '</div>' +
-      '<div class="doc-head">' +
-        '<div class="recv"><small>' + esc(cfg.leadPhrase) + '</small>' +
-          '<span>' + (esc(state.to) || '-') + '</span> ' + esc(cfg.recipientSuffix) + '</div>' +
-        '<div class="supplier">' +
-          '<div class="sr"><div class="sk">등록번호</div><div class="sv">' + (esc(state.fromReg) || '-') + '</div></div>' +
-          '<div class="sr"><div class="sk">상호</div><div class="sv"><span>' + (esc(state.from) || '-') + '</span>' + sealHTML(state, cfg) + '</div></div>' +
-          '<div class="sr"><div class="sk">주소</div><div class="sv">' + (esc(state.fromAddr) || '-') + '</div></div>' +
-          '<div class="sr"><div class="sk">연락처</div><div class="sv">' + (esc(state.fromTel) || '-') + '</div></div>' +
+  function titleMeta(state, cfg) {
+    return '<div class="qt-title">' + esc(cfg.docTitle) + '</div>' +
+      '<div class="qt-meta"><span>' + (state.date ? cfg.dateLabel + ' : ' + esc(state.date) : '') + '</span>' +
+      '<span>' + (state.no ? cfg.numberLabel + ' : ' + esc(state.no) : '') + '</span></div>';
+  }
+
+  function firstHeader(state, cfg, t) {
+    // 거래명세서: 공급받는자 + 공급자 두 박스 나란히 (세금계산서식 표준 구조)
+    if (cfg.twoParty) {
+      return titleMeta(state, cfg) +
+        '<div class="qt-lead">' + esc(cfg.leadPhrase) + '</div>' +
+        '<div class="qt-parties">' +
+          partyBox('공급받는자', { reg: state.toReg, name: state.to, ceo: state.toCeo, addr: state.toAddr, tel: state.toTel }, '') +
+          partyBox('공급자', { reg: state.fromReg, name: state.from, ceo: state.fromCeo, addr: state.fromAddr, tel: state.fromTel }, sealHTML(state, cfg)) +
         '</div>' +
+        amountBox(t);
+    }
+    // 견적서 등: 수신("○○ 귀하") + 공급자 박스 1개(업태/종목 포함 6행)
+    return titleMeta(state, cfg) +
+      '<div class="qt-head">' +
+        '<div class="qt-recv"><div class="qt-recv-name">' + (esc(state.to) || '&nbsp;') + ' <b>' + esc(cfg.recipientSuffix) + '</b></div>' +
+          '<div class="qt-recv-sub">' + esc(cfg.leadPhrase) + '</div></div>' +
+        '<table class="qt-supplier"><tbody>' +
+          '<tr><th class="qt-side" rowspan="6">공급자</th><td class="k">등록번호</td><td class="v">' + (esc(state.fromReg) || '&nbsp;') + '</td></tr>' +
+          '<tr><td class="k">상　호</td><td class="v">' + (esc(state.from) || '&nbsp;') + '</td></tr>' +
+          '<tr><td class="k">대표자</td><td class="v"><span>' + (esc(state.fromCeo) || '&nbsp;') + '</span>' + sealHTML(state, cfg) + '</td></tr>' +
+          '<tr><td class="k">주　소</td><td class="v">' + (esc(state.fromAddr) || '&nbsp;') + '</td></tr>' +
+          '<tr><td class="k">업태/종목</td><td class="v">' + (esc(state.fromBiz) || '&nbsp;') + '</td></tr>' +
+          '<tr><td class="k">전　화</td><td class="v">' + (esc(state.fromTel) || '&nbsp;') + '</td></tr>' +
+        '</tbody></table>' +
       '</div>' +
-      '<div class="amount-box"><span class="kr">일금 ' + korAmount(t.total) + '원정</span>' +
-        '<span class="num">(₩' + comma(t.total) + ')</span></div>' +
-      '<table class="doc-table">' +
-        '<colgroup><col class="c-no"><col class="c-item"><col class="c-qty"><col class="c-price"><col class="c-amt"></colgroup>' +
-        '<thead><tr><th>No</th><th>품목</th><th>수량</th><th>단가</th><th>금액</th></tr></thead>' +
-        '<tbody>' + rows + '</tbody>' +
-      '</table>' +
-      '<div class="tot"><span>공급가액</span><span class="v">' + won(t.supply) + '</span></div>' +
-      vatRow +
-      '<div class="tot sum"><span>합계</span><span class="v">' + won(t.total) + '</span></div>' +
-      '<div class="doc-note">' + esc(state.note) + '</div>';
+      amountBox(t);
+  }
+
+  function itemsTable(cfg, rowsHtml) {
+    if (cfg.taxColumns) {
+      return '<table class="qt-items tax">' +
+        '<colgroup><col class="c-date"><col class="c-item"><col class="c-spec"><col class="c-qty"><col class="c-price"><col class="c-supply"><col class="c-tax"></colgroup>' +
+        '<thead><tr><th>월일</th><th>품　목</th><th>규격</th><th>수량</th><th>단가</th><th>공급가액</th><th>세액</th></tr></thead>' +
+        '<tbody>' + rowsHtml + '</tbody></table>';
+    }
+    return '<table class="qt-items">' +
+      '<colgroup><col class="c-no"><col class="c-item"><col class="c-spec"><col class="c-qty"><col class="c-price"><col class="c-amt"></colgroup>' +
+      '<thead><tr><th>No</th><th>품　목</th><th>규격</th><th>수량</th><th>단가</th><th>금액</th></tr></thead>' +
+      '<tbody>' + rowsHtml + '</tbody></table>';
+  }
+
+  function totalsBlock(state, cfg, t) {
+    var tax = !!cfg.taxColumns;
+    var vatLabel = tax ? '세　액' : '부 가 세';
+    var sumLabel = tax ? '합계금액' : '합　계';
+    var supplyLabel = tax ? '공급가액 합계' : '공급가액';
+    var vatRow = cfg.showVat
+      ? '<tr><td class="k">' + vatLabel + '</td><td class="v">' + comma(t.vat) + ' 원</td></tr>' : '';
+    // 거래명세서 표준: 인수자 확인란
+    var receiver = tax
+      ? '<div class="qt-receiver">인수자 <span class="qt-sign"></span> (인)</div>' : '';
+    var validity = (cfg.validity && state.validity)
+      ? '<div class="qt-validity">견적 유효기간 : ' + esc(state.validity) + '</div>' : '';
+    return '<table class="qt-tot"><tbody>' +
+        '<tr><td class="k">' + supplyLabel + '</td><td class="v">' + comma(t.supply) + ' 원</td></tr>' +
+        vatRow +
+        '<tr class="sum"><td class="k">' + sumLabel + '</td><td class="v">' + comma(t.total) + ' 원</td></tr>' +
+      '</tbody></table>' +
+      validity +
+      (state.note ? '<div class="qt-note">' + esc(state.note) + '</div>' : '') +
+      receiver;
+  }
+
+  function pageEl(inner) { return '<div class="doc-page">' + inner + '</div>'; }
+
+  // 무료: 항상 1페이지 (품목은 app에서 14개로 캡)
+  function businessInvoice(state, cfg, opts) {
+    opts = opts || {};
+    var t = calc.totals(state.items, state.vat);
+    var minRows = opts.single ? THUMB_MIN : PAGE_ROWS;
+    var n = Math.max(state.items.length, minRows);
+    var mmdd = '';
+    if (state.date) { var dp = String(state.date).split('-'); if (dp.length === 3) mmdd = dp[1] + '/' + dp[2]; }
+    var inner = firstHeader(state, cfg, t) + itemsTable(cfg, rowsFor(state.items, 0, n, cfg, state.vat, mmdd)) + totalsBlock(state, cfg, t);
+    return opts.single ? pageEl(inner) : '<div class="doc-pages">' + pageEl(inner) + '</div>';
   }
 
   root.Formda.docRender = {

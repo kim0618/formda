@@ -15,29 +15,53 @@ export const categories = [
     slug: 'business',
     name: '비즈니스',
     label: '비즈니스 문서',
-    icon: '📄',
+    icon: 'business',
     desc: '견적서·거래명세서·영수증 등 사업자와 프리랜서가 자주 쓰는 거래 문서를 입력만으로 완성해 PDF로 내려받으세요.',
+    planned: ['거래명세서', '영수증', '발주서', '청구서'],
+    guides: [
+      { title: '견적서 작성 방법', desc: '처음 작성하는 사람을 위한 필수 항목과 작성 순서' },
+      { title: '견적서와 거래명세서 차이', desc: '거래 전 제안 문서와 거래 내역 문서의 차이' },
+      { title: '공급가액·부가세·합계 계산 방법', desc: '견적서 금액 계산 시 알아야 할 기본 구조' },
+    ],
   },
   {
     slug: 'job',
     name: '취업',
     label: '취업/자기PR',
-    icon: '📝',
+    icon: 'job',
     desc: '이력서·자기소개서·경력기술서 등 취업과 자기 PR에 필요한 문서를 양식 고민 없이 작성합니다.',
+    planned: ['이력서', '자기소개서', '경력기술서', '재직증명서', '사직서'],
+    guides: [
+      { title: '이력서 작성 방법', desc: '인적사항과 경력을 정리하는 기본 순서' },
+      { title: '자기소개서 쓰는 법', desc: '지원 동기와 경험을 설득력 있게 정리하기' },
+      { title: '경력기술서와 이력서 차이', desc: '무엇을 어디에 써야 하는지 구분하기' },
+    ],
   },
   {
     slug: 'life',
     name: '생활',
     label: '생활/행정',
-    icon: '🏠',
+    icon: 'life',
     desc: '명함·상장·가정통신문 등 생활과 행정에서 필요한 문서를 손쉽게 만듭니다.',
+    planned: ['명함', 'QR코드', '상장·표창장', '가정통신문'],
+    guides: [
+      { title: '명함 만들기 가이드', desc: '연락처와 직함을 깔끔하게 구성하는 법' },
+      { title: 'QR코드 활용법', desc: '링크·정보를 빠르게 공유하는 방법' },
+      { title: '상장·표창장 문구 작성', desc: '수상 내용을 격식 있게 적는 팁' },
+    ],
   },
   {
     slug: 'text',
     name: '텍스트',
     label: '텍스트 도구',
-    icon: '🔤',
+    icon: 'text',
     desc: '글자수 세기·여권 영문이름 변환 등 가볍게 자주 쓰는 텍스트 도구 모음.',
+    planned: ['글자수 세기', '영문이름 변환', '주소 변환', '텍스트 정렬'],
+    guides: [
+      { title: '글자수 세기 활용', desc: '공백 포함·제외 기준과 자기소개서 글자수 맞추기' },
+      { title: '여권 영문이름 표기법', desc: '외교부 로마자 표기 규칙 정리' },
+      { title: '한글 주소 영문 변환', desc: '도로명주소 영문 표기 방법' },
+    ],
   },
 ];
 
@@ -47,12 +71,16 @@ export const tools = [
     category: 'business',
     title: '견적서 만들기',
     navTitle: '견적서',
-    icon: '🧾',
+    icon: 'estimate',
     seoTitle: '견적서 만들기 - 무료 견적서 자동작성 PDF | 폼다',
     seoDescription:
       '가입 없이 입력만 하면 견적서가 바로 완성됩니다. 품목 자동계산, 부가세, 한글 금액, 도장 업로드, PDF·PNG 다운로드까지 무료. 폼다 견적서 만들기.',
     keywords: ['견적서 만들기', '견적서 양식', '견적서 자동작성', '무료 견적서', '견적서 PDF', '견적서 작성'],
-    summary: '품목만 입력하면 부가세·합계·한글 금액까지 자동 계산되는 견적서를 무료로 만들고 PDF로 내려받으세요.',
+    summary: '품목과 금액을 입력하면 부가세·합계·한글 금액까지 자동 계산된 견적서를 PDF로 내려받을 수 있습니다.',
+    use: '거래 전에 품목과 금액을 제안할 때 사용합니다.',
+    example: '홈페이지 제작 견적, 납품 전 금액 제안',
+    features: ['공급가액·부가세 자동 계산', '한글 금액 자동 표기', '도장·서명 이미지 첨부', 'PDF·PNG·인쇄 저장'],
+    audience: '프리랜서 · 소상공인 · 1인 사업자',
 
     docType: 'business-invoice',
     doc: {
@@ -65,6 +93,7 @@ export const tools = [
       supplierLabel: '공급자 (보내는 곳)',
       showVat: true,
       showSeal: true,
+      validity: true,
       fileName: '견적서',
     },
 
@@ -73,15 +102,18 @@ export const tools = [
       no: '2026-001',
       from: '폼다상사',
       fromReg: '123-45-67890',
+      fromCeo: '김폼다',
+      fromBiz: '서비스 / 소프트웨어 개발',
       fromTel: '02-1234-5678',
       fromAddr: '서울시 강남구 테헤란로 1',
       to: '○○ 주식회사',
+      validity: '발행일로부터 30일',
       items: [
-        { name: '웹사이트 제작', qty: 1, price: 3000000 },
-        { name: '유지보수 (월)', qty: 3, price: 100000 },
+        { name: '웹사이트 제작', spec: '반응형', qty: 1, price: 3000000 },
+        { name: '유지보수 (월)', spec: '정기 점검', qty: 3, price: 100000 },
       ],
       vat: '0.1',
-      note: '견적 유효기간: 발행일로부터 30일\n입금계좌: 폼다은행 123-456-7890',
+      note: '입금계좌: 폼다은행 123-456-7890',
     },
 
     related: ['statement', 'receipt', 'order', 'invoice'],
@@ -93,6 +125,7 @@ export const tools = [
       sections: [
         {
           h: '견적서 필수 기재 항목',
+          icon: 'checklist',
           html:
             '<p>견적서에 정해진 법정 서식은 없지만, 거래처와 오해 없이 쓰려면 아래 항목을 갖추는 것이 안전합니다.</p>' +
             '<ul>' +
@@ -106,11 +139,13 @@ export const tools = [
         },
         {
           h: '부가세 포함과 별도, 무엇이 다를까',
+          icon: 'calc',
           html:
             '<p>견적서에서 가장 자주 생기는 혼선이 부가세입니다. <b>"10% 별도"</b>는 입력한 단가를 공급가액으로 보고 거기에 10%를 더해 합계를 만듭니다. <b>"10% 포함"</b>은 입력 금액에 이미 부가세가 들어 있다고 보고 1.1로 나눠 공급가액과 세액을 역산합니다. 같은 숫자라도 최종 합계가 달라지므로, 견적서에 부가세 처리 방식을 반드시 표기해 거래처와 분쟁을 피하세요. 면세 사업자라면 "없음"을 선택하면 됩니다.</p>',
         },
         {
           h: '견적서 작성과 발송 팁',
+          icon: 'tip',
           html:
             '<ul>' +
             '<li>유효기간을 적어 두면 원자재·환율 변동에 따른 가격 변경 여지를 남길 수 있습니다.</li>' +
@@ -136,7 +171,145 @@ export const tools = [
       ],
     },
   },
+  {
+    slug: 'statement',
+    category: 'business',
+    title: '거래명세서 만들기',
+    navTitle: '거래명세서',
+    icon: 'statement',
+    seoTitle: '거래명세서 만들기 - 무료 거래명세서 양식 자동작성 PDF | 폼다',
+    seoDescription:
+      '가입 없이 입력만 하면 거래명세서가 바로 완성됩니다. 품목·공급가액·부가세 자동 계산, 한글 금액, 도장 업로드, PDF·PNG 다운로드까지 무료. 폼다 거래명세서 작성기.',
+    keywords: ['거래명세서 만들기', '거래명세서 양식', '거래명세서 자동작성', '무료 거래명세서', '거래명세서 PDF', '거래명세서 작성'],
+    summary: '납품 내역과 금액을 입력하면 공급가액·부가세·합계까지 자동 계산된 거래명세서를 PDF로 내려받을 수 있습니다.',
+    use: '납품한 품목과 수량, 금액 등 거래 내역을 정리할 때 사용합니다.',
+    example: '물품 납품 후 거래 내역 전달',
+    features: ['공급가액·부가세 자동 계산', '한글 금액 자동 표기', '도장·서명 이미지 첨부', 'PDF·PNG·인쇄 저장'],
+    audience: '소상공인 · 도소매 · 프리랜서',
+
+    docType: 'business-invoice',
+    doc: {
+      docTitle: '거 래 명 세 서',
+      dateLabel: '거래일자',
+      numberLabel: '명세서번호',
+      leadPhrase: '아래와 같이 거래 내역을 명세합니다.',
+      recipientSuffix: '귀하',
+      recipientLabel: '공급받는자 (받는 곳)',
+      supplierLabel: '공급자 (보내는 곳)',
+      showVat: true,
+      showSeal: true,
+      taxColumns: true,
+      twoParty: true,
+      fileName: '거래명세서',
+    },
+
+    sample: {
+      date: 'today',
+      no: '2026-001',
+      from: '폼다상사',
+      fromReg: '123-45-67890',
+      fromCeo: '김폼다',
+      fromBiz: '서비스 / 소프트웨어 개발',
+      fromTel: '02-1234-5678',
+      fromAddr: '서울시 강남구 테헤란로 1',
+      to: '○○ 주식회사',
+      toReg: '210-81-12345',
+      toCeo: '이대표',
+      toTel: '02-9876-5432',
+      toAddr: '서울시 서초구 서초대로 100',
+      items: [
+        { name: '제품 카탈로그 제작', spec: 'A4 16p', qty: 1, price: 1200000 },
+        { name: '카탈로그 인쇄', spec: '500부', qty: 1, price: 450000 },
+      ],
+      vat: '0.1',
+      note: '입금 계좌: 폼다은행 123-456-7890\n세금계산서는 입금 확인 후 발행됩니다.',
+    },
+
+    related: ['estimate', 'receipt', 'invoice', 'order'],
+
+    prerender: {
+      intro:
+        '거래명세서는 공급자가 거래 상대방에게 실제로 공급한 물품이나 서비스의 내역(품목·규격·수량·단가·금액)을 정리해 전달하는 문서입니다. 거래 전에 가격을 제안하는 견적서와 달리, 거래가 이루어진 뒤 "무엇을 얼마에 공급했는지"를 확인하고 정산의 근거로 삼는 용도로 쓰입니다. 세금계산서 같은 법정 증빙은 아니지만, 거래처와 공급 내역을 맞추고 대금 청구·정산의 기준으로 활용하기 좋습니다. 폼다 거래명세서 작성기는 품목과 금액만 입력하면 공급가액·부가세·합계는 물론 한글 금액까지 자동으로 채워, 가입 없이 바로 PDF나 PNG로 내려받을 수 있습니다.',
+      sections: [
+        {
+          h: '거래명세서 필수 기재 항목',
+          icon: 'checklist',
+          html:
+            '<p>거래명세서에 정해진 법정 서식은 없지만, 거래처와 내역을 정확히 맞추려면 아래 항목을 갖추는 것이 좋습니다.</p>' +
+            '<ul>' +
+            '<li><b>공급자 정보</b> - 상호, 사업자등록번호, 대표자, 주소, 연락처. 도장이나 서명을 더하면 신뢰가 높아집니다.</li>' +
+            '<li><b>공급받는자</b> - 거래 상대 상호와 담당자명.</li>' +
+            '<li><b>거래일자와 명세서 번호</b> - 실제 공급한 날짜와 관리용 번호.</li>' +
+            '<li><b>품목·규격·수량·단가·금액</b> - 실제 공급한 내역을 항목별로 적습니다.</li>' +
+            '<li><b>공급가액·부가세·합계</b> - 부가세 처리 방식을 명확히 표기합니다.</li>' +
+            '<li><b>비고</b> - 입금 계좌, 세금계산서 발행 여부, 인수 확인 등.</li>' +
+            '</ul>',
+        },
+        {
+          h: '견적서·거래명세서·세금계산서 차이',
+          icon: 'doc',
+          html:
+            '<p>세 문서는 시점과 용도가 다릅니다. <b>견적서</b>는 거래 전에 가격을 제안하는 문서, <b>거래명세서</b>는 거래 후 실제 공급한 내역을 정리하는 문서, <b>세금계산서</b>는 부가가치세법상 법정 증빙입니다. 거래명세서는 세금계산서를 대체하지 않지만, 거래 내역을 맞추고 청구·정산의 근거로 함께 쓰는 경우가 많습니다. 보통 같은 거래는 견적서 → 거래명세서 → 청구서·세금계산서 순서로 이어집니다.</p>',
+        },
+        {
+          h: '거래명세서 작성과 보관 팁',
+          icon: 'tip',
+          html:
+            '<ul>' +
+            '<li>같은 거래처와 반복 거래한다면 명세서 번호를 일련번호로 관리해 정산을 간편하게 하세요.</li>' +
+            '<li>공급가액과 부가세를 분리해 적어 두면 세금계산서 발행·대사가 수월합니다.</li>' +
+            '<li>받는 쪽이 인수 사실을 확인하도록 비고에 인수 확인란을 남기면 분쟁을 줄일 수 있습니다.</li>' +
+            '<li>PDF로 보관하면 종이 분실 걱정 없이 거래 이력을 관리할 수 있습니다.</li>' +
+            '</ul>',
+        },
+      ],
+      faq: [
+        {
+          q: '거래명세서가 세금계산서를 대신하나요?',
+          a: '아니요. 거래명세서는 거래 내역을 정리·확인하는 문서이고, 세금계산서는 부가가치세법상 법정 증빙입니다. 부가세 신고에는 세금계산서가 필요합니다.',
+        },
+        {
+          q: '견적서로 만든 내용을 거래명세서로 옮길 수 있나요?',
+          a: '네. 항목 구성이 비슷해 견적서 내용을 그대로 거래명세서로 옮긴 뒤 실제 공급 내역에 맞게 수정하면 됩니다.',
+        },
+        {
+          q: '입력한 내용은 저장되나요?',
+          a: '폼다는 입력 정보를 서버로 전송하거나 저장하지 않습니다. 모든 처리는 사용자 브라우저에서만 이루어지고, 내려받은 PDF·PNG 파일만 기기에 남습니다.',
+        },
+      ],
+    },
+  },
 ];
+
+// 예정 문서 = 빈 스텁(준비중). 레이아웃 확인용. 다음 세션에 docType/본문 채워 실제 도구화.
+// 슬러그는 미리 확정(견적서 related 링크와 연결).
+const STUB_DEFS = [
+  { slug: 'receipt', category: 'business', navTitle: '영수증', docTitle: '영 수 증', use: '대금을 받았거나 지불했음을 확인할 때 사용합니다.', example: '현금 거래 대금 수령 확인' },
+  { slug: 'order', category: 'business', navTitle: '발주서', docTitle: '발 주 서', use: '구매자가 판매자에게 주문 내용을 전달할 때 사용합니다.', example: '자재·물품 구매 주문' },
+  { slug: 'invoice', category: 'business', navTitle: '청구서', docTitle: '청 구 서', use: '거래 후 대금 지급을 요청할 때 사용합니다.', example: '용역 완료 후 대금 청구' },
+  { slug: 'resume', category: 'job', navTitle: '이력서', docTitle: '이 력 서', use: '인적사항과 경력을 정리해 지원할 때 사용합니다.' },
+  { slug: 'cover-letter', category: 'job', navTitle: '자기소개서', docTitle: '자기소개서', use: '지원 동기와 경험을 정리할 때 사용합니다.' },
+  { slug: 'career', category: 'job', navTitle: '경력기술서', docTitle: '경력기술서', use: '수행 업무와 성과를 중심으로 정리할 때 사용합니다.' },
+  { slug: 'employment', category: 'job', navTitle: '재직증명서', docTitle: '재직증명서', use: '재직 사실을 증명할 때 사용합니다.' },
+  { slug: 'resignation', category: 'job', navTitle: '사직서', docTitle: '사 직 서', use: '퇴사 의사를 전달할 때 사용합니다.' },
+  { slug: 'business-card', category: 'life', navTitle: '명함', docTitle: '명 함', use: '연락처와 직함을 안내할 때 사용합니다.' },
+  { slug: 'qr', category: 'life', navTitle: 'QR코드', docTitle: 'QR 코드', use: '링크나 정보를 빠르게 공유할 때 사용합니다.' },
+  { slug: 'award', category: 'life', navTitle: '상장·표창장', docTitle: '상 장', use: '수상자와 수상 내용을 문서로 남길 때 사용합니다.' },
+  { slug: 'notice', category: 'life', navTitle: '가정통신문', docTitle: '가정통신문', use: '안내 사항을 전달할 때 사용합니다.' },
+  { slug: 'char-count', category: 'text', navTitle: '글자수 세기', docTitle: '글자수 세기', use: '글자수와 공백 포함·제외를 빠르게 확인합니다.' },
+  { slug: 'name-roman', category: 'text', navTitle: '영문이름 변환', docTitle: '영문이름 변환', use: '한글 이름을 여권용 로마자 표기로 변환합니다.' },
+  { slug: 'address-roman', category: 'text', navTitle: '주소 변환', docTitle: '주소 영문 변환', use: '한글 주소를 영문 표기로 변환합니다.' },
+  { slug: 'text-align', category: 'text', navTitle: '텍스트 정렬', docTitle: '텍스트 정렬', use: '텍스트를 정렬하거나 줄 단위로 정리합니다.' },
+];
+for (const s of STUB_DEFS) {
+  tools.push({
+    ...s,
+    title: `${s.navTitle} 만들기`,
+    icon: s.category,
+    summary: '곧 추가됩니다.',
+    stub: true,
+  });
+}
 
 export const toolsBySlug = Object.fromEntries(tools.map((t) => [t.slug, t]));
 export const categoryBySlug = Object.fromEntries(categories.map((c) => [c.slug, c]));

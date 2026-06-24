@@ -17,52 +17,71 @@
             '<option value="incl">10% 포함</option>' +
             '<option value="0">없음</option>' +
           '</select></div>'
-      : '<div class="field"><label>구분</label><input value="-" disabled></div>';
+      : '';
 
     var sealBlock = cfg.showSeal
-      ? '<h2 class="mt">도장 / 직인 (선택)</h2>' +
-        '<div class="field seal-upload">' +
-          '<label class="seal-btn" for="f-seal">이미지 업로드</label>' +
-          '<input id="f-seal" type="file" accept="image/*" onchange="Formda.app.onSeal(this)" hidden>' +
-          '<button class="seal-clear" type="button" onclick="Formda.app.clearSeal()">제거</button>' +
-        '</div>' +
-        '<div class="seal-name" id="sealName"></div>'
+      ? '<div class="field"><label>도장/서명 이미지</label>' +
+          '<div class="seal-upload">' +
+            '<label class="seal-btn" for="f-seal">이미지 업로드</label>' +
+            '<input id="f-seal" type="file" accept="image/*" onchange="Formda.app.onSeal(this)" hidden>' +
+            '<button class="seal-clear" type="button" onclick="Formda.app.clearSeal()">제거</button>' +
+          '</div>' +
+          '<div class="seal-name" id="sealName"></div>' +
+          '<p class="field-help">업로드한 이미지는 서버에 저장되지 않고 미리보기에만 사용됩니다. 권장: PNG, 투명 배경</p>' +
+        '</div>'
       : '';
 
     return '' +
-      '<div class="row2">' +
-        '<div class="field"><label>' + cfg.dateLabel + '</label>' +
-          '<input id="f-date" type="date" oninput="Formda.app.onField(\'date\', this.value)"></div>' +
-        '<div class="field"><label>' + cfg.numberLabel + '</label>' +
-          '<input id="f-no" oninput="Formda.app.onField(\'no\', this.value)"></div>' +
+      // 1. 기본 정보 (샘플/비우기는 패널 헤더로 이동)
+      '<div class="form-sec"><h2>기본 정보</h2>' +
+        '<div class="row2">' +
+          '<div class="field"><label>' + cfg.dateLabel + '</label>' +
+            '<input id="f-date" type="date" oninput="Formda.app.onField(\'date\', this.value)"></div>' +
+          '<div class="field"><label>' + cfg.numberLabel + '</label>' +
+            '<input id="f-no" oninput="Formda.app.onField(\'no\', this.value)"></div>' +
+        '</div>' +
+        (cfg.validity
+          ? '<div class="field"><label>유효기간</label>' +
+            '<input id="f-validity" placeholder="예: 발행일로부터 30일" oninput="Formda.app.onField(\'validity\', this.value)"></div>'
+          : '') +
       '</div>' +
 
-      '<h2 class="mt">' + cfg.supplierLabel + '</h2>' +
-      field('from', '상호') +
-      '<div class="row2">' + field('fromReg', '사업자등록번호') + field('fromTel', '연락처') + '</div>' +
-      field('fromAddr', '주소') +
+      // 2. 거래 정보
+      '<div class="form-sec"><h2>거래 정보</h2>' +
+        '<div class="sub">' + cfg.supplierLabel + '</div>' +
+        field('from', '상호') +
+        '<div class="row2">' + field('fromReg', '사업자등록번호') + field('fromCeo', '대표자') + '</div>' +
+        '<div class="row2">' + field('fromBiz', '업태 / 종목') + field('fromTel', '연락처') + '</div>' +
+        field('fromAddr', '주소') +
+        '<div class="sub mt">' + cfg.recipientLabel + '</div>' +
+        field('to', '상호') +
+        (cfg.twoParty
+          ? '<div class="row2">' + field('toReg', '사업자등록번호') + field('toCeo', '대표자') + '</div>' +
+            '<div class="row2">' + field('toTel', '연락처') + '<div class="field"></div></div>' +
+            field('toAddr', '주소')
+          : '') +
+      '</div>' +
 
-      '<h2 class="mt">' + cfg.recipientLabel + '</h2>' +
-      field('to', '상호') +
+      // 3. 품목과 금액
+      '<div class="form-sec"><h2>품목과 금액</h2>' +
+        '<table class="items">' +
+          '<colgroup><col style="width:32%"><col style="width:18%"><col style="width:13%"><col style="width:27%"><col style="width:10%"></colgroup>' +
+          '<thead><tr><th>품목</th><th>규격</th><th>수량</th><th>단가</th><th></th></tr></thead>' +
+          '<tbody id="rows"></tbody>' +
+        '</table>' +
+        '<button class="addrow" id="addRowBtn" type="button" onclick="Formda.app.addRow()">+ 품목 추가</button>' +
+        '<p class="field-help" id="rowLimit" style="display:none">무료 견적서는 한 페이지(최대 14개 품목)까지 작성할 수 있어요. 여러 페이지는 추후 지원할 예정입니다.</p>' +
+        (vatBlock ? '<div style="margin-top:14px">' + vatBlock + '</div>' : '') +
+      '</div>' +
 
-      '<h2 class="mt">품목</h2>' +
-      '<table class="items">' +
-        '<colgroup><col style="width:44%"><col style="width:18%"><col style="width:28%"><col style="width:10%"></colgroup>' +
-        '<thead><tr><th>품목</th><th>수량</th><th>단가</th><th></th></tr></thead>' +
-        '<tbody id="rows"></tbody>' +
-      '</table>' +
-      '<button class="addrow" type="button" onclick="Formda.app.addRow()">+ 품목 추가</button>' +
-
-      '<div class="row2" style="margin-top:16px">' +
-        vatBlock +
+      // 선택 항목 (접기)
+      '<details class="form-opt"><summary>선택 항목 (도장·통화·비고)</summary>' +
+        sealBlock +
         '<div class="field"><label>통화</label><input value="원" disabled></div>' +
-      '</div>' +
-
-      sealBlock +
-
-      '<div class="field"><label>비고</label>' +
-        '<textarea id="f-note" rows="2" placeholder="유효기간, 입금계좌 등" ' +
-        'oninput="Formda.app.onField(\'note\', this.value)"></textarea></div>';
+        '<div class="field"><label>비고</label>' +
+          '<textarea id="f-note" rows="2" placeholder="유효기간, 입금계좌 등" ' +
+          'oninput="Formda.app.onField(\'note\', this.value)"></textarea></div>' +
+      '</details>';
   }
 
   // 품목 입력행 (수량/단가 콤마·자릿수 제한은 app 핸들러에서)
@@ -72,6 +91,7 @@
       var priceVal = it.price ? it.price.toLocaleString('ko-KR') : '';
       return '<tr>' +
         '<td><input value="' + calc.esc(it.name) + '" placeholder="품목명" oninput="Formda.app.onName(' + i + ', this.value)"></td>' +
+        '<td><input value="' + calc.esc(it.spec || '') + '" placeholder="규격" oninput="Formda.app.onSpec(' + i + ', this.value)"></td>' +
         '<td><input inputmode="numeric" value="' + (it.qty || '') + '" oninput="Formda.app.onQty(' + i + ', this)"></td>' +
         '<td><input inputmode="numeric" value="' + priceVal + '" placeholder="0" oninput="Formda.app.onPrice(' + i + ', this)"></td>' +
         '<td style="text-align:center"><button class="del" type="button" onclick="Formda.app.delRow(' + i + ')">×</button></td>' +

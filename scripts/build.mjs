@@ -1,15 +1,48 @@
 // 폼다 빌드 - registry -> 정적 HTML (tools·home·category·pages) + sitemap + robots
-import { writeFileSync, mkdirSync, rmSync, existsSync } from 'node:fs';
+import { writeFileSync, mkdirSync, rmSync, existsSync, readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import vm from 'node:vm';
 
 import { site, categories, tools } from '../data/registry.js';
-import { toolPage } from '../templates/tool-page.mjs';
+import { toolPage, stubToolPage } from '../templates/tool-page.mjs';
 import { homePage } from '../templates/home.mjs';
 import { categoryPage } from '../templates/category.mjs';
 import { trustPages } from '../templates/page.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
+
+// ---- 카드 썸네일: 엔진(doc-render)을 그대로 로드해 샘플이 채워진 완성 문서를 렌더 ----
+const THUMB_DATE = '2026-06-24'; // 썸네일용 고정 날짜 (빌드 결정성)
+function loadEngine() {
+  const ctx = { window: {}, module: { exports: {} } };
+  vm.createContext(ctx);
+  for (const f of ['engine/calc.js', 'engine/doc-render.js']) {
+    ctx.module = { exports: {} };
+    vm.runInContext(readFileSync(join(ROOT, f), 'utf8'), ctx);
+  }
+  return ctx.window.Formda;
+}
+const ENGINE = loadEngine();
+// 스텁: 빈 양식 스켈레톤 썸네일 (A4 .doc-page 안에 제목 + 회색 플레이스홀더)
+function blankThumb(tool) {
+  const bars = Array.from({ length: 8 }, () => '<div class="bl-row"></div>').join('');
+  return '<div class="doc-page">' +
+    `<div class="qt-title">${tool.docTitle || tool.navTitle}</div>` +
+    '<div class="bl-meta"><span></span><span></span></div>' +
+    '<div class="bl-box"></div>' +
+    `<div class="bl-table"><div class="bl-row head"></div>${bars}</div>` +
+    '</div>';
+}
+function renderThumb(tool) {
+  if (tool.stub) return blankThumb(tool);
+  const s = JSON.parse(JSON.stringify(tool.sample || {}));
+  if (s.date === 'today') s.date = THUMB_DATE;
+  if (!s.items || !s.items.length) s.items = [{ name: '', qty: 1, price: 0 }];
+  s.sealImg = null;
+  return ENGINE.docRender[tool.docType](s, tool.doc, { single: true });
+}
+const THUMBS = Object.fromEntries(tools.map((t) => [t.slug, renderThumb(t)]));
 
 function out(relPath, content) {
   const full = join(ROOT, relPath);
@@ -26,15 +59,15 @@ for (const dir of ['tools', 'category', 'pages']) {
 
 console.log('[1/5] 도구 페이지');
 for (const tool of tools) {
-  out(`tools/${tool.slug}.html`, toolPage(tool));
+  out(`tools/${tool.slug}.html`, tool.stub ? stubToolPage(tool) : toolPage(tool));
 }
 
 console.log('[2/5] 홈');
-out('index.html', homePage());
+out('index.html', homePage(THUMBS));
 
 console.log('[3/5] 카테고리 허브');
 for (const cat of categories) {
-  out(`category/${cat.slug}.html`, categoryPage(cat));
+  out(`category/${cat.slug}.html`, categoryPage(cat, THUMBS));
 }
 
 console.log('[4/5] 신뢰 페이지');
@@ -46,7 +79,7 @@ console.log('[5/5] sitemap + robots');
 const urls = [
   { loc: '/', priority: '1.0' },
   ...categories.map((c) => ({ loc: `/category/${c.slug}.html`, priority: '0.7' })),
-  ...tools.map((t) => ({ loc: `/tools/${t.slug}.html`, priority: '0.9' })),
+  ...tools.filter((t) => !t.stub).map((t) => ({ loc: `/tools/${t.slug}.html`, priority: '0.9' })),
   ...['about', 'terms', 'privacy', 'contact'].map((s) => ({ loc: `/pages/${s}.html`, priority: '0.3' })),
 ];
 const sitemap = `<?xml version="1.0" encoding="UTF-8"?>

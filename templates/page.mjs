@@ -11,7 +11,7 @@ function wrapPage({ slug, title, bodyHTML, description }) {
 ${header('')}
 <main class="wrap">
   <div class="crumb"><a href="/">홈</a> › ${title}</div>
-  <article class="doc-page">
+  <article class="legal-page">
     <h1>${title}</h1>
     ${bodyHTML}
   </article>

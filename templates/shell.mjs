@@ -8,20 +8,23 @@ const TRUST_PAGES = [
   { href: '/pages/contact.html', label: '문의' },
 ];
 
-export function head({ title, description, canonical, keywords }) {
+export function head({ title, description, canonical, keywords, robots }) {
   return `<!DOCTYPE html>
 <html lang="ko">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<script>document.documentElement.classList.add('js')</script>
 <title>${title}</title>
 <meta name="description" content="${escAttr(description || site.description)}" />
-${keywords ? `<meta name="keywords" content="${escAttr(keywords)}" />\n` : ''}<link rel="canonical" href="${site.domain}${canonical}" />
+${robots ? `<meta name="robots" content="${robots}" />\n` : ''}${keywords ? `<meta name="keywords" content="${escAttr(keywords)}" />\n` : ''}<link rel="canonical" href="${site.domain}${canonical}" />
 <meta property="og:type" content="website" />
 <meta property="og:title" content="${escAttr(title)}" />
 <meta property="og:description" content="${escAttr(description || site.description)}" />
 <meta property="og:url" content="${site.domain}${canonical}" />
 <meta property="og:site_name" content="${site.name}" />
+<link rel="icon" href="/assets/favicon.png" type="image/png" />
+<link rel="apple-touch-icon" href="/assets/apple-touch-icon.png" />
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" />
 <link rel="stylesheet" href="/styles/tokens.css" />
 </head>
@@ -34,7 +37,7 @@ export function header(activeCat) {
     .join('');
   return `<header class="header">
   <div class="header-in">
-    <a class="logo" href="/">폼다</a>
+    <a class="logo" href="/"><img class="logo-img" src="/assets/logo.png" alt="폼다" onerror="this.replaceWith(Object.assign(document.createElement('span'),{className:'logo-text',textContent:'폼다'}))"></a>
     <nav class="nav">${nav}</nav>
   </div>
 </header>`;
@@ -47,7 +50,8 @@ export function footer() {
   return `<footer class="footer">
   <div class="footer-in">
     <div class="footer-links">${links}</div>
-    <div class="footer-copy">© ${site.name} · ${site.tagline} · 입력 정보는 서버에 저장되지 않고 브라우저에서만 처리됩니다.</div>
+    <div class="footer-note">폼다는 입력 정보를 서버에 저장하지 않는 브라우저 기반 문서 작성 도구입니다. 작성한 문서의 내용 확인과 사용 책임은 사용자에게 있습니다.</div>
+    <div class="footer-copy">© ${site.name} · ${site.tagline}</div>
   </div>
 </footer>
 </body>
