@@ -174,6 +174,7 @@ img { max-width: 100%; }
 /* A4 한 장 (794 x 1123 = A4 @96dpi) */
 .doc-page { width: 794px; height: 1123px; background: #fff; color: #111; padding: 56px 52px;
   box-shadow: var(--shadow-paper); overflow: hidden; }
+.doc-fit { transform-origin: top center; }   /* 내용이 넘치면 app.fitDoc이 scale 적용 */
 
 /* 표준 견적서 양식 (qt-) */
 .qt-title { text-align: center; font-size: 32px; font-weight: 800; letter-spacing: 18px; padding-bottom: 14px;
@@ -208,17 +209,47 @@ img { max-width: 100%; }
 .qt-amount .v span { font-size: 13px; color: #444; }
 
 .qt-items { width: 100%; border-collapse: collapse; font-size: 12px; table-layout: fixed; }
-.qt-items col.c-no { width: 7%; } .qt-items col.c-item { width: 33%; } .qt-items col.c-spec { width: 14%; }
+.qt-items col.c-no { width: 7%; } .qt-items col.c-date { width: 9%; } .qt-items col.c-item { width: 33%; } .qt-items col.c-spec { width: 14%; }
 .qt-items col.c-qty { width: 10%; } .qt-items col.c-price { width: 18%; } .qt-items col.c-amt { width: 18%; }
+/* 영수증: 영수 확인 문구 (기본 레이아웃용) */
+.qt-confirm { text-align: center; margin: 16px 0 4px; font-size: 14px; font-weight: 700; color: #111; letter-spacing: 2px; }
+
+/* ===== 영수증 전용 레이아웃 (금액 중심 슬립형) ===== */
+.rc-title { text-align: center; font-size: 36px; font-weight: 800; letter-spacing: 24px; padding-bottom: 16px;
+  border-bottom: 3px double #111; margin-bottom: 18px; }
+.rc-recv { font-size: 18px; font-weight: 700; margin: 4px 0 18px; }
+.rc-amount { border: 2.5px solid #111; border-radius: 4px; padding: 22px 24px; text-align: center; margin-bottom: 12px; background: #fafbfc; }
+.rc-amount-kr { font-size: 26px; font-weight: 800; letter-spacing: 1px; min-height: 30px; }
+.rc-amount-num { font-size: 16px; color: #444; margin-top: 8px; }
+.rc-confirm { text-align: center; font-size: 15px; font-weight: 700; letter-spacing: 3px; margin-bottom: 22px; }
+.rc-items { width: 100%; border-collapse: collapse; font-size: 12px; table-layout: fixed; margin-bottom: 22px; }
+.rc-items th { background: #f3f4f6; border: 1px solid #999; padding: 8px 5px; font-weight: 700; }
+.rc-items td { border: 1px solid #c9ccd1; padding: 8px; height: 30px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.rc-items td.l { text-align: left; } .rc-items td.c { text-align: center; } .rc-items td.r { text-align: right; }
+.rc-items .qt-er td { color: #bbb; }
+.rc-supplier { width: 100%; }
 /* 거래명세서: 월일 + 공급가액·세액 분리 (7열, 표준) */
 .qt-items.tax col.c-date { width: 9%; } .qt-items.tax col.c-item { width: 25%; } .qt-items.tax col.c-spec { width: 11%; }
 .qt-items.tax col.c-qty { width: 8%; } .qt-items.tax col.c-price { width: 15%; }
 .qt-items.tax col.c-supply { width: 16%; } .qt-items.tax col.c-tax { width: 16%; }
+/* 거래명세서 미수금 정산란 (전잔액·당월거래·입금·미수잔액) */
+.qt-balance { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 12px; table-layout: fixed; }
+.qt-balance td { border: 1px solid #999; padding: 8px 10px; }
+.qt-balance .k { background: #f3f4f6; font-weight: 600; text-align: center; white-space: nowrap; width: 11%; }
+.qt-balance .v { text-align: right; width: 14%; }
+.qt-balance .hl { background: #eef2ff; font-weight: 800; color: #111; }
+
 /* 인수자 확인란 */
+/* 발주서 납품 조건란 */
+.qt-terms { width: 100%; border-collapse: collapse; margin-top: 12px; font-size: 12px; table-layout: fixed; }
+.qt-terms td { border: 1px solid #999; padding: 8px 10px; }
+.qt-terms .k { background: #f3f4f6; font-weight: 600; text-align: center; white-space: nowrap; width: 14%; }
+.qt-terms .v { width: 36%; }
 .qt-receiver { margin-top: 16px; text-align: right; font-size: 12px; color: #333; }
 .qt-receiver .qt-sign { display: inline-block; width: 130px; border-bottom: 1px solid #999; margin: 0 6px; vertical-align: bottom; }
 .qt-items th { background: #f3f4f6; border: 1px solid #999; padding: 8px 5px; font-weight: 700; }
-.qt-items td { border: 1px solid #c9ccd1; padding: 7px 8px; height: 31px; word-break: break-all; overflow-wrap: anywhere; }
+/* 품목 행은 1줄 고정(긴 텍스트는 …) → 행 높이 일정 = A4 한 장 안에 항상 들어감 */
+.qt-items td { border: 1px solid #c9ccd1; padding: 7px 8px; height: 31px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .qt-items td.c { text-align: center; } .qt-items td.l { text-align: left; } .qt-items td.r { text-align: right; }
 .qt-items .qt-er td { color: #bbb; }
 
@@ -414,12 +445,13 @@ img { max-width: 100%; }
 .tool-card { background: var(--white); border: 1px solid var(--line); border-radius: 18px; overflow: hidden;
   display: flex; flex-direction: column; box-shadow: 0 8px 24px rgba(15, 23, 42, .04);
   transition: border-color .12s, transform .12s, box-shadow .12s; }
-.tool-card:hover { border-color: var(--point); transform: translateY(-3px); box-shadow: 0 14px 34px rgba(79, 70, 229, .12); }
+.tool-card:hover { border-color: var(--accent, var(--point)); transform: translateY(-3px); box-shadow: 0 14px 34px rgba(79, 70, 229, .12); }
 
 /* A4 세로 비율 썸네일 - 페이지를 카드폭에 꽉 채움(스케일은 thumb.js) */
 /* 카드 썸네일: 전체 A4 비율(작게) */
 .thumb { width: 100%; aspect-ratio: 1 / 1.414; overflow: hidden; position: relative;
-  background: #fff; border-bottom: 1px solid var(--line); }
+  background: #fff; border-bottom: 1px solid var(--line);
+  border-top: 3px solid var(--accent, var(--point)); }   /* 문서별 식별 색 바 */
 .thumb-doc { position: absolute; top: 0; left: 0; width: 794px; transform-origin: top left;
   transform: scale(.34); pointer-events: none; }
 .thumb-doc .doc-page { width: 794px; border: none; box-shadow: none; border-radius: 0; padding: 40px 38px; }
@@ -430,7 +462,12 @@ img { max-width: 100%; }
 .thumb-empty::after { display: none; }
 
 .tool-meta { padding: 14px 16px; display: flex; flex-direction: column; gap: 8px; }
-.tool-meta .nm { font-weight: 700; font-size: 15.5px; }
+.tool-meta .nm { font-weight: 700; font-size: 15.5px; display: flex; align-items: center; gap: 8px; }
+.tool-ic { display: inline-flex; align-items: center; justify-content: center; flex: none;
+  width: 26px; height: 26px; padding: 4px; border-radius: 8px;
+  color: var(--accent, var(--point));
+  background: color-mix(in srgb, var(--accent, var(--point)) 12%, #fff); }
+.tool-ic svg { width: 100%; height: 100%; }
 .tool-meta .de { font-size: 12.5px; color: var(--gray); line-height: 1.5; flex: 1; }
 .meta-row { display: flex; align-items: center; gap: 6px; }
 .tag { font-size: 11px; font-weight: 700; border-radius: 6px; padding: 3px 8px; }
@@ -555,8 +592,13 @@ img { max-width: 100%; }
   /* 모바일: 고정 높이 해제, 페이지 스크롤 */
   .pane-input, .pane-preview { height: auto; max-height: none; min-height: 0; overflow: visible; }
   .form-scroll { overflow: visible; }
-  .doc-viewport { height: auto; max-height: none; min-height: 0; padding: 0;
-    border: none; background: transparent; overflow: visible; }
+  /* 확대 시 박스 안에서 가로로 스크롤(손가락 팬), 세로는 페이지 스크롤에 맡김 */
+  .doc-viewport { display: block; height: auto; max-height: none; min-height: 0; padding: 0;
+    border: none; background: transparent;
+    overflow-x: auto; overflow-y: hidden;
+    -webkit-overflow-scrolling: touch; touch-action: pan-x pan-y;
+    overscroll-behavior-x: contain; }
+  .doc-sizer { margin: 0 auto; }   /* 폭 맞춤이면 가운데, 확대로 넓어지면 좌측부터 스크롤 */
 }
 @media print {
   body { background: #fff; }

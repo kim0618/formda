@@ -70,9 +70,30 @@
           '<tbody id="rows"></tbody>' +
         '</table>' +
         '<button class="addrow" id="addRowBtn" type="button" onclick="Formda.app.addRow()">+ 품목 추가</button>' +
-        '<p class="field-help" id="rowLimit" style="display:none">무료 견적서는 한 페이지(최대 14개 품목)까지 작성할 수 있어요. 여러 페이지는 추후 지원할 예정입니다.</p>' +
+        '<p class="field-help" id="rowLimit" style="display:none">무료는 한 페이지 분량까지 작성할 수 있어요. 더 많은 품목·여러 페이지는 추후 지원할 예정입니다.</p>' +
         (vatBlock ? '<div style="margin-top:14px">' + vatBlock + '</div>' : '') +
+        (cfg.balance
+          ? '<div class="sub mt">미수금 정산 (선택)</div>' +
+            '<div class="row2">' +
+              '<div class="field"><label>전잔액</label><input id="f-prevBalance" inputmode="numeric" placeholder="0" oninput="Formda.app.onMoney(\'prevBalance\', this)"></div>' +
+              '<div class="field"><label>입금액</label><input id="f-paidAmount" inputmode="numeric" placeholder="0" oninput="Formda.app.onMoney(\'paidAmount\', this)"></div>' +
+            '</div>'
+          : '') +
       '</div>' +
+
+      // 3-1. 납품 조건 (발주서)
+      (cfg.deliveryTerms
+        ? '<div class="form-sec"><h2>납품 조건</h2>' +
+            '<div class="row2">' +
+              '<div class="field"><label>납기일자</label>' +
+                '<input id="f-deliveryDate" type="date" oninput="Formda.app.onField(\'deliveryDate\', this.value)"></div>' +
+              '<div class="field"><label>납품장소</label>' +
+                '<input id="f-deliveryPlace" placeholder="예: 발주처 본사 창고" oninput="Formda.app.onField(\'deliveryPlace\', this.value)"></div>' +
+            '</div>' +
+            '<div class="field"><label>결제조건</label>' +
+              '<input id="f-paymentTerms" placeholder="예: 납품 검수 후 30일 이내 계좌이체" oninput="Formda.app.onField(\'paymentTerms\', this.value)"></div>' +
+          '</div>'
+        : '') +
 
       // 선택 항목 (접기)
       '<details class="form-opt"><summary>선택 항목 (도장·통화·비고)</summary>' +

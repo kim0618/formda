@@ -13,8 +13,9 @@
     init: function (tool) {
       this.docType = tool.docType;
       this.cfg = tool.doc;
-      this.userZoom = 1.3;   // 사용자 확대/축소 배율 (기본 130%, 맞춤=1)
-      this.MAX_ITEMS = 14;   // 무료: 한 페이지(=doc-render PAGE_ROWS) 분량
+      // 데스크톱 기본 130%, 모바일은 폭에 딱 맞게 100%(아니면 A4가 화면보다 커서 잘림)
+      this.userZoom = (typeof window !== 'undefined' && window.innerWidth <= 980) ? 1 : 1.3;
+      this.MAX_ITEMS = (tool.doc && tool.doc.maxItems) || 14;   // 무료: 문서별 한 페이지 분량
       this.sampleState = this.resolveSample(tool.sample); // 원본 샘플 보관 (샘플 불러오기용)
 
       // 입력폼 주입 (한 번만)
@@ -62,6 +63,11 @@
       this.setVal('toTel', s.toTel);
       this.setVal('toAddr', s.toAddr);
       this.setVal('validity', s.validity);
+      this.setVal('deliveryDate', s.deliveryDate);
+      this.setVal('deliveryPlace', s.deliveryPlace);
+      this.setVal('paymentTerms', s.paymentTerms);
+      this.setMoney('prevBalance', s.prevBalance);
+      this.setMoney('paidAmount', s.paidAmount);
       this.setVal('note', s.note);
       this.setVal('vat', s.vat);
       var nm = document.getElementById('sealName');
@@ -80,6 +86,7 @@
       this.applyState({
         date: this.today(), no: '', from: '', fromReg: '', fromCeo: '', fromBiz: '', fromTel: '', fromAddr: '',
         to: '', toReg: '', toCeo: '', toTel: '', toAddr: '', validity: '',
+        deliveryDate: '', deliveryPlace: '', paymentTerms: '', prevBalance: 0, paidAmount: 0,
         items: [{ name: '', spec: '', qty: 1, price: 0 }], vat: '0.1', note: '', sealImg: null,
       });
     },
@@ -89,8 +96,20 @@
       if (el != null && v != null) el.value = v;
     },
 
+    setMoney: function (id, v) {
+      var el = document.getElementById('f-' + id);
+      if (el) el.value = v ? Number(v).toLocaleString('ko-KR') : '';
+    },
+
     onField: function (id, v) {
       this.state[id] = v;
+      this.renderDoc();
+    },
+
+    onMoney: function (id, el) {
+      var c = F.calc.cleanInt(el.value, F.calc.MAX_PRICE_DIGITS);
+      this.state[id] = c.value;
+      el.value = c.digits ? c.value.toLocaleString('ko-KR') : '';
       this.renderDoc();
     },
 
@@ -218,13 +237,21 @@
     bindResize: function () {
       var self = this;
       function sync() {
+        var pi = document.querySelector('.pane-input');
+        var pp = document.querySelector('.pane-preview');
         if (window.innerWidth > 980) {
-          document.querySelector('.pane-input').classList.remove('hide');
-          document.querySelector('.pane-preview').classList.remove('hide');
+          // 데스크톱: 두 패널 동시 표시
+          pi.classList.remove('hide');
+          pp.classList.remove('hide');
+        } else if (!pi.classList.contains('hide') && !pp.classList.contains('hide')) {
+          // 모바일 초기/데스크톱→모바일 전환: 둘 다 보이는 상태면 입력 탭만 (둘 다 뜨는 버그 방지)
+          self.showPane('input');
         }
         self.fitPreview();
       }
       window.addEventListener('resize', sync);
+      window.addEventListener('orientationchange', sync);
+      if (window.visualViewport) window.visualViewport.addEventListener('resize', sync);
       sync();
     },
   };

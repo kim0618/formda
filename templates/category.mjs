@@ -1,6 +1,7 @@
 // 카테고리 허브 = 문서 선택 허브
 // 사용 가능 도구는 균일한 그리드 카드(확장 대비), 준비중은 작게(리스트), 선택 가이드 + FAQ로 깊이.
 import { head, header, footer } from './shell.mjs';
+import { svg } from './icons.mjs';
 import { site, tools } from '../data/registry.js';
 
 // 받침 유무로 조사 선택 (을/를, 은/는)
@@ -40,10 +41,10 @@ export function categoryPage(cat, thumbs = {}) {
     ? `<section class="home-sec" style="margin-top:40px">
         <h2 class="home-sec-h">지금 사용 가능한 도구</h2>
         <div class="grid cat-grid">${live.map((t) => `
-          <a class="tool-card" href="/tools/${t.slug}.html">
+          <a class="tool-card" href="/tools/${t.slug}.html" style="--accent:${t.accent || '#4f46e5'}">
             <div class="thumb"><div class="thumb-doc">${thumbs[t.slug] || ''}</div></div>
             <div class="tool-meta">
-              <div class="nm">${t.navTitle}${suffix}</div>
+              <div class="nm"><span class="tool-ic">${svg(t.icon)}</span>${t.navTitle}${suffix}</div>
               <p class="de">${t.use || t.summary || ''}</p>
               <div class="meta-row"><span class="tag free">무료</span><span class="tag alt">PDF·PNG</span><span class="go">만들기 →</span></div>
             </div>

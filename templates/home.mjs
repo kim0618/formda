@@ -1,6 +1,7 @@
 // 홈 - 결과물(A4)이 주인공인 도구형 랜딩.
 // 히어로 좌우 2단 → 대표 도구(견적서 크게) → 3단계 → 왜 폼다 → 카테고리(텍스트형)
 import { head, header, footer } from './shell.mjs';
+import { svg } from './icons.mjs';
 import { site, categories, tools } from '../data/registry.js';
 
 export function homePage(thumbs = {}) {
@@ -107,10 +108,10 @@ export function featureCard(t, doc) {
 // 추가 라이브 도구 카드 (대표 카드 아래 그리드; 견적서 외 도구가 생기면 자동 노출)
 function liveCard(t, thumbs) {
   const suffix = t.category === 'text' ? '' : ' 작성기';
-  return `<a class="tool-card" href="/tools/${t.slug}.html">
+  return `<a class="tool-card" href="/tools/${t.slug}.html" style="--accent:${t.accent || '#4f46e5'}">
     <div class="thumb"><div class="thumb-doc">${thumbs[t.slug] || ''}</div></div>
     <div class="tool-meta">
-      <div class="nm">${t.navTitle}${suffix}</div>
+      <div class="nm"><span class="tool-ic">${svg(t.icon)}</span>${t.navTitle}${suffix}</div>
       <p class="de">${t.use || t.summary || ''}</p>
       <div class="meta-row"><span class="tag free">무료</span><span class="tag alt">PDF·PNG</span><span class="go">만들기 →</span></div>
     </div>

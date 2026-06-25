@@ -29,7 +29,7 @@
     var qty = it.qty || 0, price = it.price || 0, line = qty * price;
     // 첫 열: 거래명세서=월일, 그 외=No
     var common =
-      '<td class="c">' + (tax ? mmdd : (gi + 1)) + '</td>' +
+      '<td class="c">' + ((tax || cfg.dateColumn) ? mmdd : (gi + 1)) + '</td>' +
       '<td class="l">' + (esc(it.name) || '') + '</td>' +
       '<td class="c">' + (esc(it.spec) || '') + '</td>' +
       '<td class="c">' + (qty || '') + '</td>' +
@@ -83,8 +83,8 @@
       return titleMeta(state, cfg) +
         '<div class="qt-lead">' + esc(cfg.leadPhrase) + '</div>' +
         '<div class="qt-parties">' +
-          partyBox('공급받는자', { reg: state.toReg, name: state.to, ceo: state.toCeo, addr: state.toAddr, tel: state.toTel }, '') +
-          partyBox('공급자', { reg: state.fromReg, name: state.from, ceo: state.fromCeo, addr: state.fromAddr, tel: state.fromTel }, sealHTML(state, cfg)) +
+          partyBox(cfg.partyToLabel || '공급받는자', { reg: state.toReg, name: state.to, ceo: state.toCeo, addr: state.toAddr, tel: state.toTel }, '') +
+          partyBox(cfg.partyFromLabel || '공급자', { reg: state.fromReg, name: state.from, ceo: state.fromCeo, addr: state.fromAddr, tel: state.fromTel }, sealHTML(state, cfg)) +
         '</div>' +
         amountBox(t);
     }
@@ -102,7 +102,8 @@
           '<tr><td class="k">전　화</td><td class="v">' + (esc(state.fromTel) || '&nbsp;') + '</td></tr>' +
         '</tbody></table>' +
       '</div>' +
-      amountBox(t);
+      amountBox(t) +
+      (cfg.receiptConfirm ? '<div class="qt-confirm">위 금액을 정히 영수합니다.</div>' : '');
   }
 
   function itemsTable(cfg, rowsHtml) {
@@ -112,13 +113,23 @@
         '<thead><tr><th>월일</th><th>품　목</th><th>규격</th><th>수량</th><th>단가</th><th>공급가액</th><th>세액</th></tr></thead>' +
         '<tbody>' + rowsHtml + '</tbody></table>';
     }
+    // 영수증: 첫 열을 월일로 (taxColumns 없이 단일 금액)
+    var firstCol = cfg.dateColumn ? 'c-date' : 'c-no';
+    var firstTh = cfg.dateColumn ? '월일' : 'No';
     return '<table class="qt-items">' +
-      '<colgroup><col class="c-no"><col class="c-item"><col class="c-spec"><col class="c-qty"><col class="c-price"><col class="c-amt"></colgroup>' +
-      '<thead><tr><th>No</th><th>품　목</th><th>규격</th><th>수량</th><th>단가</th><th>금액</th></tr></thead>' +
+      '<colgroup><col class="' + firstCol + '"><col class="c-item"><col class="c-spec"><col class="c-qty"><col class="c-price"><col class="c-amt"></colgroup>' +
+      '<thead><tr><th>' + firstTh + '</th><th>품　목</th><th>규격</th><th>수량</th><th>단가</th><th>금액</th></tr></thead>' +
       '<tbody>' + rowsHtml + '</tbody></table>';
   }
 
   function totalsBlock(state, cfg, t) {
+    // 영수증: 부가세 분리 없이 합계만 (간이영수증 표준)
+    if (cfg.singleTotal) {
+      return '<table class="qt-tot"><tbody>' +
+          '<tr class="sum"><td class="k">합　계</td><td class="v">' + comma(t.total) + ' 원</td></tr>' +
+        '</tbody></table>' +
+        (state.note ? '<div class="qt-note">' + esc(state.note) + '</div>' : '');
+    }
     var tax = !!cfg.taxColumns;
     var vatLabel = tax ? '세　액' : '부 가 세';
     var sumLabel = tax ? '합계금액' : '합　계';
@@ -130,28 +141,98 @@
       ? '<div class="qt-receiver">인수자 <span class="qt-sign"></span> (인)</div>' : '';
     var validity = (cfg.validity && state.validity)
       ? '<div class="qt-validity">견적 유효기간 : ' + esc(state.validity) + '</div>' : '';
+    // 발주서 표준: 납품 조건란 (납기일자 / 납품장소 / 결제조건)
+    var terms = '';
+    if (cfg.deliveryTerms) {
+      terms = '<table class="qt-terms"><tbody>' +
+        '<tr><td class="k">납기일자</td><td class="v">' + (esc(state.deliveryDate) || '&nbsp;') + '</td>' +
+            '<td class="k">납품장소</td><td class="v">' + (esc(state.deliveryPlace) || '&nbsp;') + '</td></tr>' +
+        '<tr><td class="k">결제조건</td><td class="v" colspan="3">' + (esc(state.paymentTerms) || '&nbsp;') + '</td></tr>' +
+        '</tbody></table>';
+    }
+    // 거래명세서 표준: 미수금 정산란 (전잔액 + 당월 거래액 - 입금액 = 미수 잔액)
+    var balance = '';
+    if (cfg.balance) {
+      var prev = state.prevBalance || 0, paid = state.paidAmount || 0;
+      var outstanding = prev + t.total - paid;
+      balance = '<table class="qt-balance"><tbody><tr>' +
+        '<td class="k">전잔액</td><td class="v">' + comma(prev) + '</td>' +
+        '<td class="k">당월 거래액</td><td class="v">' + comma(t.total) + '</td>' +
+        '<td class="k">입금액</td><td class="v">' + comma(paid) + '</td>' +
+        '<td class="k hl">미수 잔액</td><td class="v hl">' + comma(outstanding) + '</td>' +
+        '</tr></tbody></table>';
+    }
     return '<table class="qt-tot"><tbody>' +
         '<tr><td class="k">' + supplyLabel + '</td><td class="v">' + comma(t.supply) + ' 원</td></tr>' +
         vatRow +
         '<tr class="sum"><td class="k">' + sumLabel + '</td><td class="v">' + comma(t.total) + ' 원</td></tr>' +
       '</tbody></table>' +
+      balance +
+      terms +
       validity +
       (state.note ? '<div class="qt-note">' + esc(state.note) + '</div>' : '') +
       receiver;
   }
 
-  function pageEl(inner) { return '<div class="doc-page">' + inner + '</div>'; }
+  // .doc-fit = 자동 맞춤 대상(내용이 A4 높이 넘으면 app.fitDoc이 축소)
+  function pageEl(inner) { return '<div class="doc-page"><div class="doc-fit">' + inner + '</div></div>'; }
 
-  // 무료: 항상 1페이지 (품목은 app에서 14개로 캡)
-  function businessInvoice(state, cfg, opts) {
-    opts = opts || {};
+  function wrap(inner, opts) {
+    return opts.single ? pageEl(inner) : '<div class="doc-pages">' + pageEl(inner) + '</div>';
+  }
+
+  // 기본 레이아웃 (견적서 / 거래명세서)
+  function renderDefault(state, cfg, opts) {
     var t = calc.totals(state.items, state.vat);
-    var minRows = opts.single ? THUMB_MIN : PAGE_ROWS;
+    var minRows = opts.single ? THUMB_MIN : (cfg.maxItems || PAGE_ROWS);
     var n = Math.max(state.items.length, minRows);
     var mmdd = '';
     if (state.date) { var dp = String(state.date).split('-'); if (dp.length === 3) mmdd = dp[1] + '/' + dp[2]; }
-    var inner = firstHeader(state, cfg, t) + itemsTable(cfg, rowsFor(state.items, 0, n, cfg, state.vat, mmdd)) + totalsBlock(state, cfg, t);
-    return opts.single ? pageEl(inner) : '<div class="doc-pages">' + pageEl(inner) + '</div>';
+    return wrap(firstHeader(state, cfg, t) + itemsTable(cfg, rowsFor(state.items, 0, n, cfg, state.vat, mmdd)) + totalsBlock(state, cfg, t), opts);
+  }
+
+  // 영수증 레이아웃: 금액이 주인공인 슬립형 (제목 → 받는분 → 큰 금액 → 영수확인 → 내역 → 공급자)
+  function renderReceipt(state, cfg, opts) {
+    var t = calc.totals(state.items, state.vat);
+    var minRows = opts.single ? 5 : (cfg.maxItems || 8);
+    var n = Math.max(state.items.length, minRows);
+    var rows = '';
+    for (var k = 0; k < n; k++) {
+      var it = state.items[k];
+      if (!it) { rows += '<tr class="qt-er"><td></td><td></td><td></td><td></td></tr>'; continue; }
+      var line = (it.qty || 0) * (it.price || 0);
+      rows += '<tr><td class="l">' + (esc(it.name) || '') + '</td>' +
+        '<td class="c">' + (it.qty || '') + '</td>' +
+        '<td class="r">' + (it.price ? comma(it.price) : '') + '</td>' +
+        '<td class="r">' + (line ? comma(line) : '') + '</td></tr>';
+    }
+    var inner =
+      '<div class="rc-title">' + esc(cfg.docTitle) + '</div>' +
+      '<div class="qt-meta"><span>No. ' + (esc(state.no) || '') + '</span>' +
+        '<span>' + (state.date ? cfg.dateLabel + ' : ' + esc(state.date) : '') + '</span></div>' +
+      '<div class="rc-recv">' + (esc(state.to) || '&nbsp;') + ' <b>' + esc(cfg.recipientSuffix) + '</b></div>' +
+      '<div class="rc-amount">' +
+        '<div class="rc-amount-kr">일금 ' + (t.total > 0 ? calc.korAmount(t.total) + '원정' : '') + '</div>' +
+        '<div class="rc-amount-num">₩ ' + comma(t.total) + '</div></div>' +
+      '<div class="rc-confirm">위 금액을 정히 영수합니다.</div>' +
+      '<table class="rc-items"><colgroup><col style="width:50%"><col style="width:14%"><col style="width:18%"><col style="width:18%"></colgroup>' +
+        '<thead><tr><th>품　목</th><th>수량</th><th>단가</th><th>금액</th></tr></thead><tbody>' + rows + '</tbody></table>' +
+      '<table class="qt-supplier rc-supplier"><tbody>' +
+        '<tr><th class="qt-side" rowspan="6">공급자</th><td class="k">등록번호</td><td class="v">' + (esc(state.fromReg) || '&nbsp;') + '</td></tr>' +
+        '<tr><td class="k">상　호</td><td class="v">' + (esc(state.from) || '&nbsp;') + '</td></tr>' +
+        '<tr><td class="k">대표자</td><td class="v"><span>' + (esc(state.fromCeo) || '&nbsp;') + '</span>' + sealHTML(state, cfg) + '</td></tr>' +
+        '<tr><td class="k">주　소</td><td class="v">' + (esc(state.fromAddr) || '&nbsp;') + '</td></tr>' +
+        '<tr><td class="k">업태/종목</td><td class="v">' + (esc(state.fromBiz) || '&nbsp;') + '</td></tr>' +
+        '<tr><td class="k">전　화</td><td class="v">' + (esc(state.fromTel) || '&nbsp;') + '</td></tr>' +
+      '</tbody></table>';
+    return wrap(inner, opts);
+  }
+
+  // 무료: 항상 1페이지 (품목은 app에서 14개로 캡). cfg.layout으로 문서별 레이아웃 분기
+  function businessInvoice(state, cfg, opts) {
+    opts = opts || {};
+    if (cfg.layout === 'receipt') return renderReceipt(state, cfg, opts);
+    return renderDefault(state, cfg, opts);
   }
 
   root.Formda.docRender = {
