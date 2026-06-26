@@ -1,6 +1,7 @@
 // 도구 페이지 템플릿 (좌 입력 / 우 A4 미리보기 + 프리렌더 본문)
 import { head, header, footer, trustBadge, steps } from './shell.mjs';
 import { site, categoryBySlug, toolsBySlug } from '../data/registry.js';
+import { guidesByTool } from '../data/guides.js';
 
 // 스텁(준비중) 도구 페이지 - noindex, 죽은 링크 방지용 안내 페이지
 export function stubToolPage(tool) {
@@ -139,7 +140,7 @@ function guideHTML(tool) {
   const faq = (p.faq || [])
     .map((f) => `<div class="g-faq-item"><p class="faq-q">Q. ${f.q}</p><p>${f.a}</p></div>`)
     .join('\n');
-  return `<section class="guide">
+  return `<section class="guide" style="--accent:${tool.accent || '#4f46e5'}">
     <h2 class="guide-title">${tool.navTitle} 작성 가이드</h2>
     <p class="guide-lead">${p.intro}</p>
     <div class="guide-cards">
@@ -157,7 +158,12 @@ function relatedHTML(tool) {
     .map((t) => `<a class="sibling-link" href="/tools/${t.slug}.html">${t.navTitle}</a>`);
   const cat = categoryBySlug[tool.category];
   pills.push(`<a class="sibling-link" href="/category/${cat.slug}.html">${cat.label} 전체 ›</a>`);
-  return `<div class="sibling-section"><div class="sibling-title">관련 문서 도구</div><div class="sibling-list">${pills.join('')}</div></div>`;
+  // 도구 → 관련 가이드 내부링크
+  const guidePills = (guidesByTool[tool.slug] || [])
+    .map((g) => `<a class="sibling-link guide" href="/guides/${g.slug}.html">${g.navTitle || g.title}</a>`);
+  const guideBlock = guidePills.length
+    ? `<div class="sibling-title mt">관련 가이드</div><div class="sibling-list">${guidePills.join('')}</div>` : '';
+  return `<div class="sibling-section"><div class="sibling-title">관련 문서 도구</div><div class="sibling-list">${pills.join('')}</div>${guideBlock}</div>`;
 }
 
 // 구조화 데이터 (SEO 리치결과 + GEO/AI 인용): FAQ · WebApplication(무료) · HowTo · Breadcrumb

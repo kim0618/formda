@@ -9,6 +9,17 @@
   <url><loc>https://formda.kr/tools/statement.html</loc><priority>0.9</priority></url>
   <url><loc>https://formda.kr/tools/receipt.html</loc><priority>0.9</priority></url>
   <url><loc>https://formda.kr/tools/order.html</loc><priority>0.9</priority></url>
+  <url><loc>https://formda.kr/tools/invoice.html</loc><priority>0.9</priority></url>
+  <url><loc>https://formda.kr/tools/char-count.html</loc><priority>0.9</priority></url>
+  <url><loc>https://formda.kr/tools/name-roman.html</loc><priority>0.9</priority></url>
+  <url><loc>https://formda.kr/tools/address-roman.html</loc><priority>0.9</priority></url>
+  <url><loc>https://formda.kr/tools/text-align.html</loc><priority>0.9</priority></url>
+  <url><loc>https://formda.kr/tools/resume.html</loc><priority>0.9</priority></url>
+  <url><loc>https://formda.kr/tools/employment.html</loc><priority>0.9</priority></url>
+  <url><loc>https://formda.kr/tools/resignation.html</loc><priority>0.9</priority></url>
+  <url><loc>https://formda.kr/tools/award.html</loc><priority>0.9</priority></url>
+  <url><loc>https://formda.kr/guides/</loc><priority>0.6</priority></url>
+  <url><loc>https://formda.kr/guides/how-to-write-estimate.html</loc><priority>0.6</priority></url>
   <url><loc>https://formda.kr/pages/about.html</loc><priority>0.3</priority></url>
   <url><loc>https://formda.kr/pages/terms.html</loc><priority>0.3</priority></url>
   <url><loc>https://formda.kr/pages/privacy.html</loc><priority>0.3</priority></url>

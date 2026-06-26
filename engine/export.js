@@ -22,8 +22,18 @@
     finally { if (pages) pages.style.transform = prev; }
   }
 
+  // 캡처 배율 = 선명도. A4 794px 기준 3배 ≈ 약 216DPI (화면 DPR이 더 높으면 그만큼).
+  var CAPTURE_SCALE = Math.min(4, Math.max(3, window.devicePixelRatio || 1));
+
   function shoot(el) {
-    return window.html2canvas(el, { scale: 2, backgroundColor: '#ffffff', windowWidth: 794 });
+    return window.html2canvas(el, {
+      scale: CAPTURE_SCALE,
+      backgroundColor: '#ffffff',
+      windowWidth: 794,
+      useCORS: true,
+      imageTimeout: 0,
+      logging: false,
+    });
   }
 
   async function downloadPDF(fileName, btn) {
@@ -40,7 +50,7 @@
           var canvas = await shoot(els[i]);
           var imgH = (canvas.height * pw) / canvas.width;
           if (i > 0) pdf.addPage();
-          pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, 0, pw, Math.min(imgH, ph));
+          pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, 0, pw, Math.min(imgH, ph), undefined, 'FAST');
         }
         pdf.save(fileName + '.pdf');
       });

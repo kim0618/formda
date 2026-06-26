@@ -12,6 +12,7 @@
 
     init: function (tool) {
       this.docType = tool.docType;
+      this.slug = tool.slug || tool.docType;
       this.cfg = tool.doc;
       // 데스크톱 기본 130%, 모바일은 폭에 딱 맞게 100%(아니면 A4가 화면보다 커서 잘림)
       this.userZoom = (typeof window !== 'undefined' && window.innerWidth <= 980) ? 1 : 1.3;
@@ -23,14 +24,19 @@
       formHost.innerHTML = F.formEngine[this.docType](this.cfg);
 
       this.applyState(JSON.parse(JSON.stringify(this.sampleState)));
+      // 반복 사용: 저장된 내 회사 정보 자동 적용 + 문서번호 자동증가
+      var prof = this.loadProfileRaw();
+      if (prof && this.docType === 'business-invoice') this.applyProfile(prof);
+      this.applyNextDocNo();
+      this.updateProfileBar();
       this.bindResize();
 
       // CSS/폰트 로딩 후 다시 맞춤 (초기 크기 어긋남 방지)
       var self = this;
-      if (window.requestAnimationFrame) requestAnimationFrame(function () { self.fitPreview(); });
-      window.addEventListener('load', function () { self.fitPreview(); });
+      if (window.requestAnimationFrame) requestAnimationFrame(function () { self.fitPreview(true); });
+      window.addEventListener('load', function () { self.fitPreview(true); });
       if (document.fonts && document.fonts.ready) {
-        document.fonts.ready.then(function () { self.fitPreview(); });
+        document.fonts.ready.then(function () { self.fitPreview(true); });
       }
     },
 
@@ -38,6 +44,10 @@
       var s = JSON.parse(JSON.stringify(sample || {}));
       if (s.date === 'today') s.date = new Date().toISOString().slice(0, 10);
       if (!s.items || !s.items.length) s.items = [{ name: '', spec: '', qty: 1, price: 0 }];
+      if (this.docType === 'resume') {
+        if (!s.edu || !s.edu.length) s.edu = [{ period: '', school: '', major: '', status: '' }];
+        if (!s.career || !s.career.length) s.career = [{ period: '', company: '', role: '', task: '' }];
+      }
       s.sealImg = null;
       return s;
     },
@@ -66,6 +76,9 @@
       this.setVal('deliveryDate', s.deliveryDate);
       this.setVal('deliveryPlace', s.deliveryPlace);
       this.setVal('paymentTerms', s.paymentTerms);
+      this.setVal('payDue', s.payDue);
+      this.setVal('payHolder', s.payHolder);
+      this.setVal('payAccount', s.payAccount);
       this.setMoney('prevBalance', s.prevBalance);
       this.setMoney('paidAmount', s.paidAmount);
       this.setVal('note', s.note);
@@ -74,7 +87,36 @@
       if (nm) nm.textContent = s.sealImg ? '도장 적용됨' : '';
       var fi = document.getElementById('f-seal');
       if (fi) fi.value = '';
+      // 이력서 가족 필드 (다른 docType에선 해당 입력칸이 없어 setVal이 자동 무시됨)
+      this.setVal('name', s.name);
+      this.setVal('birth', s.birth);
+      this.setVal('tel', s.tel);
+      this.setVal('email', s.email);
+      this.setVal('addr', s.addr);
+      this.setVal('etc', s.etc);
+      // 증명·증서 가족 필드 (해당 입력칸 없으면 setVal 자동 무시)
+      this.setVal('dept', s.dept);
+      this.setVal('position', s.position);
+      this.setVal('period', s.period);
+      this.setVal('body', s.body);
+      this.setVal('purpose', s.purpose);
+      this.setVal('orgName', s.orgName);
+      this.setVal('orgCeo', s.orgCeo);
+      this.setVal('orgReg', s.orgReg);
+      this.setVal('orgTel', s.orgTel);
+      this.setVal('orgAddr', s.orgAddr);
+      this.setVal('docNo', s.docNo);
+      this.setVal('hireDate', s.hireDate);
+      this.setVal('lastDay', s.lastDay);
+      this.setVal('recipient', s.recipient);
+      this.setVal('handover', s.handover);
+      this.setVal('recipientSub', s.recipientSub);
+      this.setVal('orgTitle', s.orgTitle);
+      var pn = document.getElementById('photoName');
+      if (pn) pn.textContent = s.photo ? '사진 적용됨' : '';
       this.drawRows();
+      this.drawEdu();
+      this.drawCareer();
       this.renderDoc();
     },
 
@@ -83,13 +125,77 @@
     },
 
     clearAll: function () {
+      if (this.docType === 'certificate') {
+        this.applyState({
+          name: '', birth: '', addr: '', dept: '', position: '', period: '', body: '', purpose: '',
+          docNo: '', date: this.today(), orgName: '', orgCeo: '', orgReg: '', orgTel: '', orgAddr: '',
+          hireDate: '', lastDay: '', recipient: '', handover: '',
+          recipientSub: '', orgTitle: '', sealImg: null,
+        });
+        return;
+      }
+      if (this.docType === 'resume') {
+        this.applyState({
+          name: '', birth: '', tel: '', email: '', addr: '', photo: null,
+          edu: [{ period: '', school: '', major: '', status: '' }],
+          career: [{ period: '', company: '', role: '', task: '' }],
+          etc: '', date: this.today(),
+        });
+        return;
+      }
       this.applyState({
         date: this.today(), no: '', from: '', fromReg: '', fromCeo: '', fromBiz: '', fromTel: '', fromAddr: '',
         to: '', toReg: '', toCeo: '', toTel: '', toAddr: '', validity: '',
-        deliveryDate: '', deliveryPlace: '', paymentTerms: '', prevBalance: 0, paidAmount: 0,
+        deliveryDate: '', deliveryPlace: '', paymentTerms: '',
+        payDue: '', payHolder: '', payAccount: '', prevBalance: 0, paidAmount: 0,
         items: [{ name: '', spec: '', qty: 1, price: 0 }], vat: '0.1', note: '', sealImg: null,
       });
     },
+
+    // ----- 반복 사용: 내 회사 정보 + 문서번호 (localStorage, 이 브라우저에만 저장) -----
+    PROFILE_KEY: 'formda_profile_v1',
+    PROFILE_FIELDS: ['from', 'fromReg', 'fromCeo', 'fromBiz', 'fromTel', 'fromAddr'],
+    store: function (k, v) { try { localStorage.setItem(k, v); return true; } catch (e) { return false; } },
+    fetch: function (k) { try { return localStorage.getItem(k); } catch (e) { return null; } },
+    loadProfileRaw: function () { try { return JSON.parse(this.fetch(this.PROFILE_KEY) || 'null'); } catch (e) { return null; } },
+
+    saveProfile: function () {
+      var s = this.state, p = {};
+      this.PROFILE_FIELDS.forEach(function (k) { p[k] = s[k] || ''; });
+      p.sealImg = s.sealImg || null;
+      if (this.store(this.PROFILE_KEY, JSON.stringify(p))) this.flashProfile('내 회사 정보를 저장했어요');
+      else this.flashProfile('저장에 실패했어요');
+      this.updateProfileBar();
+    },
+    applyProfile: function (p) {
+      var self = this;
+      this.PROFILE_FIELDS.forEach(function (k) { if (p[k] != null) { self.state[k] = p[k]; self.setVal(k, p[k]); } });
+      if (p.sealImg) {
+        this.state.sealImg = p.sealImg;
+        var nm = document.getElementById('sealName'); if (nm) nm.textContent = '저장된 도장 적용됨';
+      }
+      this.renderDoc();
+    },
+    loadProfile: function () { var p = this.loadProfileRaw(); if (p) { this.applyProfile(p); this.flashProfile('저장된 정보를 불러왔어요'); } },
+    clearProfile: function () { try { localStorage.removeItem(this.PROFILE_KEY); } catch (e) {} this.flashProfile('저장된 정보를 지웠어요'); this.updateProfileBar(); },
+    flashProfile: function (msg) {
+      var el = document.getElementById('profileStatus'); if (!el) return;
+      el.textContent = msg; clearTimeout(this._pf);
+      this._pf = setTimeout(function () { el.textContent = ''; }, 2600);
+    },
+    updateProfileBar: function () {
+      var has = !!this.loadProfileRaw();
+      var load = document.getElementById('profileLoadBtn'), clr = document.getElementById('profileClearBtn');
+      if (load) load.style.display = has ? '' : 'none';
+      if (clr) clr.style.display = has ? '' : 'none';
+    },
+    docnoKey: function () { return 'formda_docno_' + this.slug; },
+    nextDocNo: function (s) { return String(s).replace(/(\d+)(\D*)$/, function (_, d, tail) { return String(Number(d) + 1).padStart(d.length, '0') + tail; }); },
+    applyNextDocNo: function () {
+      var last = this.fetch(this.docnoKey());
+      if (last) { var nx = this.nextDocNo(last); this.state.no = nx; this.setVal('no', nx); this.renderDoc(); }
+    },
+    recordDocNo: function () { if (this.state.no) this.store(this.docnoKey(), this.state.no); },
 
     setVal: function (id, v) {
       var el = document.getElementById('f-' + id);
@@ -137,6 +243,61 @@
       this.state.items.splice(i, 1);
       if (!this.state.items.length) this.state.items.push({ name: '', spec: '', qty: 1, price: 0 });
       this.drawRows();
+      this.renderDoc();
+    },
+
+    // ----- 이력서 학력·경력 행 -----
+    drawEdu: function () {
+      var h = document.getElementById('eduRows');
+      if (!h) return;
+      h.innerHTML = F.formEngine.eduRows(this.state.edu || []);
+      var b = document.getElementById('addEduBtn');
+      if (b) b.disabled = (this.state.edu || []).length >= (this.cfg.maxEdu || 4);
+    },
+    drawCareer: function () {
+      var h = document.getElementById('careerRows');
+      if (!h) return;
+      h.innerHTML = F.formEngine.careerRows(this.state.career || []);
+      var b = document.getElementById('addCareerBtn');
+      if (b) b.disabled = (this.state.career || []).length >= (this.cfg.maxCareer || 5);
+    },
+    addEdu: function () {
+      if ((this.state.edu || []).length >= (this.cfg.maxEdu || 4)) return;
+      this.state.edu.push({ period: '', school: '', major: '', status: '' });
+      this.drawEdu(); this.renderDoc();
+    },
+    delEdu: function (i) {
+      this.state.edu.splice(i, 1);
+      if (!this.state.edu.length) this.state.edu.push({ period: '', school: '', major: '', status: '' });
+      this.drawEdu(); this.renderDoc();
+    },
+    onEdu: function (i, f, v) { this.state.edu[i][f] = v; this.renderDoc(); },
+    addCareer: function () {
+      if ((this.state.career || []).length >= (this.cfg.maxCareer || 5)) return;
+      this.state.career.push({ period: '', company: '', role: '', task: '' });
+      this.drawCareer(); this.renderDoc();
+    },
+    delCareer: function (i) {
+      this.state.career.splice(i, 1);
+      if (!this.state.career.length) this.state.career.push({ period: '', company: '', role: '', task: '' });
+      this.drawCareer(); this.renderDoc();
+    },
+    onCareer: function (i, f, v) { this.state.career[i][f] = v; this.renderDoc(); },
+    onPhoto: function (input) {
+      var file = input.files && input.files[0];
+      if (!file) return;
+      var self = this, reader = new FileReader();
+      reader.onload = function (e) {
+        self.state.photo = e.target.result;
+        var n = document.getElementById('photoName'); if (n) n.textContent = '사진 적용됨: ' + file.name;
+        self.renderDoc();
+      };
+      reader.readAsDataURL(file);
+    },
+    clearPhoto: function () {
+      this.state.photo = null;
+      var n = document.getElementById('photoName'); if (n) n.textContent = '';
+      var i = document.getElementById('f-photo'); if (i) i.value = '';
       this.renderDoc();
     },
 
@@ -196,18 +357,26 @@
 
     // A4 페이지(794x1123)를 미리보기 박스에 맞춰 스케일 (× 사용자 줌)
     // 데스크톱: 높이에 맞춰 한 장이 통째로 보이게. 모바일: 폭에 맞춰.
-    fitPreview: function () {
+    fitPreview: function (remeasure) {
       var host = document.getElementById('doc');
       if (!host) return;
       var sizer = host.querySelector('.doc-sizer');
       var pages = host.querySelector('.doc-pages');
       if (!sizer || !pages) return;
-      var mobile = window.innerWidth <= 980;
-      var availW = host.clientWidth - (mobile ? 0 : 36);
-      if (availW <= 0) return;
-      var base = mobile ? (availW / 794) : Math.min(availW / 794, (host.clientHeight - 36) / 1123);
-      if (!(base > 0)) base = availW / 794;
-      var scale = base * (this.userZoom || 1);
+      // 기준 배율은 리사이즈 때만 재측정. 재렌더 때마다 측정하면 스크롤바 등장→폭 축소→더 작아짐 루프 발생.
+      if (remeasure || this._base == null) {
+        var mobile = window.innerWidth <= 980;
+        var prevOv = host.style.overflow;
+        host.style.overflow = 'hidden';   // 측정 동안 스크롤바 영향 제거
+        var availW = host.clientWidth - (mobile ? 0 : 36);
+        var availH = host.clientHeight - 36;
+        host.style.overflow = prevOv;
+        if (availW <= 0) return;
+        var base = mobile ? (availW / 794) : Math.min(availW / 794, availH / 1123);
+        if (!(base > 0)) base = availW / 794;
+        this._base = base;
+      }
+      var scale = this._base * (this.userZoom || 1);
       pages.style.transformOrigin = 'top left';
       pages.style.transform = 'scale(' + scale + ')';
       sizer.style.width = (794 * scale) + 'px';
@@ -221,8 +390,8 @@
     zoomReset: function () { this.userZoom = 1; this.fitPreview(); },
 
     // ----- 내보내기 -----
-    downloadPDF: function (btn) { F.exporter.downloadPDF(this.cfg.fileName + (this.state.no ? '_' + this.state.no : ''), btn); },
-    downloadPNG: function (btn) { F.exporter.downloadPNG(this.cfg.fileName + (this.state.no ? '_' + this.state.no : ''), btn); },
+    downloadPDF: function (btn) { this.recordDocNo(); F.exporter.downloadPDF(this.cfg.fileName + (this.state.no ? '_' + this.state.no : ''), btn); },
+    downloadPNG: function (btn) { this.recordDocNo(); F.exporter.downloadPNG(this.cfg.fileName + (this.state.no ? '_' + this.state.no : ''), btn); },
     print: function () { F.exporter.printDoc(); },
 
     // ----- 모바일 탭 -----
@@ -231,7 +400,7 @@
       document.querySelector('.pane-preview').classList.toggle('hide', p !== 'preview');
       document.getElementById('tabInput').classList.toggle('on', p === 'input');
       document.getElementById('tabPreview').classList.toggle('on', p === 'preview');
-      if (p === 'preview') this.fitPreview();
+      if (p === 'preview') this.fitPreview(true);
     },
 
     bindResize: function () {
@@ -247,7 +416,7 @@
           // 모바일 초기/데스크톱→모바일 전환: 둘 다 보이는 상태면 입력 탭만 (둘 다 뜨는 버그 방지)
           self.showPane('input');
         }
-        self.fitPreview();
+        self.fitPreview(true);
       }
       window.addEventListener('resize', sync);
       window.addEventListener('orientationchange', sync);

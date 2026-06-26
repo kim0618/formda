@@ -2,7 +2,8 @@
 // 히어로 좌우 2단 → 대표 도구(견적서 크게) → 3단계 → 왜 폼다 → 카테고리(텍스트형)
 import { head, header, footer } from './shell.mjs';
 import { svg } from './icons.mjs';
-import { site, categories, tools } from '../data/registry.js';
+import { site, categories, tools, categoryBySlug, toolsBySlug } from '../data/registry.js';
+import { guides } from '../data/guides.js';
 
 export function homePage(thumbs = {}) {
   const live = tools.filter((t) => !t.stub); // 실제 사용 가능한 도구
@@ -76,6 +77,15 @@ ${header('')}
     </div>
     <div class="cat-list">${categories.map(catRow).join('')}</div>
   </section>
+
+  <!-- 가이드 -->
+  <section class="home-sec reveal">
+    <div class="home-sec-head">
+      <h2 class="home-sec-h">문서 작성 가이드</h2>
+      <a class="sec-more" href="/guides/">전체 보기 →</a>
+    </div>
+    <div class="guide-grid">${guides.slice(0, 6).map(guideCardHome).join('')}</div>
+  </section>
 </main>
 
 <script src="/engine/thumb.js"></script>
@@ -84,6 +94,17 @@ ${header('')}
 <script type="application/ld+json">${JSON.stringify({ '@context': 'https://schema.org', '@type': 'Organization', name: site.name, url: site.domain + '/', logo: site.domain + '/assets/logo.png' })}</script>
 ${footer()}
 `;
+}
+
+function guideCardHome(g) {
+  const cat = categoryBySlug[g.category];
+  const tool = toolsBySlug[g.tool];
+  return `<a class="guide-card" href="/guides/${g.slug}.html" style="--accent:${(tool && tool.accent) || '#4f46e5'}">
+    <span class="guide-card-tag">${cat.label}</span>
+    <h3>${g.title}</h3>
+    <p>${g.seoDescription}</p>
+    <span class="guide-card-go">읽어보기 →</span>
+  </a>`;
 }
 
 // 대표 도구 가로형 카드: 좌 A4 썸네일 · 우 정보/기능/대상/CTA (카테고리 페이지서도 재사용)

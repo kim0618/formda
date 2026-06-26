@@ -5,7 +5,10 @@ import { fileURLToPath } from 'node:url';
 import vm from 'node:vm';
 
 import { site, categories, tools } from '../data/registry.js';
+import { guides } from '../data/guides.js';
 import { toolPage, stubToolPage } from '../templates/tool-page.mjs';
+import { textToolPage, textThumb } from '../templates/text-tool-page.mjs';
+import { guidePage, guidesIndexPage } from '../templates/guide-page.mjs';
 import { homePage } from '../templates/home.mjs';
 import { categoryPage } from '../templates/category.mjs';
 import { trustPages } from '../templates/page.mjs';
@@ -36,6 +39,7 @@ function blankThumb(tool) {
 }
 function renderThumb(tool) {
   if (tool.stub) return blankThumb(tool);
+  if (tool.toolType === 'text') return textThumb(tool);
   const s = JSON.parse(JSON.stringify(tool.sample || {}));
   if (s.date === 'today') s.date = THUMB_DATE;
   if (!s.items || !s.items.length) s.items = [{ name: '', qty: 1, price: 0 }];
@@ -52,14 +56,15 @@ function out(relPath, content) {
 }
 
 // 생성물 폴더 정리 (소스 폴더는 건드리지 않음)
-for (const dir of ['tools', 'category', 'pages']) {
+for (const dir of ['tools', 'category', 'pages', 'guides']) {
   const p = join(ROOT, dir);
   if (existsSync(p)) rmSync(p, { recursive: true, force: true });
 }
 
 console.log('[1/5] 도구 페이지');
 for (const tool of tools) {
-  out(`tools/${tool.slug}.html`, tool.stub ? stubToolPage(tool) : toolPage(tool));
+  const html = tool.stub ? stubToolPage(tool) : (tool.toolType === 'text' ? textToolPage(tool) : toolPage(tool));
+  out(`tools/${tool.slug}.html`, html);
 }
 
 console.log('[2/5] 홈');
@@ -70,16 +75,24 @@ for (const cat of categories) {
   out(`category/${cat.slug}.html`, categoryPage(cat, THUMBS));
 }
 
-console.log('[4/5] 신뢰 페이지');
+console.log('[4/6] 신뢰 페이지');
 for (const p of trustPages()) {
   out(`pages/${p.slug}.html`, p.html);
 }
 
-console.log('[5/5] sitemap + robots');
+console.log('[5/6] 가이드');
+out('guides/index.html', guidesIndexPage(guides));
+for (const g of guides) {
+  out(`guides/${g.slug}.html`, guidePage(g));
+}
+
+console.log('[6/6] sitemap + robots');
 const urls = [
   { loc: '/', priority: '1.0' },
   ...categories.map((c) => ({ loc: `/category/${c.slug}.html`, priority: '0.7' })),
   ...tools.filter((t) => !t.stub).map((t) => ({ loc: `/tools/${t.slug}.html`, priority: '0.9' })),
+  { loc: '/guides/', priority: '0.6' },
+  ...guides.map((g) => ({ loc: `/guides/${g.slug}.html`, priority: '0.6' })),
   ...['about', 'terms', 'privacy', 'contact'].map((s) => ({ loc: `/pages/${s}.html`, priority: '0.3' })),
 ];
 const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
@@ -94,4 +107,4 @@ Allow: /
 Sitemap: ${site.domain}/sitemap.xml
 `);
 
-console.log(`\n완료: 도구 ${tools.length} · 카테고리 ${categories.length} · 신뢰 4 · sitemap ${urls.length} URL`);
+console.log(`\n완료: 도구 ${tools.length} · 카테고리 ${categories.length} · 가이드 ${guides.length} · 신뢰 4 · sitemap ${urls.length} URL`);

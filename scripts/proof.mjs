@@ -15,28 +15,41 @@ for (const f of ['engine/calc.js', 'engine/doc-render.js']) {
 }
 const ENGINE = ctx.window.Formda;
 
-function render(tool, items) {
+function render(tool, override) {
   const s = JSON.parse(JSON.stringify(tool.sample || {}));
   if (s.date === 'today') s.date = '2026-06-24';
-  if (items) s.items = items;
+  if (override) Object.assign(s, override);
   s.sealImg = null;
   return ENGINE.docRender[tool.docType](s, tool.doc, { single: true });
 }
 
-// 스트레스: 문서별 상한(maxItems)만큼 + 긴 품목명/규격 + 큰 금액 → 실제 최악 케이스
+// 스트레스: 문서별 상한만큼 + 긴 텍스트 → 실제 최악 케이스
 function stressItems(cap) {
   return Array.from({ length: cap }, (_, i) => ({
     name: '아주 긴 품목명 예시 ' + (i + 1) + ' (상세 옵션·사양 포함 케이스)',
     spec: '규격-' + (i + 1) + '-옵션', qty: 99, price: 12345678,
   }));
 }
+function stressResume(d) {
+  return {
+    edu: Array.from({ length: d.maxEdu || 4 }, () => ({ period: '2010.03 ~ 2014.02', school: '아주 긴 학교 이름 예시 대학교', major: '아주 긴 전공명 학과 (학사)', status: '졸업' })),
+    career: Array.from({ length: d.maxCareer || 5 }, () => ({ period: '2014.03 ~ 2020.12', company: '아주 긴 회사명 주식회사', role: '아주 긴 직위·부서명 책임', task: '아주 긴 담당업무 설명 예시 케이스' })),
+    etc: '컴퓨터활용능력 1급\nTOEIC 990\nOPIc AL\n정보처리기사\n운전면허 1종 보통\n한국사능력검정 1급\nGTQ 1급 (자격 7줄 초과 테스트)',
+  };
+}
 
-const live = tools.filter((t) => !t.stub);
+const live = tools.filter((t) => !t.stub && t.toolType !== 'text'); // 텍스트 유틸은 A4 문서 아님
 const blocks = live.flatMap((t) => {
+  if (t.docType === 'resume') {
+    return [
+      sheet(`${t.navTitle} — 기본 샘플`, render(t)),
+      sheet(`${t.navTitle} — 학력 ${t.doc.maxEdu}·경력 ${t.doc.maxCareer} 최대 + 긴 텍스트 (최악 케이스)`, render(t, stressResume(t.doc))),
+    ];
+  }
   const cap = (t.doc && t.doc.maxItems) || 10;
   return [
     sheet(`${t.navTitle} — 기본 샘플`, render(t)),
-    sheet(`${t.navTitle} — 최대 ${cap}개 + 긴 이름·큰 금액 (최악 케이스)`, render(t, stressItems(cap))),
+    sheet(`${t.navTitle} — 최대 ${cap}개 + 긴 이름·큰 금액 (최악 케이스)`, render(t, { items: stressItems(cap) })),
   ];
 }).join('\n');
 

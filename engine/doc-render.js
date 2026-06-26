@@ -63,9 +63,9 @@
       '</tbody></table>';
   }
 
-  function amountBox(t) {
+  function amountBox(t, cfg) {
     return '<div class="qt-amount">' +
-      '<div class="k">합계금액</div>' +
+      '<div class="k">' + ((cfg && cfg.amountLabel) || '합계금액') + '</div>' +
       '<div class="v"><b>' + (t.total > 0 ? '一金 ' + calc.korAmount(t.total) + '원整' : '') + '</b>' +
       '<span>' + (t.total > 0 ? '(₩' + comma(t.total) + ')' : '') + '</span></div>' +
     '</div>';
@@ -86,7 +86,7 @@
           partyBox(cfg.partyToLabel || '공급받는자', { reg: state.toReg, name: state.to, ceo: state.toCeo, addr: state.toAddr, tel: state.toTel }, '') +
           partyBox(cfg.partyFromLabel || '공급자', { reg: state.fromReg, name: state.from, ceo: state.fromCeo, addr: state.fromAddr, tel: state.fromTel }, sealHTML(state, cfg)) +
         '</div>' +
-        amountBox(t);
+        amountBox(t, cfg);
     }
     // 견적서 등: 수신("○○ 귀하") + 공급자 박스 1개(업태/종목 포함 6행)
     return titleMeta(state, cfg) +
@@ -102,7 +102,7 @@
           '<tr><td class="k">전　화</td><td class="v">' + (esc(state.fromTel) || '&nbsp;') + '</td></tr>' +
         '</tbody></table>' +
       '</div>' +
-      amountBox(t) +
+      amountBox(t, cfg) +
       (cfg.receiptConfirm ? '<div class="qt-confirm">위 금액을 정히 영수합니다.</div>' : '');
   }
 
@@ -150,6 +150,15 @@
         '<tr><td class="k">결제조건</td><td class="v" colspan="3">' + (esc(state.paymentTerms) || '&nbsp;') + '</td></tr>' +
         '</tbody></table>';
     }
+    // 청구서 표준: 결제 안내란 (납부기한 / 예금주 / 입금계좌)
+    var payInfo = '';
+    if (cfg.payInfo) {
+      payInfo = '<table class="qt-terms"><tbody>' +
+        '<tr><td class="k">납부기한</td><td class="v">' + (esc(state.payDue) || '&nbsp;') + '</td>' +
+            '<td class="k">예금주</td><td class="v">' + (esc(state.payHolder) || '&nbsp;') + '</td></tr>' +
+        '<tr><td class="k">입금계좌</td><td class="v" colspan="3">' + (esc(state.payAccount) || '&nbsp;') + '</td></tr>' +
+        '</tbody></table>';
+    }
     // 거래명세서 표준: 미수금 정산란 (전잔액 + 당월 거래액 - 입금액 = 미수 잔액)
     var balance = '';
     if (cfg.balance) {
@@ -169,6 +178,7 @@
       '</tbody></table>' +
       balance +
       terms +
+      payInfo +
       validity +
       (state.note ? '<div class="qt-note">' + esc(state.note) + '</div>' : '') +
       receiver;
@@ -228,6 +238,134 @@
     return wrap(inner, opts);
   }
 
+  // ===== 증명·증서 (certificate) 가족 =====
+  function korDate(s) {
+    if (!s) return '';
+    var p = String(s).split('-');
+    if (p.length !== 3) return esc(s);
+    return p[0] + '년 ' + Number(p[1]) + '월 ' + Number(p[2]) + '일';
+  }
+  function ctRow(label, v) {
+    return '<tr><td class="k">' + label + '</td><td class="v">' + (esc(v) || '&nbsp;') + '</td></tr>';
+  }
+  function renderEmployment(state, cfg) {
+    var s = state;
+    var info = '<table class="ct-info"><tbody>' +
+      ctRow('성　명', s.name) + ctRow('생년월일', s.birth) +
+      ctRow('주　소', s.addr) +
+      ctRow('소　속', s.dept) + ctRow('직　위', s.position) +
+      ctRow('재직기간', s.period) + '</tbody></table>';
+    var meta = [];
+    if (s.orgReg) meta.push('사업자등록번호 ' + esc(s.orgReg));
+    if (s.orgTel) meta.push('전화 ' + esc(s.orgTel));
+    if (s.orgAddr) meta.push(esc(s.orgAddr));
+    return '<div class="ct-page">' +
+      '<div class="ct-top">' +
+        (s.docNo ? '<div class="ct-docno">제 ' + esc(s.docNo) + ' 호</div>' : '') +
+        '<div class="ct-title">' + esc(cfg.docTitle) + '</div>' + info +
+        '<div class="ct-body">' + (esc(s.body) || '위 사람은 당사에 위와 같이 재직하고 있음을 증명합니다.') + '</div>' +
+        (s.purpose ? '<div class="ct-purpose">용　도 : ' + esc(s.purpose) + '</div>' : '') +
+      '</div>' +
+      '<div class="ct-bottom">' +
+        '<div class="ct-date">' + korDate(s.date) + '</div>' +
+        '<div class="ct-issuer">' +
+          '<div class="ct-org">' + (esc(s.orgName) || '&nbsp;') + '</div>' +
+          '<div class="ct-ceo">대표이사 ' + (esc(s.orgCeo) || '&nbsp;') + sealHTML(s, cfg) + '</div>' +
+          '<div class="ct-meta">' + meta.join('　·　') + '</div>' +
+        '</div>' +
+      '</div>' +
+    '</div>';
+  }
+  function renderResignation(state, cfg) {
+    var s = state;
+    var info = '<table class="ct-info"><tbody>' +
+      ctRow('소　속', s.dept) + ctRow('직　위', s.position) +
+      ctRow('성　명', s.name) + ctRow('생년월일', s.birth) +
+      ctRow('입사일자', s.hireDate) + ctRow('퇴직희망일', s.lastDay) + '</tbody></table>';
+    return '<div class="ct-page">' +
+      '<div class="ct-top">' +
+        '<div class="ct-title">' + esc(cfg.docTitle) + '</div>' + info +
+        '<div class="ct-body ct-letter">' + (esc(s.body) || '상기 본인은 일신상의 사유로 인하여 위 퇴직희망일자로 사직하고자 하오니 재가하여 주시기 바랍니다. 퇴직 전까지 담당 업무를 후임자에게 성실히 인수인계할 것을 약속드리며, 그동안 베풀어 주신 배려에 깊이 감사드립니다.') + '</div>' +
+        '<div class="ct-sec">인수인계 사항</div><div class="ct-handover">' + (esc(s.handover) || '&nbsp;') + '</div>' +
+      '</div>' +
+      '<div class="ct-bottom">' +
+        '<div class="ct-date">' + korDate(s.date) + '</div>' +
+        '<div class="ct-signer">작성자 : ' + (esc(s.name) || '&nbsp;') + sealHTML(s, cfg) + '</div>' +
+        '<div class="ct-recipient">' + (esc(s.recipient) || '&nbsp;') + ' 귀하</div>' +
+      '</div>' +
+    '</div>';
+  }
+  function renderAward(state, cfg) {
+    var s = state;
+    return '<div class="aw-page">' +
+      '<div class="aw-top">' +
+        (s.docNo ? '<div class="ct-docno">제 ' + esc(s.docNo) + ' 호</div>' : '') +
+        '<div class="aw-title">' + esc(cfg.docTitle) + '</div>' +
+      '</div>' +
+      '<div class="aw-mid">' +
+        '<div class="aw-recipient">' +
+          (s.recipientSub ? '<div class="aw-sub">' + esc(s.recipientSub) + '</div>' : '') +
+          '<div class="aw-name">' + (esc(s.name) || '&nbsp;') + '</div>' +
+        '</div>' +
+        '<div class="aw-body">' + (esc(s.body) || '위 사람은 평소 맡은 바 직무에 성실하고 그 성과가 우수하여 다른 이의 모범이 되므로, 그 공로를 기리어 이 상장을 수여합니다.') + '</div>' +
+      '</div>' +
+      '<div class="aw-bottom">' +
+        '<div class="aw-date">' + korDate(s.date) + '</div>' +
+        '<div class="aw-issuer"><div class="aw-org">' + (esc(s.orgName) || '&nbsp;') + '</div>' +
+          '<div class="aw-ceo">' + (esc(s.orgTitle) || '대표이사') + '　' + (esc(s.orgCeo) || '&nbsp;') + sealHTML(s, cfg) + '</div></div>' +
+      '</div>' +
+    '</div>';
+  }
+  function certificate(state, cfg, opts) {
+    opts = opts || {};
+    var inner;
+    if (cfg.variant === 'resignation') inner = renderResignation(state, cfg);
+    else if (cfg.variant === 'award') inner = renderAward(state, cfg);
+    else inner = renderEmployment(state, cfg);
+    return wrap(inner, opts);
+  }
+
+  // ===== 이력서 (resume) 가족 =====
+  function rsTable(list, cols, minRows, headers) {
+    var n = Math.max((list || []).length, minRows);
+    var rows = '';
+    for (var i = 0; i < n; i++) {
+      var it = (list || [])[i];
+      rows += '<tr>' + cols.map(function (c) {
+        return '<td class="' + (c.cls || '') + '">' + (it ? (esc(it[c.key]) || '') : '') + '</td>';
+      }).join('') + '</tr>';
+    }
+    var thead = '<tr>' + headers.map(function (h) { return '<th>' + h + '</th>'; }).join('') + '</tr>';
+    return '<table class="rs-table"><thead>' + thead + '</thead><tbody>' + rows + '</tbody></table>';
+  }
+  function renderResume(state, cfg, opts) {
+    opts = opts || {};
+    var s = state;
+    var photo = s.photo ? '<img src="' + s.photo + '" alt="사진">' : '<span>사진<br>3 × 4</span>';
+    var info = '<table class="rs-info"><tbody>' +
+      '<tr><td class="k">성　명</td><td class="v">' + (esc(s.name) || '&nbsp;') + '</td></tr>' +
+      '<tr><td class="k">생년월일</td><td class="v">' + (esc(s.birth) || '&nbsp;') + '</td></tr>' +
+      '<tr><td class="k">연락처</td><td class="v">' + (esc(s.tel) || '&nbsp;') + '</td></tr>' +
+      '<tr><td class="k">이메일</td><td class="v">' + (esc(s.email) || '&nbsp;') + '</td></tr>' +
+      '<tr><td class="k">주　소</td><td class="v">' + (esc(s.addr) || '&nbsp;') + '</td></tr>' +
+      '</tbody></table>';
+    var eduCols = [{ key: 'period', cls: 'c' }, { key: 'school', cls: 'l' }, { key: 'major', cls: 'l' }, { key: 'status', cls: 'c' }];
+    var carCols = [{ key: 'period', cls: 'c' }, { key: 'company', cls: 'l' }, { key: 'role', cls: 'l' }, { key: 'task', cls: 'l' }];
+    var eduMin = opts.single ? 3 : (cfg.maxEdu || 4);
+    var carMin = opts.single ? 4 : (cfg.maxCareer || 5);
+    var inner =
+      '<div class="rs-page">' +
+      '<div class="rs-title">' + esc(cfg.docTitle) + '</div>' +
+      '<div class="rs-top"><div class="rs-info-wrap">' + info + '</div><div class="rs-photo">' + photo + '</div></div>' +
+      '<div class="rs-sec">학력사항</div>' + rsTable(s.edu, eduCols, eduMin, ['재학기간', '학교명', '전공·학위', '졸업구분']) +
+      '<div class="rs-sec">경력사항</div>' + rsTable(s.career, carCols, carMin, ['근무기간', '회사명', '직위·부서', '담당업무']) +
+      '<div class="rs-sec">자격·기타</div><div class="rs-etc">' + (esc(s.etc) || '&nbsp;') + '</div>' +
+      '<div class="rs-foot"><span>' + (s.date ? '작성일 : ' + esc(s.date) : '') + '</span>' +
+        '<span>작성자 : ' + (esc(s.name) || '&nbsp;') + ' (인)</span></div>' +
+      '</div>';
+    return wrap(inner, opts);
+  }
+
   // 무료: 항상 1페이지 (품목은 app에서 14개로 캡). cfg.layout으로 문서별 레이아웃 분기
   function businessInvoice(state, cfg, opts) {
     opts = opts || {};
@@ -237,5 +375,7 @@
 
   root.Formda.docRender = {
     'business-invoice': businessInvoice,
+    'resume': renderResume,
+    'certificate': certificate,
   };
 })(typeof window !== 'undefined' ? window : this);

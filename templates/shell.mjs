@@ -34,7 +34,7 @@ ${robots ? `<meta name="robots" content="${robots}" />\n` : ''}${keywords ? `<me
 export function header(activeCat) {
   const nav = categories
     .map((c) => `<a href="/category/${c.slug}.html"${c.slug === activeCat ? ' class="on"' : ''}>${c.name}</a>`)
-    .join('');
+    .join('') + `<a href="/guides/"${activeCat === 'guides' ? ' class="on"' : ''}>가이드</a>`;
   return `<header class="header">
   <div class="header-in">
     <a class="logo" href="/"><img class="logo-img" src="/assets/logo.png" alt="폼다" onerror="this.replaceWith(Object.assign(document.createElement('span'),{className:'logo-text',textContent:'폼다'}))"></a>
@@ -44,7 +44,7 @@ export function header(activeCat) {
 }
 
 export function footer() {
-  const links = [{ href: '/', label: '홈' }, ...TRUST_PAGES]
+  const links = [{ href: '/', label: '홈' }, { href: '/guides/', label: '가이드' }, ...TRUST_PAGES]
     .map((p) => `<a href="${p.href}">${p.label}</a>`)
     .join('');
   return `<footer class="footer">

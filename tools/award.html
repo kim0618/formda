@@ -4,13 +4,13 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <script>document.documentElement.classList.add('js')</script>
-<title>상장·표창장 만들기 - 준비중 | 폼다</title>
-<meta name="description" content="상장·표창장 자동작성 도구는 곧 추가됩니다." />
-<meta name="robots" content="noindex,follow" />
+<title>상장 양식 무료 - 표창장·상장 입력하면 바로 완성 PDF | 폼다</title>
+<meta name="description" content="가입 없이 수상자와 공적 문구만 입력하면 상장·표창장이 바로 완성됩니다. 테두리 디자인, 직인 첨부, PDF·PNG 다운로드까지 무료. 폼다 상장 만들기." />
+<meta name="keywords" content="상장 양식, 표창장 양식, 상장 만들기, 상장 무료, 표창장 만들기, 상장 PDF, 감사장 양식" />
 <link rel="canonical" href="https://formda.kr/tools/award.html" />
 <meta property="og:type" content="website" />
-<meta property="og:title" content="상장·표창장 만들기 - 준비중 | 폼다" />
-<meta property="og:description" content="상장·표창장 자동작성 도구는 곧 추가됩니다." />
+<meta property="og:title" content="상장 양식 무료 - 표창장·상장 입력하면 바로 완성 PDF | 폼다" />
+<meta property="og:description" content="가입 없이 수상자와 공적 문구만 입력하면 상장·표창장이 바로 완성됩니다. 테두리 디자인, 직인 첨부, PDF·PNG 다운로드까지 무료. 폼다 상장 만들기." />
 <meta property="og:url" content="https://formda.kr/tools/award.html" />
 <meta property="og:site_name" content="폼다" />
 <link rel="icon" href="/assets/favicon.png" type="image/png" />
@@ -22,27 +22,104 @@
 <header class="header">
   <div class="header-in">
     <a class="logo" href="/"><img class="logo-img" src="/assets/logo.png" alt="폼다" onerror="this.replaceWith(Object.assign(document.createElement('span'),{className:'logo-text',textContent:'폼다'}))"></a>
-    <nav class="nav"><a href="/category/business.html">비즈니스</a><a href="/category/job.html">취업</a><a href="/category/life.html" class="on">생활</a><a href="/category/text.html">텍스트</a></nav>
+    <nav class="nav"><a href="/category/business.html">비즈니스</a><a href="/category/job.html">취업</a><a href="/category/life.html" class="on">생활</a><a href="/category/text.html">텍스트</a><a href="/guides/">가이드</a></nav>
   </div>
 </header>
+
 <main class="wrap">
   <div class="crumb"><a href="/">홈</a> › <a href="/category/life.html">생활/행정</a> › 상장·표창장</div>
-  <div class="stub-page">
-    <span class="stub-badge">준비중</span>
-    <h1>상장·표창장 작성기</h1>
-    <p>상장·표창장 자동작성 도구를 준비하고 있어요. 견적서처럼 입력하면 바로 완성되는 상장·표창장로 곧 찾아옵니다.</p>
-    <div class="hero-cta" style="justify-content:center">
-      <a class="btn-cta primary" href="/tools/estimate.html">지금은 견적서 만들기</a>
-      <a class="btn-cta ghost" href="/category/life.html">생활/행정 전체 보기</a>
-    </div>
+  <h1 class="title">상장·표창장 작성기</h1>
+  <p class="subtitle">회사 정보와 품목만 입력하면 상장·표창장 PDF·PNG를 바로 만들 수 있습니다. 가입 없이 무료.</p>
+  <div class="trust">🔒 입력 정보는 <b>서버에 저장되지 않고</b> 브라우저에서만 처리됩니다.</div>
+  <div class="steps">
+    <span class="step"><span class="num">1</span>입력</span><span class="arrow">→</span>
+    <span class="step"><span class="num">2</span>실시간 미리보기</span><span class="arrow">→</span>
+    <span class="step"><span class="num">3</span>PDF·PNG 다운로드</span>
   </div>
+
+  <div class="tabs no-print">
+    <button id="tabInput" class="on" onclick="Formda.app.showPane('input')">입력</button>
+    <button id="tabPreview" onclick="Formda.app.showPane('preview')">미리보기</button>
+  </div>
+
+  <div class="editor">
+  <div class="cols">
+    <section class="pane-input">
+      <div class="pane-head">
+        <span class="pv-label">입력</span>
+        <div class="head-actions no-print">
+          <button class="mini-btn" type="button" onclick="Formda.app.loadSample()">샘플 불러오기</button>
+          <button class="mini-btn danger" type="button" onclick="Formda.app.clearAll()">전체 비우기</button>
+        </div>
+      </div>
+      <div class="form-scroll"><div id="formPanel"><!-- 입력폼: 엔진이 렌더 --></div></div>
+    </section>
+
+    <section class="pane-preview">
+      <div class="pane-head">
+        <span class="pv-label">미리보기</span>
+        <div class="zoom no-print">
+          <button type="button" onclick="Formda.app.zoomOut()" aria-label="축소">−</button>
+          <button type="button" class="zoom-pct" onclick="Formda.app.zoomReset()" aria-label="맞춤"><span id="zoomLabel">100%</span></button>
+          <button type="button" onclick="Formda.app.zoomIn()" aria-label="확대">+</button>
+        </div>
+      </div>
+      <div class="preview-wrap">
+        <div class="doc-viewport" id="doc"><!-- 미리보기: 엔진이 A4 페이지로 렌더 --></div>
+        <div class="actions no-print">
+          <button class="btn btn-ghost" onclick="Formda.app.print()">인쇄</button>
+          <button class="btn btn-ghost" onclick="Formda.app.downloadPNG(this)">PNG 저장</button>
+          <button class="btn btn-primary btn-pdf" onclick="Formda.app.downloadPDF(this)">PDF 다운로드</button>
+        </div>
+      </div>
+    </section>
+  </div>
+  </div>
+
+  <section class="guide" style="--accent:#b45309">
+    <h2 class="guide-title">상장·표창장 작성 가이드</h2>
+    <p class="guide-lead">상장과 표창장은 수상자의 공적이나 성과를 공식적으로 인정하고 격식 있게 남기는 문서입니다. 회사에서 우수사원을 표창하거나 학교·기관·동호회에서 공로를 치하할 때 사용합니다. 정해진 법정 양식은 없지만 수상자 정보와 공적 문구, 수여일자, 수여기관과 직인이 들어가야 격식을 갖춥니다. 폼다 상장 만들기는 수상자와 공적 문구만 입력하면 테두리 디자인이 들어간 상장을 한 장으로 완성하고, 직인 이미지를 올려 날인까지 반영할 수 있습니다.</p>
+    <div class="guide-cards">
+      <article class="g-card"><div class="g-card-head"><span class="g-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="4.5" y="3" width="15" height="18" rx="2.5"/><path d="m7.5 9 1.4 1.4L11.4 8"/><path d="M13.5 9.2h3"/><path d="m7.5 15 1.4 1.4 2.5-2.4"/><path d="M13.5 15.2h3"/></svg></span><h3>상장 필수 기재 항목</h3></div>
+<p>상장과 표창장은 형식이 자유롭지만, 격식을 갖추려면 아래 항목이 들어가야 합니다.</p><div class="tbl-scroll"><table class="g-table"><thead><tr><th>항목</th><th>내용</th></tr></thead><tbody><tr><td>수상자</td><td>소속·직위와 성명</td></tr><tr><td>제목</td><td>상장, 표창장, 감사장 등</td></tr><tr><td>공적 문구</td><td>무엇을 잘했는지 구체적인 사유</td></tr><tr><td>수여일자</td><td>상장을 수여하는 날짜</td></tr><tr><td>수여기관·직인</td><td>기관·회사명, 수여자 직위·성명, 직인</td></tr></tbody></table></div></article>
+<article class="g-card"><div class="g-card-head"><span class="g-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 18.5h5"/><path d="M10.2 21.5h3.6"/><path d="M12 2.5a6.3 6.3 0 0 0-3.9 11.3c.7.6 1 1.2 1 2.2h5.8c0-1 .3-1.6 1-2.2A6.3 6.3 0 0 0 12 2.5z"/></svg></span><h3>공적 문구는 구체적으로 씁니다</h3></div>
+<p>상장의 핵심은 공적 문구입니다. "근무 성적이 우수하여"처럼 막연하게 적기보다, 무엇을 언제 어떻게 잘했는지 구체적으로 적으면 받는 사람에게 더 뜻깊습니다. 공적 내용은 육하원칙에 따라 구체적 사례를 담는 것이 좋습니다. 끝맺음은 상장이면 "이 상장을 수여합니다", 표창장이면 "이에 표창합니다"로 적습니다.</p></article>
+<article class="g-card"><div class="g-card-head"><span class="g-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 18.5h5"/><path d="M10.2 21.5h3.6"/><path d="M12 2.5a6.3 6.3 0 0 0-3.9 11.3c.7.6 1 1.2 1 2.2h5.8c0-1 .3-1.6 1-2.2A6.3 6.3 0 0 0 12 2.5z"/></svg></span><h3>상장·표창장·감사장의 차이</h3></div>
+<p>비슷해 보이지만 쓰임이 조금 다릅니다. <b>상장</b>은 성적이나 성과가 뛰어난 사람에게, <b>표창장</b>은 공로나 善行을 인정해 칭찬할 때, <b>감사장</b>은 도움이나 기여에 감사를 표할 때 줍니다. 양식은 거의 같고 제목과 끝맺음 문구만 다르므로, 폼다에서 제목과 문구만 바꿔 모두 만들 수 있습니다.</p></article>
+      <article class="g-card g-faq"><div class="g-card-head"><span class="g-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9.6 9.4a2.5 2.5 0 0 1 4.3 1.7c0 1.6-2.4 1.9-2.4 3.4"/><path d="M11.5 17.4h.02"/></svg></span><h3>자주 묻는 질문</h3></div><div class="g-faq-item"><p class="faq-q">Q. 상장과 표창장은 어떻게 다른가요?</p><p>상장은 주로 성적이나 성과가 뛰어난 사람에게 주고, 표창장은 공로나 모범적인 행동을 인정해 칭찬할 때 줍니다. 형식과 양식은 거의 같고 제목과 끝맺음 문구(수여합니다 / 표창합니다)만 다릅니다. 폼다에서는 제목과 공적 문구만 바꾸면 상장, 표창장, 감사장을 모두 만들 수 있습니다.</p></div>
+<div class="g-faq-item"><p class="faq-q">Q. 공적 문구는 어떻게 써야 하나요?</p><p>무엇을 언제 어떻게 잘했는지 구체적으로 적는 것이 좋습니다. "성실히 근무하여"처럼 막연한 표현보다 "한 해 동안 신규 거래처를 다수 발굴하여 매출 향상에 기여하였으므로"처럼 구체적 사례를 담으면 받는 사람에게 더 뜻깊습니다. 공적 내용은 육하원칙에 따라 정확하게 기재하는 것이 원칙입니다.</p></div>
+<div class="g-faq-item"><p class="faq-q">Q. 직인은 꼭 필요한가요?</p><p>법적 의무는 아니지만, 상장은 수여기관의 공식 문서이므로 기관 직인이나 대표 도장을 넣는 것이 격식에 맞습니다. 폼다에서는 직인 이미지를 올리면 수여자 이름 옆에 바로 반영되므로, 인쇄해서 찍지 않아도 날인된 상장을 만들 수 있습니다.</p></div>
+<div class="g-faq-item"><p class="faq-q">Q. 작성한 상장은 저장되나요?</p><p>폼다는 입력 내용을 서버로 전송하거나 저장하지 않습니다. 모든 처리는 사용자 브라우저 안에서만 이루어지며, PDF·PNG로 내려받은 파일만 기기에 남습니다. 수상자 정보가 외부로 나가지 않으므로 안심하고 만들 수 있습니다.</p></div></article>
+    </div>
+    <div class="sibling-section"><div class="sibling-title">관련 문서 도구</div><div class="sibling-list"><a class="sibling-link" href="/tools/employment.html">재직증명서</a><a class="sibling-link" href="/tools/resume.html">이력서</a><a class="sibling-link" href="/category/life.html">생활/행정 전체 ›</a></div></div>
+  </section>
 </main>
+
+<!-- 모바일 하단 고정 다운로드 바 -->
+<div class="mobile-bar no-print">
+  <button class="btn btn-ghost" onclick="Formda.app.downloadPNG(this)">PNG</button>
+  <button class="btn btn-primary btn-pdf" onclick="Formda.app.downloadPDF(this)">PDF 다운로드</button>
+</div>
+
 <footer class="footer">
   <div class="footer-in">
-    <div class="footer-links"><a href="/">홈</a><a href="/pages/about.html">소개</a><a href="/pages/terms.html">이용약관</a><a href="/pages/privacy.html">개인정보처리방침</a><a href="/pages/contact.html">문의</a></div>
+    <div class="footer-links"><a href="/">홈</a><a href="/guides/">가이드</a><a href="/pages/about.html">소개</a><a href="/pages/terms.html">이용약관</a><a href="/pages/privacy.html">개인정보처리방침</a><a href="/pages/contact.html">문의</a></div>
     <div class="footer-note">폼다는 입력 정보를 서버에 저장하지 않는 브라우저 기반 문서 작성 도구입니다. 작성한 문서의 내용 확인과 사용 책임은 사용자에게 있습니다.</div>
     <div class="footer-copy">© 폼다 · 입력하면 바로 완성되는 무료 문서 도구</div>
   </div>
 </footer>
 </body>
 </html>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script>window.FORMDA_TOOL = {"slug":"award","docType":"certificate","doc":{"docTitle":"상 장","variant":"award","fileName":"상장","showSeal":true},"sample":{"date":"today","docNo":"2026-001","recipientSub":"경영지원팀 과장","name":"홍 길 동","body":"위 사람은 평소 맡은 바 직무에 성실하고 그 성과가 우수하여 다른 직원의 모범이 되었으므로, 그 공로를 기리어 이 상장을 수여합니다.","orgName":"폼다 주식회사","orgTitle":"대표이사","orgCeo":"김폼다"}};</script>
+<script src="/engine/calc.js"></script>
+<script src="/engine/doc-render.js"></script>
+<script src="/engine/form-engine.js"></script>
+<script src="/engine/export.js"></script>
+<script src="/engine/app.js"></script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"상장과 표창장은 어떻게 다른가요?","acceptedAnswer":{"@type":"Answer","text":"상장은 주로 성적이나 성과가 뛰어난 사람에게 주고, 표창장은 공로나 모범적인 행동을 인정해 칭찬할 때 줍니다. 형식과 양식은 거의 같고 제목과 끝맺음 문구(수여합니다 / 표창합니다)만 다릅니다. 폼다에서는 제목과 공적 문구만 바꾸면 상장, 표창장, 감사장을 모두 만들 수 있습니다."}},{"@type":"Question","name":"공적 문구는 어떻게 써야 하나요?","acceptedAnswer":{"@type":"Answer","text":"무엇을 언제 어떻게 잘했는지 구체적으로 적는 것이 좋습니다. \"성실히 근무하여\"처럼 막연한 표현보다 \"한 해 동안 신규 거래처를 다수 발굴하여 매출 향상에 기여하였으므로\"처럼 구체적 사례를 담으면 받는 사람에게 더 뜻깊습니다. 공적 내용은 육하원칙에 따라 정확하게 기재하는 것이 원칙입니다."}},{"@type":"Question","name":"직인은 꼭 필요한가요?","acceptedAnswer":{"@type":"Answer","text":"법적 의무는 아니지만, 상장은 수여기관의 공식 문서이므로 기관 직인이나 대표 도장을 넣는 것이 격식에 맞습니다. 폼다에서는 직인 이미지를 올리면 수여자 이름 옆에 바로 반영되므로, 인쇄해서 찍지 않아도 날인된 상장을 만들 수 있습니다."}},{"@type":"Question","name":"작성한 상장은 저장되나요?","acceptedAnswer":{"@type":"Answer","text":"폼다는 입력 내용을 서버로 전송하거나 저장하지 않습니다. 모든 처리는 사용자 브라우저 안에서만 이루어지며, PDF·PNG로 내려받은 파일만 기기에 남습니다. 수상자 정보가 외부로 나가지 않으므로 안심하고 만들 수 있습니다."}}]}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"폼다 상장·표창장 작성기","url":"https://formda.kr/tools/award.html","applicationCategory":"BusinessApplication","operatingSystem":"All","inLanguage":"ko","description":"가입 없이 수상자와 공적 문구만 입력하면 상장·표창장이 바로 완성됩니다. 테두리 디자인, 직인 첨부, PDF·PNG 다운로드까지 무료. 폼다 상장 만들기.","offers":{"@type":"Offer","price":"0","priceCurrency":"KRW"},"publisher":{"@type":"Organization","name":"폼다","url":"https://formda.kr/"}}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"HowTo","name":"상장·표창장 만드는 방법","inLanguage":"ko","step":[{"@type":"HowToStep","position":1,"name":"정보 입력","text":"회사 정보와 품목·금액을 입력합니다."},{"@type":"HowToStep","position":2,"name":"실시간 미리보기","text":"입력하는 즉시 A4 문서에 그대로 반영됩니다."},{"@type":"HowToStep","position":3,"name":"PDF·PNG 저장","text":"완성된 문서를 PDF·PNG로 저장하거나 인쇄합니다."}]}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"홈","item":"https://formda.kr/"},{"@type":"ListItem","position":2,"name":"생활/행정","item":"https://formda.kr/category/life.html"},{"@type":"ListItem","position":3,"name":"상장·표창장"}]}</script>

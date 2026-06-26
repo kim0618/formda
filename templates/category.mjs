@@ -11,12 +11,19 @@ function josa(word, withBatchim, withoutBatchim) {
   return word + (has ? withBatchim : withoutBatchim);
 }
 
+// 카테고리에 faq가 없을 때의 폴백 (전 카테고리에 faq를 채우면 거의 안 쓰임)
 const FAQ = [
   { q: '입력한 정보가 서버에 저장되나요?', a: '아니요. 입력 정보는 서버로 전송하지 않고 사용자 브라우저에서만 처리됩니다.' },
   { q: '무료인가요?', a: '네. 문서 작성과 PDF·PNG 저장, 인쇄까지 모두 무료로 제공합니다.' },
-  { q: '모바일에서도 사용할 수 있나요?', a: '네. 모바일에서도 입력·실시간 미리보기·저장이 가능하도록 지원합니다.' },
-  { q: '작성한 문서는 어떻게 받나요?', a: 'PDF 또는 PNG 파일로 내려받거나 브라우저에서 바로 인쇄할 수 있습니다.' },
 ];
+
+const GUIDE_ICONS = {
+  checklist: '<rect x="4.5" y="3" width="15" height="18" rx="2.5"/><path d="m7.5 9 1.4 1.4L11.4 8"/><path d="M13.5 9.2h3"/><path d="m7.5 15 1.4 1.4 2.5-2.4"/><path d="M13.5 15.2h3"/>',
+  tip: '<path d="M9.5 18.5h5"/><path d="M10.2 21.5h3.6"/><path d="M12 2.5a6.3 6.3 0 0 0-3.9 11.3c.7.6 1 1.2 1 2.2h5.8c0-1 .3-1.6 1-2.2A6.3 6.3 0 0 0 12 2.5z"/>',
+  faq: '<circle cx="12" cy="12" r="9"/><path d="M9.6 9.4a2.5 2.5 0 0 1 4.3 1.7c0 1.6-2.4 1.9-2.4 3.4"/><path d="M11.5 17.4h.02"/>',
+  doc: '<path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4"/><path d="M9 12h6M9 16h4"/>',
+};
+function guideIco(key) { return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">${GUIDE_ICONS[key] || GUIDE_ICONS.doc}</svg>`; }
 
 export function categoryPage(cat, thumbs = {}) {
   const inCat = tools.filter((t) => t.category === cat.slug);
@@ -66,11 +73,22 @@ export function categoryPage(cat, thumbs = {}) {
   const guide = inCat.map((t) =>
     `<div class="dg-item"><b>${t.navTitle}</b><p>${t.use || ''}</p>${t.example ? `<span class="dg-ex">예: ${t.example}</span>` : ''}</div>`).join('');
 
-  const faqHtml = FAQ.map((f) =>
-    `<div class="faq-item"><div class="q">${f.q}</div><div class="a">${f.a}</div></div>`).join('');
+  const cf = cat.faq || FAQ;
+  const catSections = (cat.sections || []).map((s) =>
+    `<article class="g-card"><div class="g-card-head"><span class="g-ico">${guideIco(s.icon)}</span><h3>${s.h}</h3></div>${s.html}</article>`).join('');
+  const catFaq = cf.map((f) => `<div class="g-faq-item"><p class="faq-q">Q. ${f.q}</p><p>${f.a}</p></div>`).join('');
+  const catGuide = cat.intro
+    ? `<section class="guide">
+        <h2 class="guide-title">${cat.label} 가이드</h2>
+        <p class="guide-lead">${cat.intro}</p>
+        <div class="guide-cards">${catSections}
+          <article class="g-card g-faq"><div class="g-card-head"><span class="g-ico">${guideIco('faq')}</span><h3>자주 묻는 질문</h3></div>${catFaq}</article>
+        </div>
+      </section>`
+    : '';
   const faqLd = {
     '@context': 'https://schema.org', '@type': 'FAQPage',
-    mainEntity: FAQ.map((f) => ({ '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: f.a } })),
+    mainEntity: cf.map((f) => ({ '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: f.a } })),
   };
 
   return `${head({
@@ -98,10 +116,7 @@ ${header(cat.slug)}
     <div class="doc-guide">${guide}</div>
   </section>
 
-  <section class="home-sec">
-    <h2 class="home-sec-h">자주 묻는 질문</h2>
-    <div class="faq-list">${faqHtml}</div>
-  </section>
+  ${catGuide}
 </main>
 
 <script src="/engine/thumb.js"></script>

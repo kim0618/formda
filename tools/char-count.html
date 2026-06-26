@@ -4,13 +4,13 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <script>document.documentElement.classList.add('js')</script>
-<title>글자수 세기 만들기 - 준비중 | 폼다</title>
-<meta name="description" content="글자수 세기 자동작성 도구는 곧 추가됩니다." />
-<meta name="robots" content="noindex,follow" />
+<title>글자수 세기 - 공백 포함·제외 실시간 글자수 계산 | 폼다</title>
+<meta name="description" content="글자수, 공백 포함·제외, 단어 수, 바이트, 원고지 매수까지 실시간으로 세어 줍니다. 가입 없이 무료, 입력 내용은 서버에 저장되지 않습니다. 폼다 글자수 세기." />
+<meta name="keywords" content="글자수 세기, 글자수 계산기, 공백 제외 글자수, 바이트 계산, 원고지 매수, 자소서 글자수" />
 <link rel="canonical" href="https://formda.kr/tools/char-count.html" />
 <meta property="og:type" content="website" />
-<meta property="og:title" content="글자수 세기 만들기 - 준비중 | 폼다" />
-<meta property="og:description" content="글자수 세기 자동작성 도구는 곧 추가됩니다." />
+<meta property="og:title" content="글자수 세기 - 공백 포함·제외 실시간 글자수 계산 | 폼다" />
+<meta property="og:description" content="글자수, 공백 포함·제외, 단어 수, 바이트, 원고지 매수까지 실시간으로 세어 줍니다. 가입 없이 무료, 입력 내용은 서버에 저장되지 않습니다. 폼다 글자수 세기." />
 <meta property="og:url" content="https://formda.kr/tools/char-count.html" />
 <meta property="og:site_name" content="폼다" />
 <link rel="icon" href="/assets/favicon.png" type="image/png" />
@@ -22,27 +22,53 @@
 <header class="header">
   <div class="header-in">
     <a class="logo" href="/"><img class="logo-img" src="/assets/logo.png" alt="폼다" onerror="this.replaceWith(Object.assign(document.createElement('span'),{className:'logo-text',textContent:'폼다'}))"></a>
-    <nav class="nav"><a href="/category/business.html">비즈니스</a><a href="/category/job.html">취업</a><a href="/category/life.html">생활</a><a href="/category/text.html" class="on">텍스트</a></nav>
+    <nav class="nav"><a href="/category/business.html">비즈니스</a><a href="/category/job.html">취업</a><a href="/category/life.html">생활</a><a href="/category/text.html" class="on">텍스트</a><a href="/guides/">가이드</a></nav>
   </div>
 </header>
+
 <main class="wrap">
   <div class="crumb"><a href="/">홈</a> › <a href="/category/text.html">텍스트 도구</a> › 글자수 세기</div>
-  <div class="stub-page">
-    <span class="stub-badge">준비중</span>
-    <h1>글자수 세기 작성기</h1>
-    <p>글자수 세기 자동작성 도구를 준비하고 있어요. 견적서처럼 입력하면 바로 완성되는 글자수 세기로 곧 찾아옵니다.</p>
-    <div class="hero-cta" style="justify-content:center">
-      <a class="btn-cta primary" href="/tools/estimate.html">지금은 견적서 만들기</a>
-      <a class="btn-cta ghost" href="/category/text.html">텍스트 도구 전체 보기</a>
+  <h1 class="title">글자수 세기</h1>
+  <p class="subtitle">텍스트를 붙여넣으면 공백 포함·제외 글자수, 단어 수, 바이트, 원고지 매수를 실시간으로 계산합니다.</p>
+  <div class="trust">🔒 입력 정보는 <b>서버에 저장되지 않고</b> 브라우저에서만 처리됩니다.</div>
+
+  <section class="text-tool" style="--accent:#0ea5e9">
+    <div id="textTool"><!-- 유틸 UI: text-engine 렌더 --></div>
+  </section>
+
+  <section class="guide" style="--accent:#0ea5e9">
+    <h2 class="guide-title">글자수 세기 사용 가이드</h2>
+    <p class="guide-lead">글자수 세기는 입력한 텍스트의 글자수를 공백 포함과 공백 제외로 동시에 보여 주고, 단어 수·줄 수·바이트 수·원고지 매수까지 한 번에 계산해 주는 도구입니다. 자기소개서나 지원서는 "공백 포함 1,000자 이내", SNS는 바이트 기준 글자 제한이 걸리는 경우가 많아, 기준에 맞는 숫자를 정확히 확인하는 것이 중요합니다. 폼다 글자수 세기는 글을 붙여넣는 즉시 모든 수치를 실시간으로 갱신하고, 입력 내용을 서버로 보내지 않고 브라우저에서만 계산하므로 민감한 글도 안심하고 확인할 수 있습니다.</p>
+    <div class="guide-cards">
+      <article class="g-card"><div class="g-card-head"><span class="g-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="4.5" y="3" width="15" height="18" rx="2.5"/><path d="m7.5 9 1.4 1.4L11.4 8"/><path d="M13.5 9.2h3"/><path d="m7.5 15 1.4 1.4 2.5-2.4"/><path d="M13.5 15.2h3"/></svg></span><h3>공백 포함과 공백 제외, 어떤 기준을 봐야 할까</h3></div>
+<p>글자수 제한은 기관마다 기준이 다릅니다. 대부분의 자기소개서는 <b>공백 포함</b> 기준이지만, 일부는 <b>공백 제외</b>로 셉니다. 폼다는 두 값을 동시에 보여 주므로 어떤 기준이든 바로 맞출 수 있습니다.</p><ul><li><b>공백 포함</b> - 띄어쓰기와 줄바꿈을 포함한 전체 글자수. 대부분의 지원서 기준.</li><li><b>공백 제외</b> - 띄어쓰기를 뺀 순수 글자수.</li><li><b>바이트(UTF-8)</b> - 한글은 보통 3바이트로, 바이트 제한이 있는 입력란에서 확인합니다.</li><li><b>원고지 매수</b> - 200자 원고지 기준 환산값으로, 과제·기고문 분량 가늠에 유용합니다.</li></ul></article>
+<article class="g-card"><div class="g-card-head"><span class="g-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 18.5h5"/><path d="M10.2 21.5h3.6"/><path d="M12 2.5a6.3 6.3 0 0 0-3.9 11.3c.7.6 1 1.2 1 2.2h5.8c0-1 .3-1.6 1-2.2A6.3 6.3 0 0 0 12 2.5z"/></svg></span><h3>이런 분들이 자주 씁니다</h3></div>
+<ul><li>자기소개서·지원서 글자수를 맞춰야 하는 취준생</li><li>제목·본문 글자수 제한을 확인하는 블로거·마케터</li><li>과제·리포트 분량을 원고지 매수로 환산해야 하는 학생</li><li>상세페이지·상품명 바이트 제한을 맞추는 셀러</li></ul></article>
+<article class="g-card"><div class="g-card-head"><span class="g-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="4.5" y="3" width="15" height="18" rx="2.5"/><path d="m7.5 9 1.4 1.4L11.4 8"/><path d="M13.5 9.2h3"/><path d="m7.5 15 1.4 1.4 2.5-2.4"/><path d="M13.5 15.2h3"/></svg></span><h3>자주 쓰는 글자수 기준 예시</h3></div>
+<p>글자수 제한은 용도마다 다릅니다. 자주 쓰는 기준을 참고로 정리하면 다음과 같습니다.</p><div class="tbl-scroll"><table class="g-table"><thead><tr><th>용도</th><th>흔히 쓰는 기준</th></tr></thead><tbody><tr><td>일반 자기소개서 문항</td><td>공백 포함 500~1,000자</td></tr><tr><td>공공기관 자소서 항목</td><td>항목당 공백 포함 약 1,000자</td></tr><tr><td>네이버 블로그 제목</td><td>공백 포함 약 40자 권장</td></tr><tr><td>X(트위터) 게시글</td><td>280자 (한글은 1자=1)</td></tr><tr><td>유튜브 영상 설명</td><td>약 5,000자</td></tr></tbody></table></div><p>실제 기준은 기관과 서비스마다 다르므로, 제출 전 해당 페이지의 안내를 한 번 더 확인하세요.</p></article>
+<article class="g-card"><div class="g-card-head"><span class="g-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 18.5h5"/><path d="M10.2 21.5h3.6"/><path d="M12 2.5a6.3 6.3 0 0 0-3.9 11.3c.7.6 1 1.2 1 2.2h5.8c0-1 .3-1.6 1-2.2A6.3 6.3 0 0 0 12 2.5z"/></svg></span><h3>글자수가 넘칠 때 줄이는 법</h3></div>
+<ul><li><b>중복 표현 제거</b> - 같은 말을 다르게 반복한 문장을 하나로 합칩니다.</li><li><b>한 문장 한 메시지</b> - 접속사로 길게 이은 문장을 짧게 끊습니다.</li><li><b>수식어 줄이기</b> - "정말", "매우" 같은 강조어를 덜어내면 글자수가 빠르게 줄어듭니다.</li><li><b>공백 제외 기준이면</b> 띄어쓰기 영향이 작으니, 공백 포함과 제외 수치를 함께 보고 기준에 맞춥니다.</li></ul></article>
+      <article class="g-card g-faq"><div class="g-card-head"><span class="g-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9.6 9.4a2.5 2.5 0 0 1 4.3 1.7c0 1.6-2.4 1.9-2.4 3.4"/><path d="M11.5 17.4h.02"/></svg></span><h3>자주 묻는 질문</h3></div><div class="g-faq-item"><p class="faq-q">Q. 줄바꿈(엔터)도 글자수에 포함되나요?</p><p>공백 포함 글자수에는 줄바꿈(엔터)도 공백 문자로 함께 셉니다. 공백 제외 글자수에서는 줄바꿈과 띄어쓰기가 모두 빠집니다. 대부분의 자기소개서 입력 시스템은 줄바꿈을 글자수에 포함하므로, 제출 기준을 맞출 때는 공백 포함 수치를 기준으로 보는 것이 안전합니다.</p></div>
+<div class="g-faq-item"><p class="faq-q">Q. 입력한 글이 저장되나요?</p><p>아니요. 모든 계산은 사용자 브라우저 안에서만 이루어지며, 입력한 텍스트를 서버로 전송하거나 저장하지 않습니다.</p></div>
+<div class="g-faq-item"><p class="faq-q">Q. 바이트 수는 어떤 기준인가요?</p><p>UTF-8 인코딩 기준입니다. 한글은 보통 한 글자당 3바이트로 계산되며, 영문·숫자는 1바이트입니다.</p></div>
+<div class="g-faq-item"><p class="faq-q">Q. 원고지 매수는 어떻게 계산되나요?</p><p>공백 포함 글자수를 200으로 나눠 올림한 값입니다. 일반적인 200자 원고지 기준 분량을 가늠할 때 참고하세요.</p></div></article>
     </div>
-  </div>
+    <div class="sibling-section"><div class="sibling-title">관련 도구</div><div class="sibling-list"><a class="sibling-link" href="/tools/name-roman.html">영문이름 변환</a><a class="sibling-link" href="/tools/text-align.html">텍스트 정렬</a><a class="sibling-link" href="/tools/address-roman.html">주소 변환</a><a class="sibling-link" href="/category/text.html">텍스트 도구 전체 ›</a></div></div>
+  </section>
 </main>
+
 <footer class="footer">
   <div class="footer-in">
-    <div class="footer-links"><a href="/">홈</a><a href="/pages/about.html">소개</a><a href="/pages/terms.html">이용약관</a><a href="/pages/privacy.html">개인정보처리방침</a><a href="/pages/contact.html">문의</a></div>
+    <div class="footer-links"><a href="/">홈</a><a href="/guides/">가이드</a><a href="/pages/about.html">소개</a><a href="/pages/terms.html">이용약관</a><a href="/pages/privacy.html">개인정보처리방침</a><a href="/pages/contact.html">문의</a></div>
     <div class="footer-note">폼다는 입력 정보를 서버에 저장하지 않는 브라우저 기반 문서 작성 도구입니다. 작성한 문서의 내용 확인과 사용 책임은 사용자에게 있습니다.</div>
     <div class="footer-copy">© 폼다 · 입력하면 바로 완성되는 무료 문서 도구</div>
   </div>
 </footer>
 </body>
 </html>
+
+<script>window.FORMDA_TEXT_TOOL = {"slug":"char-count","kind":"count","sample":{"text":"폼다는 가입 없이 문서를 만드는 무료 도구입니다.\n견적서, 거래명세서, 영수증을 입력만으로 완성하세요."}};</script>
+<script src="/engine/text-engine.js"></script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"줄바꿈(엔터)도 글자수에 포함되나요?","acceptedAnswer":{"@type":"Answer","text":"공백 포함 글자수에는 줄바꿈(엔터)도 공백 문자로 함께 셉니다. 공백 제외 글자수에서는 줄바꿈과 띄어쓰기가 모두 빠집니다. 대부분의 자기소개서 입력 시스템은 줄바꿈을 글자수에 포함하므로, 제출 기준을 맞출 때는 공백 포함 수치를 기준으로 보는 것이 안전합니다."}},{"@type":"Question","name":"입력한 글이 저장되나요?","acceptedAnswer":{"@type":"Answer","text":"아니요. 모든 계산은 사용자 브라우저 안에서만 이루어지며, 입력한 텍스트를 서버로 전송하거나 저장하지 않습니다."}},{"@type":"Question","name":"바이트 수는 어떤 기준인가요?","acceptedAnswer":{"@type":"Answer","text":"UTF-8 인코딩 기준입니다. 한글은 보통 한 글자당 3바이트로 계산되며, 영문·숫자는 1바이트입니다."}},{"@type":"Question","name":"원고지 매수는 어떻게 계산되나요?","acceptedAnswer":{"@type":"Answer","text":"공백 포함 글자수를 200으로 나눠 올림한 값입니다. 일반적인 200자 원고지 기준 분량을 가늠할 때 참고하세요."}}]}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"폼다 글자수 세기","url":"https://formda.kr/tools/char-count.html","applicationCategory":"UtilitiesApplication","operatingSystem":"All","inLanguage":"ko","description":"글자수, 공백 포함·제외, 단어 수, 바이트, 원고지 매수까지 실시간으로 세어 줍니다. 가입 없이 무료, 입력 내용은 서버에 저장되지 않습니다. 폼다 글자수 세기.","offers":{"@type":"Offer","price":"0","priceCurrency":"KRW"},"publisher":{"@type":"Organization","name":"폼다","url":"https://formda.kr/"}}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"홈","item":"https://formda.kr/"},{"@type":"ListItem","position":2,"name":"텍스트 도구","item":"https://formda.kr/category/text.html"},{"@type":"ListItem","position":3,"name":"글자수 세기"}]}</script>

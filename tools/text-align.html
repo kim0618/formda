@@ -4,13 +4,13 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <script>document.documentElement.classList.add('js')</script>
-<title>텍스트 정렬 만들기 - 준비중 | 폼다</title>
-<meta name="description" content="텍스트 정렬 자동작성 도구는 곧 추가됩니다." />
-<meta name="robots" content="noindex,follow" />
+<title>텍스트 정렬·정리 - 줄 정렬, 중복 제거, 줄번호 매기기 | 폼다</title>
+<meta name="description" content="여러 줄 텍스트를 가나다·ABC 순으로 정렬하고 중복 줄 제거, 빈 줄 제거, 공백 정리, 줄 번호 매기기를 한 번에. 가입 없이 무료. 폼다 텍스트 정렬." />
+<meta name="keywords" content="텍스트 정렬, 줄 정렬, 중복 제거, 가나다순 정렬, 줄번호 매기기, 리스트 정리" />
 <link rel="canonical" href="https://formda.kr/tools/text-align.html" />
 <meta property="og:type" content="website" />
-<meta property="og:title" content="텍스트 정렬 만들기 - 준비중 | 폼다" />
-<meta property="og:description" content="텍스트 정렬 자동작성 도구는 곧 추가됩니다." />
+<meta property="og:title" content="텍스트 정렬·정리 - 줄 정렬, 중복 제거, 줄번호 매기기 | 폼다" />
+<meta property="og:description" content="여러 줄 텍스트를 가나다·ABC 순으로 정렬하고 중복 줄 제거, 빈 줄 제거, 공백 정리, 줄 번호 매기기를 한 번에. 가입 없이 무료. 폼다 텍스트 정렬." />
 <meta property="og:url" content="https://formda.kr/tools/text-align.html" />
 <meta property="og:site_name" content="폼다" />
 <link rel="icon" href="/assets/favicon.png" type="image/png" />
@@ -22,27 +22,53 @@
 <header class="header">
   <div class="header-in">
     <a class="logo" href="/"><img class="logo-img" src="/assets/logo.png" alt="폼다" onerror="this.replaceWith(Object.assign(document.createElement('span'),{className:'logo-text',textContent:'폼다'}))"></a>
-    <nav class="nav"><a href="/category/business.html">비즈니스</a><a href="/category/job.html">취업</a><a href="/category/life.html">생활</a><a href="/category/text.html" class="on">텍스트</a></nav>
+    <nav class="nav"><a href="/category/business.html">비즈니스</a><a href="/category/job.html">취업</a><a href="/category/life.html">생활</a><a href="/category/text.html" class="on">텍스트</a><a href="/guides/">가이드</a></nav>
   </div>
 </header>
+
 <main class="wrap">
   <div class="crumb"><a href="/">홈</a> › <a href="/category/text.html">텍스트 도구</a> › 텍스트 정렬</div>
-  <div class="stub-page">
-    <span class="stub-badge">준비중</span>
-    <h1>텍스트 정렬 작성기</h1>
-    <p>텍스트 정렬 자동작성 도구를 준비하고 있어요. 견적서처럼 입력하면 바로 완성되는 텍스트 정렬로 곧 찾아옵니다.</p>
-    <div class="hero-cta" style="justify-content:center">
-      <a class="btn-cta primary" href="/tools/estimate.html">지금은 견적서 만들기</a>
-      <a class="btn-cta ghost" href="/category/text.html">텍스트 도구 전체 보기</a>
+  <h1 class="title">텍스트 정렬</h1>
+  <p class="subtitle">여러 줄 텍스트를 정렬하고 중복·빈 줄 제거, 공백 정리, 줄 번호 매기기를 실시간으로 처리합니다.</p>
+  <div class="trust">🔒 입력 정보는 <b>서버에 저장되지 않고</b> 브라우저에서만 처리됩니다.</div>
+
+  <section class="text-tool" style="--accent:#10b981">
+    <div id="textTool"><!-- 유틸 UI: text-engine 렌더 --></div>
+  </section>
+
+  <section class="guide" style="--accent:#10b981">
+    <h2 class="guide-title">텍스트 정렬 사용 가이드</h2>
+    <p class="guide-lead">텍스트 정렬은 여러 줄로 된 텍스트를 가나다순·ABC순으로 정렬하고, 중복된 줄과 빈 줄을 제거하거나 줄마다 번호를 매기는 등 줄 단위 정리를 한 번에 해 주는 도구입니다. 명단을 정렬하거나 키워드 목록에서 중복을 빼는 작업을 엑셀 없이 브라우저에서 바로 처리할 수 있고, 옵션을 켜고 끄는 즉시 결과가 갱신됩니다. 입력 내용은 서버에 저장되지 않습니다.</p>
+    <div class="guide-cards">
+      <article class="g-card"><div class="g-card-head"><span class="g-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="4.5" y="3" width="15" height="18" rx="2.5"/><path d="m7.5 9 1.4 1.4L11.4 8"/><path d="M13.5 9.2h3"/><path d="m7.5 15 1.4 1.4 2.5-2.4"/><path d="M13.5 15.2h3"/></svg></span><h3>한 번에 처리할 수 있는 정리 작업</h3></div>
+<p>여러 옵션을 함께 적용할 수 있어, 흩어진 목록을 깔끔한 결과로 한 번에 정리합니다.</p><ul><li><b>정렬</b> - 가나다·ABC 오름차순 또는 내림차순으로 줄을 정렬합니다.</li><li><b>중복 줄 제거</b> - 똑같은 줄이 여러 번 있으면 하나만 남깁니다.</li><li><b>빈 줄 제거</b> - 내용 없는 줄을 없애 목록을 압축합니다.</li><li><b>앞뒤 공백 제거·줄 번호</b> - 줄 양끝 공백을 정리하고 1, 2, 3 번호를 매깁니다.</li></ul></article>
+<article class="g-card"><div class="g-card-head"><span class="g-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 18.5h5"/><path d="M10.2 21.5h3.6"/><path d="M12 2.5a6.3 6.3 0 0 0-3.9 11.3c.7.6 1 1.2 1 2.2h5.8c0-1 .3-1.6 1-2.2A6.3 6.3 0 0 0 12 2.5z"/></svg></span><h3>이런 작업에 편합니다</h3></div>
+<ul><li>참석자·고객 명단을 가나다순으로 정렬</li><li>키워드·태그 목록에서 중복 제거</li><li>복사한 목록의 빈 줄과 공백 정리</li><li>번호가 필요한 목록에 줄 번호 매기기</li></ul></article>
+<article class="g-card"><div class="g-card-head"><span class="g-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 18.5h5"/><path d="M10.2 21.5h3.6"/><path d="M12 2.5a6.3 6.3 0 0 0-3.9 11.3c.7.6 1 1.2 1 2.2h5.8c0-1 .3-1.6 1-2.2A6.3 6.3 0 0 0 12 2.5z"/></svg></span><h3>옵션을 조합한 정리 예시</h3></div>
+<p>여러 옵션을 동시에 켜면 흩어진 목록을 한 번에 깔끔하게 만들 수 있습니다. 명단 정리를 예로 들어 보겠습니다.</p><div class="tbl-scroll"><table class="g-table"><thead><tr><th>단계</th><th>결과</th></tr></thead><tbody><tr><td>입력</td><td> 김철수 / 이영희 / (빈 줄) / 김철수 / 박민수</td></tr><tr><td>앞뒤 공백 제거 + 빈 줄 제거</td><td>김철수 / 이영희 / 김철수 / 박민수</td></tr><tr><td>중복 줄 제거</td><td>김철수 / 이영희 / 박민수</td></tr><tr><td>오름차순 정렬</td><td>김철수 / 박민수 / 이영희</td></tr></tbody></table></div><p>네 가지 옵션을 한꺼번에 켜면 위 과정을 한 번에 처리해 결과가 바로 나옵니다.</p></article>
+<article class="g-card"><div class="g-card-head"><span class="g-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="4.5" y="3" width="15" height="18" rx="2.5"/><path d="m7.5 9 1.4 1.4L11.4 8"/><path d="M13.5 9.2h3"/><path d="m7.5 15 1.4 1.4 2.5-2.4"/><path d="M13.5 15.2h3"/></svg></span><h3>한글·영문·숫자 정렬 기준</h3></div>
+<ul><li><b>한글</b> - 가나다순으로 정렬됩니다.</li><li><b>영문</b> - 대소문자를 구분하지 않고 사전식(알파벳순)으로 정렬됩니다.</li><li><b>숫자</b> - 문자로 비교되어 1, 10, 2, 3 순서가 될 수 있습니다. 순서를 맞추려면 01, 02처럼 자릿수를 맞추세요.</li></ul></article>
+      <article class="g-card g-faq"><div class="g-card-head"><span class="g-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9.6 9.4a2.5 2.5 0 0 1 4.3 1.7c0 1.6-2.4 1.9-2.4 3.4"/><path d="M11.5 17.4h.02"/></svg></span><h3>자주 묻는 질문</h3></div><div class="g-faq-item"><p class="faq-q">Q. 숫자가 섞인 줄은 어떻게 정렬되나요?</p><p>정렬은 글자 기준이라 숫자가 섞이면 1, 10, 2, 20, 3처럼 사람이 기대하는 순서와 다르게 정렬될 수 있습니다. 이는 숫자를 하나의 수가 아니라 문자 그대로 앞에서부터 비교하기 때문입니다. 순서를 제대로 맞추려면 1, 2, 3을 01, 02, 03처럼 자릿수를 맞춰 입력하면 됩니다. 한글과 영문이 섞인 경우에는 각각 묶여 정렬됩니다.</p></div>
+<div class="g-faq-item"><p class="faq-q">Q. 정렬은 어떤 기준인가요?</p><p>한국어 정렬(localeCompare) 기준으로, 한글은 가나다순, 영문은 알파벳순으로 정렬됩니다. 오름차순과 내림차순을 선택할 수 있습니다.</p></div>
+<div class="g-faq-item"><p class="faq-q">Q. 여러 옵션을 같이 쓸 수 있나요?</p><p>네. 공백 제거, 빈 줄 제거, 중복 제거, 정렬, 줄 번호 매기기를 함께 적용할 수 있고, 결과는 즉시 갱신됩니다.</p></div>
+<div class="g-faq-item"><p class="faq-q">Q. 입력한 내용이 저장되나요?</p><p>아니요. 모든 처리는 브라우저 안에서만 이루어지며 입력 내용을 서버로 전송하거나 저장하지 않습니다.</p></div></article>
     </div>
-  </div>
+    <div class="sibling-section"><div class="sibling-title">관련 도구</div><div class="sibling-list"><a class="sibling-link" href="/tools/char-count.html">글자수 세기</a><a class="sibling-link" href="/tools/name-roman.html">영문이름 변환</a><a class="sibling-link" href="/tools/address-roman.html">주소 변환</a><a class="sibling-link" href="/category/text.html">텍스트 도구 전체 ›</a></div></div>
+  </section>
 </main>
+
 <footer class="footer">
   <div class="footer-in">
-    <div class="footer-links"><a href="/">홈</a><a href="/pages/about.html">소개</a><a href="/pages/terms.html">이용약관</a><a href="/pages/privacy.html">개인정보처리방침</a><a href="/pages/contact.html">문의</a></div>
+    <div class="footer-links"><a href="/">홈</a><a href="/guides/">가이드</a><a href="/pages/about.html">소개</a><a href="/pages/terms.html">이용약관</a><a href="/pages/privacy.html">개인정보처리방침</a><a href="/pages/contact.html">문의</a></div>
     <div class="footer-note">폼다는 입력 정보를 서버에 저장하지 않는 브라우저 기반 문서 작성 도구입니다. 작성한 문서의 내용 확인과 사용 책임은 사용자에게 있습니다.</div>
     <div class="footer-copy">© 폼다 · 입력하면 바로 완성되는 무료 문서 도구</div>
   </div>
 </footer>
 </body>
 </html>
+
+<script>window.FORMDA_TEXT_TOOL = {"slug":"text-align","kind":"align","sample":{"text":"다람쥐\n가오리\n나비\n다람쥐\n라쿤\n나비"}};</script>
+<script src="/engine/text-engine.js"></script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"숫자가 섞인 줄은 어떻게 정렬되나요?","acceptedAnswer":{"@type":"Answer","text":"정렬은 글자 기준이라 숫자가 섞이면 1, 10, 2, 20, 3처럼 사람이 기대하는 순서와 다르게 정렬될 수 있습니다. 이는 숫자를 하나의 수가 아니라 문자 그대로 앞에서부터 비교하기 때문입니다. 순서를 제대로 맞추려면 1, 2, 3을 01, 02, 03처럼 자릿수를 맞춰 입력하면 됩니다. 한글과 영문이 섞인 경우에는 각각 묶여 정렬됩니다."}},{"@type":"Question","name":"정렬은 어떤 기준인가요?","acceptedAnswer":{"@type":"Answer","text":"한국어 정렬(localeCompare) 기준으로, 한글은 가나다순, 영문은 알파벳순으로 정렬됩니다. 오름차순과 내림차순을 선택할 수 있습니다."}},{"@type":"Question","name":"여러 옵션을 같이 쓸 수 있나요?","acceptedAnswer":{"@type":"Answer","text":"네. 공백 제거, 빈 줄 제거, 중복 제거, 정렬, 줄 번호 매기기를 함께 적용할 수 있고, 결과는 즉시 갱신됩니다."}},{"@type":"Question","name":"입력한 내용이 저장되나요?","acceptedAnswer":{"@type":"Answer","text":"아니요. 모든 처리는 브라우저 안에서만 이루어지며 입력 내용을 서버로 전송하거나 저장하지 않습니다."}}]}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"폼다 텍스트 정렬","url":"https://formda.kr/tools/text-align.html","applicationCategory":"UtilitiesApplication","operatingSystem":"All","inLanguage":"ko","description":"여러 줄 텍스트를 가나다·ABC 순으로 정렬하고 중복 줄 제거, 빈 줄 제거, 공백 정리, 줄 번호 매기기를 한 번에. 가입 없이 무료. 폼다 텍스트 정렬.","offers":{"@type":"Offer","price":"0","priceCurrency":"KRW"},"publisher":{"@type":"Organization","name":"폼다","url":"https://formda.kr/"}}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"홈","item":"https://formda.kr/"},{"@type":"ListItem","position":2,"name":"텍스트 도구","item":"https://formda.kr/category/text.html"},{"@type":"ListItem","position":3,"name":"텍스트 정렬"}]}</script>
