@@ -163,7 +163,7 @@
         '</div>' +
         '<div class="form-sec"><h2>수여 내용</h2>' +
           '<div class="field"><label>수여 문구·공적</label>' +
-            '<textarea id="f-body" rows="4" placeholder="위 사람은 ~하여 그 공이 크므로 이 상장을 수여합니다." oninput="Formda.app.onField(\'body\', this.value)"></textarea></div>' +
+            '<textarea id="f-body" rows="6" placeholder="위 사람은 ~하여 그 공이 크므로 이 상장을 수여합니다." oninput="Formda.app.onField(\'body\', this.value)"></textarea></div>' +
           '<div class="row2">' + lf('docNo', '상장 번호 (선택)', '2026-001') + lf('date', '수여일자', '', 'date') + '</div>' +
         '</div>' +
         '<div class="form-sec"><h2>수여기관</h2>' +
@@ -208,6 +208,120 @@
         lf('orgName', '회사명') +
         '<div class="row2">' + lf('orgCeo', '대표자') + lf('orgReg', '사업자등록번호') + '</div>' +
         '<div class="row2">' + lf('orgTel', '연락처') + lf('orgAddr', '주소') + '</div>' +
+        sealBlock +
+      '</div>';
+  }
+
+  // ===== 자기소개서 (cover-letter) =====
+  function coverLetterForm(cfg) {
+    return '' +
+      '<div class="form-sec"><h2>기본 정보</h2>' +
+        '<div class="row2">' + lf('name', '이름', '홍길동') + lf('applyTo', '지원 회사·분야 (선택)', '○○회사 마케팅') + '</div>' +
+      '</div>' +
+      '<div class="form-sec"><h2>문항</h2>' +
+        '<div id="qRows"></div>' +
+        '<button class="addrow" id="addQBtn" type="button" onclick="Formda.app.addQ()">+ 문항 추가</button>' +
+        '<p class="field-help">문항(예: 성장과정, 지원 동기)과 답변을 입력하면 길이에 따라 자동으로 여러 장에 나눠 담깁니다.</p>' +
+      '</div>';
+  }
+  function qcLabel(b) {
+    b = b || '';
+    return '공백 포함 ' + b.length.toLocaleString('ko-KR') + '자 · 제외 ' + b.replace(/\s/g, '').length.toLocaleString('ko-KR') + '자';
+  }
+  function qRows(items) {
+    var calc = root.Formda.calc;
+    return items.map(function (it, i) {
+      return '<div class="q-block">' +
+        '<div class="q-row"><input class="q-head" value="' + calc.esc(it.heading || '') + '" placeholder="문항 (예: 지원 동기)" oninput="Formda.app.onQHead(' + i + ', this.value)">' +
+        '<button class="del" type="button" onclick="Formda.app.delQ(' + i + ')">×</button></div>' +
+        '<textarea class="q-body" rows="5" placeholder="답변을 입력하세요." oninput="Formda.app.onQBody(' + i + ', this.value)">' + calc.esc(it.body || '') + '</textarea>' +
+        '<div class="q-count" id="qc-' + i + '">' + qcLabel(it.body) + '</div>' +
+        '</div>';
+    }).join('');
+  }
+
+  // ===== 경력기술서 (career) =====
+  function careerForm(cfg) {
+    return '' +
+      '<div class="form-sec"><h2>기본 정보</h2>' +
+        '<div class="row2">' + lf('name', '성명', '홍길동') + lf('contact', '연락처·이메일 (선택)', '010-0000-0000') + '</div>' +
+        '<div class="field"><label>경력 요약 (선택)</label>' +
+          '<textarea id="f-summary" rows="3" placeholder="경력과 강점을 2~3줄로 요약" oninput="Formda.app.onField(\'summary\', this.value)"></textarea></div>' +
+        '<div class="field"><label>핵심 역량 (선택)</label>' +
+          '<textarea id="f-skills" rows="4" placeholder="줄마다 하나씩. 예)\n퍼포먼스 마케팅 (검색·디스플레이·SNS 광고)\n데이터 분석 (GA4, SQL, Excel)\n브랜드 캠페인 기획·실행" oninput="Formda.app.onField(\'skills\', this.value)"></textarea>' +
+          '<p class="field-help">이직 시 채용 담당자가 가장 먼저 보는 항목입니다. 보유 기술·강점을 줄 단위로 적으세요.</p></div>' +
+      '</div>' +
+      '<div class="form-sec"><h2>경력 사항</h2>' +
+        '<div id="expRows"></div>' +
+        '<button class="addrow" id="addExpBtn" type="button" onclick="Formda.app.addExp()">+ 경력 추가</button>' +
+        '<p class="field-help">회사·기간·직위와 담당 업무·성과를 적으면 길이에 따라 자동으로 여러 장에 나눠 담깁니다.</p>' +
+      '</div>';
+  }
+  function careerExpRows(items) {
+    var calc = root.Formda.calc;
+    return items.map(function (it, i) {
+      return '<div class="q-block">' +
+        '<div class="q-row"><input class="q-head" value="' + calc.esc(it.company || '') + '" placeholder="회사명" oninput="Formda.app.onExp(' + i + ', \'company\', this.value)">' +
+          '<input class="q-head" value="' + calc.esc(it.period || '') + '" placeholder="근무기간 (예: 2020.03 ~ 2023.02)" oninput="Formda.app.onExp(' + i + ', \'period\', this.value)"></div>' +
+        '<div class="q-row"><input class="q-head" value="' + calc.esc(it.role || '') + '" placeholder="직위·담당 (예: 마케팅팀 과장)" oninput="Formda.app.onExp(' + i + ', \'role\', this.value)">' +
+          '<button class="del" type="button" onclick="Formda.app.delExp(' + i + ')">×</button></div>' +
+        '<textarea class="q-body" rows="5" placeholder="담당 업무와 성과를 구체적으로 적습니다." oninput="Formda.app.onExp(' + i + ', \'body\', this.value)">' + calc.esc(it.body || '') + '</textarea>' +
+        '<div class="q-count" id="qc-' + i + '">' + qcLabel(it.body) + '</div>' +
+        '</div>';
+    }).join('');
+  }
+
+  // ===== 명함 (card) =====
+  function cardForm(cfg) {
+    var colors = ['#1e3a8a', '#4f46e5', '#0d9488', '#b45309', '#e11d48', '#16a34a', '#334155'];
+    var swatches = colors.map(function (c) {
+      return '<button type="button" class="cd-sw" data-color="' + c + '" style="background:' + c + '" onclick="Formda.app.setCardColor(\'' + c + '\')" aria-label="' + c + '"></button>';
+    }).join('');
+    return '' +
+      '<div class="form-sec"><h2>회사 정보</h2>' +
+        lf('company', '회사명', '폼다 주식회사') +
+        lf('slogan', '슬로건 (선택)', '입력하면 바로 완성되는 문서') +
+        '<div class="field"><label>로고 이미지 (선택)</label><div class="seal-upload">' +
+          '<label class="seal-btn" for="f-logo">이미지 업로드</label>' +
+          '<input id="f-logo" type="file" accept="image/*" onchange="Formda.app.onLogo(this)" hidden>' +
+          '<button class="seal-clear" type="button" onclick="Formda.app.clearLogo()">제거</button></div>' +
+          '<div class="seal-name" id="logoName"></div></div>' +
+        '<div class="field"><label>카드 색상</label><div class="cd-colors">' + swatches + '</div></div>' +
+      '</div>' +
+      '<div class="form-sec"><h2>이름·직함</h2>' +
+        lf('name', '이름', '홍길동') +
+        '<div class="row2">' + lf('position', '직함', '팀장') + lf('dept', '부서 (선택)', '마케팅팀') + '</div>' +
+      '</div>' +
+      '<div class="form-sec"><h2>연락처</h2>' +
+        '<div class="row2">' + lf('tel', '휴대폰·연락처', '010-1234-5678') + lf('email', '이메일', 'hong@example.com') + '</div>' +
+        lf('website', '웹사이트 (선택)', 'www.formda.kr') +
+        lf('addr', '주소 (선택)', '서울특별시 강남구 테헤란로 1') +
+      '</div>';
+  }
+
+  // ===== 가정통신문·안내문 (notice) =====
+  function noticeForm(cfg) {
+    var sealBlock = cfg.showSeal
+      ? '<div class="field"><label>직인 이미지 (선택)</label><div class="seal-upload">' +
+          '<label class="seal-btn" for="f-seal">이미지 업로드</label>' +
+          '<input id="f-seal" type="file" accept="image/*" onchange="Formda.app.onSeal(this)" hidden>' +
+          '<button class="seal-clear" type="button" onclick="Formda.app.clearSeal()">제거</button></div>' +
+          '<div class="seal-name" id="sealName"></div></div>'
+      : '';
+    return '' +
+      '<div class="form-sec"><h2>기관 정보</h2>' +
+        lf('orgName', '학교·기관명', '○○초등학교') +
+        '<div class="row2">' + lf('docNo', '통신문 번호 (선택)', '2026-15') + lf('date', '발행일자', '', 'date') + '</div>' +
+      '</div>' +
+      '<div class="form-sec"><h2>안내 내용</h2>' +
+        lf('title', '제목', '현장체험학습 안내') +
+        '<div class="field"><label>본문</label>' +
+          '<textarea id="f-body" rows="9" placeholder="안녕하십니까. ...\n\n1. 일시 :\n2. 장소 :\n3. 대상 :" oninput="Formda.app.onField(\'body\', this.value)"></textarea></div>' +
+      '</div>' +
+      '<div class="form-sec"><h2>발신·회신</h2>' +
+        lf('sender', '발신 (예: ○○초등학교장)', '○○초등학교장') +
+        '<div class="field"><label>회신 확인 문구</label>' +
+          '<input id="f-reply" placeholder="위 가정통신문 내용을 확인하였습니다." oninput="Formda.app.onField(\'reply\', this.value)"></div>' +
         sealBlock +
       '</div>';
   }
@@ -258,10 +372,75 @@
   function eduRows(list) { return rowsBuilder(list, ['period', 'school', 'major', 'status'], 'onEdu'); }
   function careerRows(list) { return rowsBuilder(list, ['period', 'company', 'role', 'task'], 'onCareer'); }
 
+  function sealField(cfg, label) {
+    if (!cfg.showSeal) return '';
+    return '<div class="field"><label>' + (label || '도장·서명 이미지 (선택)') + '</label><div class="seal-upload">' +
+      '<label class="seal-btn" for="f-seal">이미지 업로드</label>' +
+      '<input id="f-seal" type="file" accept="image/*" onchange="Formda.app.onSeal(this)" hidden>' +
+      '<button class="seal-clear" type="button" onclick="Formda.app.clearSeal()">제거</button></div>' +
+      '<div class="seal-name" id="sealName"></div></div>';
+  }
+  // 차용증 / 위임장 (legal) - cfg.variant로 분기
+  function legalForm(cfg) {
+    if (cfg.variant === 'mandate') {
+      return '' +
+        '<div class="form-sec"><h2>위임인 (본인)</h2>' +
+          '<div class="row2">' + lf('prName', '성명', '홍길동') + lf('prId', '주민등록번호', '600101-1******') + '</div>' +
+          lf('prAddr', '주소', '서울시 ...') +
+          lf('prTel', '연락처', '010-0000-0000') +
+        '</div>' +
+        '<div class="form-sec"><h2>수임인 (대리인)</h2>' +
+          '<div class="row2">' + lf('agName', '성명', '김대리') + lf('agId', '주민등록번호', '900101-1******') + '</div>' +
+          lf('agAddr', '주소', '서울시 강남구 ...') +
+          '<div class="row2">' + lf('agTel', '연락처', '010-0000-0000') + lf('relation', '위임인과의 관계', '본인의 자녀') + '</div>' +
+        '</div>' +
+        '<div class="form-sec"><h2>위임 내용</h2>' +
+          '<div class="field"><label>위임할 사항</label>' +
+            '<textarea id="f-content" rows="5" placeholder="예) ○○구청에서 본인의 주민등록등본·초본 발급 및 수령에 관한 일체의 권한" oninput="Formda.app.onField(\'content\', this.value)"></textarea>' +
+            '<p class="field-help">위임 사항을 구체적으로 적을수록 처리 기관에서 인정받기 쉽습니다.</p></div>' +
+          '<div class="row2">' + lf('period', '위임 기간 (선택)', '2026-07-01 ~ 2026-07-31') + lf('attach', '첨부서류 (선택)', '인감증명서 1부') + '</div>' +
+          lf('date', '작성일자', '', 'date') +
+          sealField(cfg, '위임인 인감·도장 (선택)') +
+          '<p class="field-help">관공서·금융·부동산 제출 시 인감도장 날인 + <b>인감증명서(3개월 이내) 별도 첨부</b>가 필요합니다.</p>' +
+        '</div>';
+    }
+    return '' +
+      '<div class="form-sec"><h2>채권자 (빌려준 사람)</h2>' +
+        '<div class="row2">' + lf('crName', '성명', '홍길동') + lf('crId', '주민등록번호', '600101-1******') + '</div>' +
+        lf('crAddr', '주소', '서울시 ...') +
+        lf('crTel', '연락처', '010-0000-0000') +
+      '</div>' +
+      '<div class="form-sec"><h2>채무자 (빌린 사람)</h2>' +
+        '<div class="row2">' + lf('dbName', '성명', '김철수') + lf('dbId', '주민등록번호', '900101-1******') + '</div>' +
+        lf('dbAddr', '주소', '서울시 ...') +
+        lf('dbTel', '연락처', '010-0000-0000') +
+        sealField(cfg, '채무자 인감·도장 (선택)') +
+      '</div>' +
+      '<div class="form-sec"><h2>차용 금액·조건</h2>' +
+        '<div class="field"><label>차용 금액 (원)</label>' +
+          '<input id="f-amount" inputmode="numeric" placeholder="3,000,000" oninput="Formda.app.onMoney(\'amount\', this)">' +
+          '<p class="field-help">금액은 미리보기에서 한글 정자(일금 ○○○원정)로 자동 변환됩니다.</p></div>' +
+        '<div class="row2">' + lf('rate', '이자율 (연 %)', '5') + lf('dueDate', '변제기일', '2027-06-30') + '</div>' +
+        '<div class="row2">' + lf('repayMethod', '변제 방법', '만기 일시 상환') + lf('delayRate', '지연손해금 (연 %, 선택)', '12') + '</div>' +
+        '<div class="field"><label>특약사항 (선택)</label>' +
+          '<textarea id="f-special" rows="3" placeholder="예) 이자는 매월 말일에 지급한다. 변제기일 도래 전이라도 채무자가 ..." oninput="Formda.app.onField(\'special\', this.value)"></textarea></div>' +
+        '<div class="field"><label>작성일자</label><input id="f-date" type="date" oninput="Formda.app.onField(\'date\', this.value)"></div>' +
+        '<p class="field-help">이자율은 <b>이자제한법상 연 20%</b>를 넘을 수 없습니다. 강제집행력이 필요하면 공증을 권장합니다.</p>' +
+      '</div>';
+  }
+
   root.Formda.formEngine = {
     'business-invoice': businessInvoiceForm,
+    'legal': legalForm,
     'resume': resumeForm,
     'certificate': certificateForm,
+    'notice': noticeForm,
+    'card': cardForm,
+    'cover-letter': coverLetterForm,
+    'career': careerForm,
+    qRows: qRows,
+    careerExpRows: careerExpRows,
+    qcLabel: qcLabel,
     itemRows: itemRows,
     eduRows: eduRows,
     careerRows: careerRows,

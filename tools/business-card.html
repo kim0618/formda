@@ -4,15 +4,22 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <script>document.documentElement.classList.add('js')</script>
-<title>명함 만들기 - 준비중 | 폼다</title>
-<meta name="description" content="명함 자동작성 도구는 곧 추가됩니다." />
-<meta name="robots" content="noindex,follow" />
+<title>명함 만들기 무료 - 입력하면 바로 완성되는 명함 PDF·이미지 | 폼다</title>
+<meta name="description" content="가입 없이 이름·직함·연락처만 입력하면 명함이 바로 완성됩니다. 깔끔한 디자인, 명함 크기 PDF·PNG 다운로드까지 무료. 폼다 명함 만들기." />
+<meta name="keywords" content="명함 만들기, 명함 양식, 명함 무료, 명함 디자인, 명함 제작, 명함 PDF, 무료 명함" />
 <link rel="canonical" href="https://formda.kr/tools/business-card.html" />
 <meta property="og:type" content="website" />
-<meta property="og:title" content="명함 만들기 - 준비중 | 폼다" />
-<meta property="og:description" content="명함 자동작성 도구는 곧 추가됩니다." />
+<meta property="og:title" content="명함 만들기 무료 - 입력하면 바로 완성되는 명함 PDF·이미지 | 폼다" />
+<meta property="og:description" content="가입 없이 이름·직함·연락처만 입력하면 명함이 바로 완성됩니다. 깔끔한 디자인, 명함 크기 PDF·PNG 다운로드까지 무료. 폼다 명함 만들기." />
 <meta property="og:url" content="https://formda.kr/tools/business-card.html" />
 <meta property="og:site_name" content="폼다" />
+<meta property="og:image" content="https://formda.kr/assets/og.png" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="명함 만들기 무료 - 입력하면 바로 완성되는 명함 PDF·이미지 | 폼다" />
+<meta name="twitter:description" content="가입 없이 이름·직함·연락처만 입력하면 명함이 바로 완성됩니다. 깔끔한 디자인, 명함 크기 PDF·PNG 다운로드까지 무료. 폼다 명함 만들기." />
+<meta name="twitter:image" content="https://formda.kr/assets/og.png" />
 <link rel="icon" href="/assets/favicon.png" type="image/png" />
 <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png" />
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" />
@@ -23,20 +30,89 @@
   <div class="header-in">
     <a class="logo" href="/"><img class="logo-img" src="/assets/logo.png" alt="폼다" onerror="this.replaceWith(Object.assign(document.createElement('span'),{className:'logo-text',textContent:'폼다'}))"></a>
     <nav class="nav"><a href="/category/business.html">비즈니스</a><a href="/category/job.html">취업</a><a href="/category/life.html" class="on">생활</a><a href="/category/text.html">텍스트</a><a href="/guides/">가이드</a></nav>
-  </div>
-</header>
-<main class="wrap">
-  <div class="crumb"><a href="/">홈</a> › <a href="/category/life.html">생활/행정</a> › 명함</div>
-  <div class="stub-page">
-    <span class="stub-badge">준비중</span>
-    <h1>명함 작성기</h1>
-    <p>명함 자동작성 도구를 준비하고 있어요. 견적서처럼 입력하면 바로 완성되는 명함로 곧 찾아옵니다.</p>
-    <div class="hero-cta" style="justify-content:center">
-      <a class="btn-cta primary" href="/tools/estimate.html">지금은 견적서 만들기</a>
-      <a class="btn-cta ghost" href="/category/life.html">생활/행정 전체 보기</a>
+    <div class="hdr-search">
+      <svg class="hdr-search-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.2-3.2"></path></svg>
+      <input id="site-search" type="search" placeholder="문서 검색" autocomplete="off" aria-label="문서 검색">
+      <div id="search-results" class="search-results" role="listbox"></div>
     </div>
   </div>
+</header>
+
+<main class="wrap">
+  <div class="crumb"><a href="/">홈</a> › <a href="/category/life.html">생활/행정</a> › 명함</div>
+  <h1 class="title">명함 작성기</h1>
+  <p class="subtitle">회사 정보와 품목만 입력하면 명함 PDF·PNG를 바로 만들 수 있습니다. 가입 없이 무료.</p>
+  <div class="trust">🔒 입력 정보는 <b>서버에 저장되지 않고</b> 브라우저에서만 처리됩니다.</div>
+  <div class="steps">
+    <span class="step"><span class="num">1</span>입력</span><span class="arrow">→</span>
+    <span class="step"><span class="num">2</span>실시간 미리보기</span><span class="arrow">→</span>
+    <span class="step"><span class="num">3</span>PDF·PNG 다운로드</span>
+  </div>
+
+  <div class="tabs no-print">
+    <button id="tabInput" class="on" onclick="Formda.app.showPane('input')">입력</button>
+    <button id="tabPreview" onclick="Formda.app.showPane('preview')">미리보기</button>
+  </div>
+
+  <div class="editor">
+  <div class="cols">
+    <section class="pane-input">
+      <div class="pane-head">
+        <span class="pv-label">입력</span>
+        <div class="head-actions no-print">
+          <button class="mini-btn" type="button" onclick="Formda.app.loadSample()">샘플 불러오기</button>
+          <button class="mini-btn danger" type="button" onclick="Formda.app.clearAll()">전체 비우기</button>
+        </div>
+      </div>
+      <div class="form-scroll"><div id="formPanel"><!-- 입력폼: 엔진이 렌더 --></div></div>
+    </section>
+
+    <section class="pane-preview">
+      <div class="pane-head">
+        <span class="pv-label">미리보기</span>
+        <div class="zoom no-print">
+          <button type="button" onclick="Formda.app.zoomOut()" aria-label="축소">−</button>
+          <button type="button" class="zoom-pct" onclick="Formda.app.zoomReset()" aria-label="맞춤"><span id="zoomLabel">100%</span></button>
+          <button type="button" onclick="Formda.app.zoomIn()" aria-label="확대">+</button>
+        </div>
+      </div>
+      <div class="preview-wrap">
+        <div class="doc-viewport" id="doc"><!-- 미리보기: 엔진이 A4 페이지로 렌더 --></div>
+        <div class="actions no-print">
+          <button class="btn btn-ghost" onclick="Formda.app.print()">인쇄</button>
+          <button class="btn btn-ghost" onclick="Formda.app.downloadPNG(this)">PNG 저장</button>
+          <button class="btn btn-primary btn-pdf" onclick="Formda.app.downloadPDF(this)">PDF 다운로드</button>
+        </div>
+      </div>
+    </section>
+  </div>
+  </div>
+
+  <section class="guide" style="--accent:#1e3a8a">
+    <h2 class="guide-title">명함 작성 가이드</h2>
+    <p class="guide-lead">명함은 이름과 직함, 연락처를 담아 처음 만나는 사람에게 자신을 알리는 작은 카드입니다. 디자인이 화려할 필요는 없고, 회사명과 이름, 연락 방법이 한눈에 들어오도록 깔끔하게 정리하는 것이 중요합니다. 폼다 명함 만들기는 회사와 이름, 연락처만 입력하면 표준 명함 크기(90×50mm)로 완성해 주고, 가입 없이 바로 PNG나 PDF로 내려받아 인쇄하거나 메신저로 공유할 수 있습니다.</p>
+    <div class="guide-cards">
+      <article class="g-card"><div class="g-card-head"><span class="g-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="4.5" y="3" width="15" height="18" rx="2.5"/><path d="m7.5 9 1.4 1.4L11.4 8"/><path d="M13.5 9.2h3"/><path d="m7.5 15 1.4 1.4 2.5-2.4"/><path d="M13.5 15.2h3"/></svg></span><h3>명함에 꼭 들어가는 항목</h3></div>
+<p>정보가 너무 많으면 복잡해 보이므로, 꼭 필요한 항목만 담는 것이 좋습니다.</p><div class="tbl-scroll"><table class="g-table"><thead><tr><th>항목</th><th>내용</th></tr></thead><tbody><tr><td>회사명·슬로건</td><td>소속 회사 또는 브랜드, 한 줄 소개</td></tr><tr><td>이름·직함</td><td>이름과 직책, 부서</td></tr><tr><td>연락처</td><td>휴대폰, 이메일, 웹사이트, 주소</td></tr></tbody></table></div><p>개인 명함이라면 회사명 대신 직업이나 브랜드명을 넣어도 됩니다.</p></article>
+<article class="g-card"><div class="g-card-head"><span class="g-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 18.5h5"/><path d="M10.2 21.5h3.6"/><path d="M12 2.5a6.3 6.3 0 0 0-3.9 11.3c.7.6 1 1.2 1 2.2h5.8c0-1 .3-1.6 1-2.2A6.3 6.3 0 0 0 12 2.5z"/></svg></span><h3>깔끔한 명함을 만드는 팁</h3></div>
+<ul><li><b>이름을 가장 크게</b> - 명함의 주인공은 이름입니다. 이름이 가장 먼저 보이도록 합니다.</li><li><b>연락처는 정확히</b> - 휴대폰과 이메일은 오타가 없도록 한 번 더 확인합니다.</li><li><b>정보는 적게</b> - 연락 방법은 두세 가지면 충분합니다. 너무 많으면 산만해집니다.</li><li><b>PNG로 공유</b> - 인쇄 전에 PNG로 저장해 메신저로 디지털 명함처럼 보낼 수 있습니다.</li></ul></article>
+<article class="g-card"><div class="g-card-head"><span class="g-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 18.5h5"/><path d="M10.2 21.5h3.6"/><path d="M12 2.5a6.3 6.3 0 0 0-3.9 11.3c.7.6 1 1.2 1 2.2h5.8c0-1 .3-1.6 1-2.2A6.3 6.3 0 0 0 12 2.5z"/></svg></span><h3>색상과 로고로 브랜드를 살리세요</h3></div>
+<p>명함은 작지만 브랜드의 첫인상입니다. 폼다 명함 만들기는 강조 색상을 직접 고르고 회사 로고 이미지를 올릴 수 있어, 회사나 브랜드의 색과 로고를 그대로 반영할 수 있습니다.</p><ul><li><b>색은 한두 가지로</b> - 브랜드 대표 색을 강조색으로 쓰고 나머지는 무채색으로 두면 깔끔합니다.</li><li><b>로고는 선명한 PNG로</b> - 배경이 투명한 PNG 로고를 올리면 명함에 자연스럽게 얹힙니다.</li><li><b>가독성 우선</b> - 강조색이 진하면 글자가 묻히지 않는지 미리보기로 확인하세요.</li></ul></article>
+      <article class="g-card g-faq"><div class="g-card-head"><span class="g-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9.6 9.4a2.5 2.5 0 0 1 4.3 1.7c0 1.6-2.4 1.9-2.4 3.4"/><path d="M11.5 17.4h.02"/></svg></span><h3>자주 묻는 질문</h3></div><div class="g-faq-item"><p class="faq-q">Q. 명함 크기는 어떻게 되나요?</p><p>폼다 명함은 국내에서 가장 널리 쓰이는 표준 명함 크기인 90×50mm로 만들어집니다. PDF로 내려받으면 이 크기로 출력되며, 인쇄소에 맡기거나 명함 용지에 직접 인쇄할 수 있습니다. PNG로 저장하면 메신저나 이메일로 디지털 명함처럼 공유하기 좋습니다.</p></div>
+<div class="g-faq-item"><p class="faq-q">Q. 개인 명함이나 N잡러 명함도 만들 수 있나요?</p><p>네. 회사가 없어도 회사명 자리에 브랜드명·직업·닉네임을 넣으면 프리랜서·창업자·N잡러 명함으로 쓸 수 있습니다. 강조 색상과 로고를 바꿔 활동별로 다른 명함을 만들어 두면 상황에 맞게 골라 쓸 수 있습니다.</p></div>
+<div class="g-faq-item"><p class="faq-q">Q. 인쇄는 어떻게 하나요?</p><p>PDF로 내려받아 가정용 프린터의 명함 용지에 인쇄하거나, 파일을 인쇄소에 맡겨 제작할 수 있습니다. 여러 장을 한 번에 인쇄하려면 인쇄소에 PDF를 전달하는 것이 깔끔합니다. 디지털로만 쓸 거라면 PNG 파일을 그대로 공유하면 됩니다.</p></div>
+<div class="g-faq-item"><p class="faq-q">Q. 작성한 명함 정보가 저장되나요?</p><p>폼다는 입력 내용을 서버로 전송하거나 저장하지 않습니다. 모든 처리는 사용자 브라우저 안에서만 이루어지며, PDF·PNG로 내려받은 파일만 기기에 남습니다. 연락처 같은 개인정보가 외부로 나가지 않으므로 안심하고 만들 수 있습니다.</p></div></article>
+    </div>
+    <div class="sibling-section"><div class="sibling-title">관련 문서 도구</div><div class="sibling-list"><a class="sibling-link" href="/tools/notice.html">가정통신문</a><a class="sibling-link" href="/tools/award.html">상장·표창장</a><a class="sibling-link" href="/category/life.html">생활/행정 전체 ›</a></div></div>
+  </section>
 </main>
+
+<!-- 모바일 하단 고정 다운로드 바 -->
+<div class="mobile-bar no-print">
+  <button class="btn btn-ghost" onclick="Formda.app.downloadPNG(this)">PNG</button>
+  <button class="btn btn-primary btn-pdf" onclick="Formda.app.downloadPDF(this)">PDF 다운로드</button>
+</div>
+
 <footer class="footer">
   <div class="footer-in">
     <div class="footer-links"><a href="/">홈</a><a href="/guides/">가이드</a><a href="/pages/about.html">소개</a><a href="/pages/terms.html">이용약관</a><a href="/pages/privacy.html">개인정보처리방침</a><a href="/pages/contact.html">문의</a></div>
@@ -44,5 +120,20 @@
     <div class="footer-copy">© 폼다 · 입력하면 바로 완성되는 무료 문서 도구</div>
   </div>
 </footer>
+<script src="/search-index.js" defer></script>
+<script src="/engine/search.js" defer></script>
 </body>
 </html>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script>window.FORMDA_TOOL = {"slug":"business-card","docType":"card","doc":{"fileName":"명함","pageSize":[90,50],"accent":"#1e3a8a"},"sample":{"company":"폼다 주식회사","slogan":"입력하면 바로 완성되는 문서","logo":null,"cardColor":"#1e3a8a","name":"홍길동","position":"마케팅팀 팀장","dept":"","tel":"010-1234-5678","email":"hong@formda.kr","website":"www.formda.kr","addr":"서울특별시 강남구 테헤란로 1"}};</script>
+<script src="/engine/calc.js"></script>
+<script src="/engine/doc-render.js"></script>
+<script src="/engine/form-engine.js"></script>
+<script src="/engine/export.js"></script>
+<script src="/engine/app.js"></script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"명함 크기는 어떻게 되나요?","acceptedAnswer":{"@type":"Answer","text":"폼다 명함은 국내에서 가장 널리 쓰이는 표준 명함 크기인 90×50mm로 만들어집니다. PDF로 내려받으면 이 크기로 출력되며, 인쇄소에 맡기거나 명함 용지에 직접 인쇄할 수 있습니다. PNG로 저장하면 메신저나 이메일로 디지털 명함처럼 공유하기 좋습니다."}},{"@type":"Question","name":"개인 명함이나 N잡러 명함도 만들 수 있나요?","acceptedAnswer":{"@type":"Answer","text":"네. 회사가 없어도 회사명 자리에 브랜드명·직업·닉네임을 넣으면 프리랜서·창업자·N잡러 명함으로 쓸 수 있습니다. 강조 색상과 로고를 바꿔 활동별로 다른 명함을 만들어 두면 상황에 맞게 골라 쓸 수 있습니다."}},{"@type":"Question","name":"인쇄는 어떻게 하나요?","acceptedAnswer":{"@type":"Answer","text":"PDF로 내려받아 가정용 프린터의 명함 용지에 인쇄하거나, 파일을 인쇄소에 맡겨 제작할 수 있습니다. 여러 장을 한 번에 인쇄하려면 인쇄소에 PDF를 전달하는 것이 깔끔합니다. 디지털로만 쓸 거라면 PNG 파일을 그대로 공유하면 됩니다."}},{"@type":"Question","name":"작성한 명함 정보가 저장되나요?","acceptedAnswer":{"@type":"Answer","text":"폼다는 입력 내용을 서버로 전송하거나 저장하지 않습니다. 모든 처리는 사용자 브라우저 안에서만 이루어지며, PDF·PNG로 내려받은 파일만 기기에 남습니다. 연락처 같은 개인정보가 외부로 나가지 않으므로 안심하고 만들 수 있습니다."}}]}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"폼다 명함 작성기","url":"https://formda.kr/tools/business-card.html","applicationCategory":"BusinessApplication","operatingSystem":"All","inLanguage":"ko","description":"가입 없이 이름·직함·연락처만 입력하면 명함이 바로 완성됩니다. 깔끔한 디자인, 명함 크기 PDF·PNG 다운로드까지 무료. 폼다 명함 만들기.","offers":{"@type":"Offer","price":"0","priceCurrency":"KRW"},"publisher":{"@type":"Organization","name":"폼다","url":"https://formda.kr/"}}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"HowTo","name":"명함 만드는 방법","inLanguage":"ko","step":[{"@type":"HowToStep","position":1,"name":"정보 입력","text":"회사 정보와 품목·금액을 입력합니다."},{"@type":"HowToStep","position":2,"name":"실시간 미리보기","text":"입력하는 즉시 A4 문서에 그대로 반영됩니다."},{"@type":"HowToStep","position":3,"name":"PDF·PNG 저장","text":"완성된 문서를 PDF·PNG로 저장하거나 인쇄합니다."}]}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"홈","item":"https://formda.kr/"},{"@type":"ListItem","position":2,"name":"생활/행정","item":"https://formda.kr/category/life.html"},{"@type":"ListItem","position":3,"name":"명함"}]}</script>

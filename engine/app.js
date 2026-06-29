@@ -14,8 +14,9 @@
       this.docType = tool.docType;
       this.slug = tool.slug || tool.docType;
       this.cfg = tool.doc;
-      // 데스크톱 기본 130%, 모바일은 폭에 딱 맞게 100%(아니면 A4가 화면보다 커서 잘림)
-      this.userZoom = (typeof window !== 'undefined' && window.innerWidth <= 980) ? 1 : 1.3;
+      // 데스크톱 A4 기본 130%. 모바일·가로형(명함)은 폭에 맞게 100%(아니면 폭을 넘어 잘림)
+      var narrowFit = (typeof window !== 'undefined' && window.innerWidth <= 980) || tool.docType === 'card';
+      this.userZoom = narrowFit ? 1 : 1.3;
       this.MAX_ITEMS = (tool.doc && tool.doc.maxItems) || 14;   // 무료: 문서별 한 페이지 분량
       this.sampleState = this.resolveSample(tool.sample); // 원본 샘플 보관 (샘플 불러오기용)
 
@@ -43,7 +44,13 @@
     resolveSample: function (sample) {
       var s = JSON.parse(JSON.stringify(sample || {}));
       if (s.date === 'today') s.date = new Date().toISOString().slice(0, 10);
-      if (!s.items || !s.items.length) s.items = [{ name: '', spec: '', qty: 1, price: 0 }];
+      if (this.docType === 'cover-letter') {
+        if (!s.items || !s.items.length) s.items = [{ heading: '', body: '' }];
+      } else if (this.docType === 'career') {
+        if (!s.items || !s.items.length) s.items = [{ company: '', period: '', role: '', body: '' }];
+      } else if (!s.items || !s.items.length) {
+        s.items = [{ name: '', spec: '', qty: 1, price: 0 }];
+      }
       if (this.docType === 'resume') {
         if (!s.edu || !s.edu.length) s.edu = [{ period: '', school: '', major: '', status: '' }];
         if (!s.career || !s.career.length) s.career = [{ period: '', company: '', role: '', task: '' }];
@@ -112,6 +119,32 @@
       this.setVal('handover', s.handover);
       this.setVal('recipientSub', s.recipientSub);
       this.setVal('orgTitle', s.orgTitle);
+      this.setVal('title', s.title);
+      this.setVal('sender', s.sender);
+      this.setVal('reply', s.reply);
+      this.setVal('company', s.company);
+      this.setVal('slogan', s.slogan);
+      this.setVal('website', s.website);
+      var ln = document.getElementById('logoName'); if (ln) ln.textContent = s.logo ? '로고 적용됨' : '';
+      this.updateColorSwatch();
+      this.setVal('applyTo', s.applyTo);
+      this.setVal('contact', s.contact);
+      this.setVal('summary', s.summary);
+      this.setVal('skills', s.skills);
+      // 차용증·위임장 (legal) 가족 필드 (해당 입력칸 없으면 setVal 자동 무시)
+      this.setMoney('amount', s.amount);
+      this.setVal('rate', s.rate);
+      this.setVal('dueDate', s.dueDate);
+      this.setVal('repayMethod', s.repayMethod);
+      this.setVal('delayRate', s.delayRate);
+      this.setVal('special', s.special);
+      this.setVal('crName', s.crName); this.setVal('crId', s.crId); this.setVal('crAddr', s.crAddr); this.setVal('crTel', s.crTel);
+      this.setVal('dbName', s.dbName); this.setVal('dbId', s.dbId); this.setVal('dbAddr', s.dbAddr); this.setVal('dbTel', s.dbTel);
+      this.setVal('agName', s.agName); this.setVal('agId', s.agId); this.setVal('agAddr', s.agAddr); this.setVal('agTel', s.agTel);
+      this.setVal('relation', s.relation); this.setVal('content', s.content); this.setVal('attach', s.attach); this.setVal('lead', s.lead);
+      this.setVal('prName', s.prName); this.setVal('prId', s.prId); this.setVal('prAddr', s.prAddr); this.setVal('prTel', s.prTel);
+      this.drawQ();
+      this.drawExp();
       var pn = document.getElementById('photoName');
       if (pn) pn.textContent = s.photo ? '사진 적용됨' : '';
       this.drawRows();
@@ -125,6 +158,27 @@
     },
 
     clearAll: function () {
+      if (this.docType === 'cover-letter') {
+        this.applyState({ name: '', applyTo: '', items: [{ heading: '', body: '' }] });
+        return;
+      }
+      if (this.docType === 'career') {
+        this.applyState({ name: '', contact: '', summary: '', skills: '', items: [{ company: '', period: '', role: '', body: '' }] });
+        return;
+      }
+      if (this.docType === 'card') {
+        this.applyState({
+          company: '', slogan: '', name: '', position: '', dept: '',
+          tel: '', email: '', website: '', addr: '', logo: null, cardColor: this.cfg.accent,
+        });
+        return;
+      }
+      if (this.docType === 'notice') {
+        this.applyState({
+          orgName: '', docNo: '', date: this.today(), title: '', body: '', sender: '', reply: '', sealImg: null,
+        });
+        return;
+      }
       if (this.docType === 'certificate') {
         this.applyState({
           name: '', birth: '', addr: '', dept: '', position: '', period: '', body: '', purpose: '',
@@ -141,6 +195,20 @@
           career: [{ period: '', company: '', role: '', task: '' }],
           etc: '', date: this.today(),
         });
+        return;
+      }
+      if (this.docType === 'legal') {
+        if (this.cfg.variant === 'mandate') {
+          this.applyState({
+            agName: '', agId: '', agAddr: '', agTel: '', relation: '', content: '',
+            period: '', attach: '', date: this.today(), prName: '', prId: '', prAddr: '', prTel: '', sealImg: null,
+          });
+        } else {
+          this.applyState({
+            amount: 0, rate: '', dueDate: '', repayMethod: '', delayRate: '', special: '', body: '', date: this.today(),
+            crName: '', crId: '', crAddr: '', crTel: '', dbName: '', dbId: '', dbAddr: '', dbTel: '', sealImg: null,
+          });
+        }
         return;
       }
       this.applyState({
@@ -208,8 +276,23 @@
     },
 
     onField: function (id, v) {
+      var prev = this.state[id];
       this.state[id] = v;
       this.renderDoc();
+      // 캡(max-height) 걸린 본문이 넘치면 입력 거부 → 문서가 밀려 내려가지 않음
+      if (this.overflowing()) {
+        this.state[id] = prev;
+        this.setVal(id, prev == null ? '' : prev);
+        this.renderDoc();
+      }
+    },
+    // 캡 걸린 자유 텍스트 영역이 max-height를 넘쳤는지
+    overflowing: function () {
+      var els = document.querySelectorAll('#doc .nt-body, #doc .aw-body, #doc .ct-letter, #doc .ct-handover, #doc .ct-body, #doc .rs-etc, #doc .qt-note, #doc .lg-content, #doc .lg-special');
+      for (var i = 0; i < els.length; i++) {
+        if (els[i].scrollHeight > els[i].clientHeight + 2) return true;
+      }
+      return false;
     },
 
     onMoney: function (id, el) {
@@ -300,6 +383,98 @@
       var i = document.getElementById('f-photo'); if (i) i.value = '';
       this.renderDoc();
     },
+    // ----- 명함 로고·색상 -----
+    onLogo: function (input) {
+      var file = input.files && input.files[0];
+      if (!file) return;
+      var self = this, reader = new FileReader();
+      reader.onload = function (e) {
+        self.state.logo = e.target.result;
+        var n = document.getElementById('logoName'); if (n) n.textContent = '로고 적용됨: ' + file.name;
+        self.renderDoc();
+      };
+      reader.readAsDataURL(file);
+    },
+    clearLogo: function () {
+      this.state.logo = null;
+      var n = document.getElementById('logoName'); if (n) n.textContent = '';
+      var i = document.getElementById('f-logo'); if (i) i.value = '';
+      this.renderDoc();
+    },
+    setCardColor: function (c) {
+      this.state.cardColor = c;
+      this.renderDoc();
+      this.updateColorSwatch();
+    },
+    updateColorSwatch: function () {
+      var sws = document.querySelectorAll('.cd-sw');
+      for (var i = 0; i < sws.length; i++) {
+        sws[i].classList.toggle('on', sws[i].getAttribute('data-color') === this.state.cardColor);
+      }
+    },
+    // ----- 자기소개서 문항 + 멀티페이지 -----
+    drawQ: function () {
+      var h = document.getElementById('qRows');
+      if (!h) return;
+      h.innerHTML = F.formEngine.qRows(this.state.items || []);
+    },
+    addQ: function () {
+      this.state.items.push({ heading: '', body: '' });
+      this.drawQ(); this.renderDoc();
+    },
+    delQ: function (i) {
+      this.state.items.splice(i, 1);
+      if (!this.state.items.length) this.state.items.push({ heading: '', body: '' });
+      this.drawQ(); this.renderDoc();
+    },
+    onQHead: function (i, v) { this.state.items[i].heading = v; this.renderDoc(); },
+    onQBody: function (i, v) {
+      this.state.items[i].body = v;
+      var c = document.getElementById('qc-' + i); if (c) c.textContent = F.formEngine.qcLabel(v);
+      this.renderDoc();
+    },
+    // 경력기술서 경력 항목
+    drawExp: function () {
+      var h = document.getElementById('expRows');
+      if (h) h.innerHTML = F.formEngine.careerExpRows(this.state.items || []);
+    },
+    addExp: function () { this.state.items.push({ company: '', period: '', role: '', body: '' }); this.drawExp(); this.renderDoc(); },
+    delExp: function (i) {
+      this.state.items.splice(i, 1);
+      if (!this.state.items.length) this.state.items.push({ company: '', period: '', role: '', body: '' });
+      this.drawExp(); this.renderDoc();
+    },
+    onExp: function (i, field, v) {
+      this.state.items[i][field] = v;
+      if (field === 'body') { var c = document.getElementById('qc-' + i); if (c) c.textContent = F.formEngine.qcLabel(v); }
+      this.renderDoc();
+    },
+    // 본문(.cl-flow 블록)을 A4 페이지 높이(1011px)로 패킹해 여러 .doc-page로 분할
+    paginateFlow: function () {
+      var doc = document.getElementById('doc');
+      var flow = doc.querySelector('.cl-flow');
+      if (!flow) return;
+      var kids = Array.prototype.slice.call(flow.children);
+      if (!kids.length) return;
+      var CONTENT_H = 1011, MAX_PAGES = 8;
+      var pages = [[]], curH = 0;
+      for (var i = 0; i < kids.length; i++) {
+        var st = window.getComputedStyle(kids[i]);
+        var h = kids[i].offsetHeight + (parseFloat(st.marginTop) || 0) + (parseFloat(st.marginBottom) || 0);
+        if (curH + h > CONTENT_H && pages[pages.length - 1].length) {
+          if (pages.length >= MAX_PAGES) break;
+          pages.push([]); curH = 0;
+        }
+        pages[pages.length - 1].push(kids[i].outerHTML);
+        curH += h;
+      }
+      var html = '';
+      for (var p = 0; p < pages.length; p++) {
+        html += '<div class="doc-page"><div class="doc-fit"><div class="cl-flow">' + pages[p].join('') + '</div></div></div>';
+      }
+      var sizer = doc.querySelector('.doc-sizer');
+      if (sizer) sizer.innerHTML = '<div class="doc-pages">' + html + '</div>';
+    },
 
     onName: function (i, v) {
       this.state.items[i].name = v;
@@ -352,6 +527,7 @@
     renderDoc: function () {
       var html = F.docRender[this.docType](this.state, this.cfg);
       document.getElementById('doc').innerHTML = '<div class="doc-sizer">' + html + '</div>';
+      if (this.cfg.flow) this.paginateFlow();
       this.fitPreview();
     },
 
@@ -363,6 +539,11 @@
       var sizer = host.querySelector('.doc-sizer');
       var pages = host.querySelector('.doc-pages');
       if (!sizer || !pages) return;
+      // 페이지 실제 크기를 읽어 적용 (A4=794×1123, 명함 등 다른 크기도 자동 대응)
+      var pageNode = host.querySelector('.doc-page');
+      var pw = (pageNode && pageNode.offsetWidth) || 794;
+      var ph = (pageNode && pageNode.offsetHeight) || 1123;
+      this._pw = pw;
       // 기준 배율은 리사이즈 때만 재측정. 재렌더 때마다 측정하면 스크롤바 등장→폭 축소→더 작아짐 루프 발생.
       if (remeasure || this._base == null) {
         var mobile = window.innerWidth <= 980;
@@ -372,14 +553,14 @@
         var availH = host.clientHeight - 36;
         host.style.overflow = prevOv;
         if (availW <= 0) return;
-        var base = mobile ? (availW / 794) : Math.min(availW / 794, availH / 1123);
-        if (!(base > 0)) base = availW / 794;
+        var base = mobile ? (availW / pw) : Math.min(availW / pw, availH / ph);
+        if (!(base > 0)) base = availW / pw;
         this._base = base;
       }
       var scale = this._base * (this.userZoom || 1);
       pages.style.transformOrigin = 'top left';
       pages.style.transform = 'scale(' + scale + ')';
-      sizer.style.width = (794 * scale) + 'px';
+      sizer.style.width = ((this._pw || 794) * scale) + 'px';
       sizer.style.height = (pages.offsetHeight * scale) + 'px';
       var lbl = document.getElementById('zoomLabel');
       if (lbl) lbl.textContent = Math.round((this.userZoom || 1) * 100) + '%';
@@ -390,7 +571,7 @@
     zoomReset: function () { this.userZoom = 1; this.fitPreview(); },
 
     // ----- 내보내기 -----
-    downloadPDF: function (btn) { this.recordDocNo(); F.exporter.downloadPDF(this.cfg.fileName + (this.state.no ? '_' + this.state.no : ''), btn); },
+    downloadPDF: function (btn) { this.recordDocNo(); F.exporter.downloadPDF(this.cfg.fileName + (this.state.no ? '_' + this.state.no : ''), btn, this.cfg.pageSize); },
     downloadPNG: function (btn) { this.recordDocNo(); F.exporter.downloadPNG(this.cfg.fileName + (this.state.no ? '_' + this.state.no : ''), btn); },
     print: function () { F.exporter.printDoc(); },
 

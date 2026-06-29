@@ -185,10 +185,10 @@
   }
 
   // .doc-fit = 자동 맞춤 대상(내용이 A4 높이 넘으면 app.fitDoc이 축소)
-  function pageEl(inner) { return '<div class="doc-page"><div class="doc-fit">' + inner + '</div></div>'; }
+  function pageEl(inner, cls) { return '<div class="doc-page' + (cls ? ' ' + cls : '') + '"><div class="doc-fit">' + inner + '</div></div>'; }
 
-  function wrap(inner, opts) {
-    return opts.single ? pageEl(inner) : '<div class="doc-pages">' + pageEl(inner) + '</div>';
+  function wrap(inner, opts, cls) {
+    return opts.single ? pageEl(inner, cls) : '<div class="doc-pages">' + pageEl(inner, cls) + '</div>';
   }
 
   // 기본 레이아웃 (견적서 / 거래명세서)
@@ -301,6 +301,7 @@
       '<div class="aw-top">' +
         (s.docNo ? '<div class="ct-docno">제 ' + esc(s.docNo) + ' 호</div>' : '') +
         '<div class="aw-title">' + esc(cfg.docTitle) + '</div>' +
+        '<div class="aw-flourish"><span>&#9670;</span></div>' +
       '</div>' +
       '<div class="aw-mid">' +
         '<div class="aw-recipient">' +
@@ -322,6 +323,98 @@
     if (cfg.variant === 'resignation') inner = renderResignation(state, cfg);
     else if (cfg.variant === 'award') inner = renderAward(state, cfg);
     else inner = renderEmployment(state, cfg);
+    return wrap(inner, opts);
+  }
+
+  // ===== 자기소개서 (cover-letter) - 멀티페이지 flow =====
+  function renderCoverLetter(state, cfg, opts) {
+    opts = opts || {};
+    var s = state;
+    var blocks = '<div class="cl-head"><div class="cl-title">' + esc(cfg.docTitle) + '</div>' +
+      '<div class="cl-meta">' + [esc(s.name), esc(s.applyTo)].filter(Boolean).join('　|　') + '</div></div>';
+    (s.items || []).forEach(function (it) {
+      if (it.heading) blocks += '<div class="cl-q">' + esc(it.heading) + '</div>';
+      String(it.body || '').split(/\n+/).forEach(function (p) {
+        if (p.trim()) blocks += '<p class="cl-p">' + esc(p) + '</p>';
+      });
+    });
+    // 브라우저에서 app.paginateFlow가 페이지로 분할. 노드(썸네일)에선 1페이지로 클리핑.
+    return wrap('<div class="cl-flow">' + blocks + '</div>', opts);
+  }
+
+  // ===== 경력기술서 (career) - 멀티페이지 flow =====
+  function renderCareer(state, cfg, opts) {
+    opts = opts || {};
+    var s = state;
+    var blocks = '<div class="cl-head"><div class="cl-title">' + esc(cfg.docTitle) + '</div>' +
+      '<div class="cl-meta">' + [esc(s.name), esc(s.contact)].filter(Boolean).join('　|　') + '</div></div>';
+    if (s.summary && s.summary.trim()) {
+      blocks += '<div class="cl-q">경력 요약</div>';
+      String(s.summary).split(/\n+/).forEach(function (p) { if (p.trim()) blocks += '<p class="cl-p">' + esc(p) + '</p>'; });
+    }
+    if (s.skills && s.skills.trim()) {
+      blocks += '<div class="cl-q">핵심 역량</div>';
+      String(s.skills).split(/\n+/).forEach(function (p) { if (p.trim()) blocks += '<p class="cl-p">' + esc(p) + '</p>'; });
+    }
+    if ((s.items || []).length) blocks += '<div class="cl-q">경력 사항</div>';
+    (s.items || []).forEach(function (it) {
+      var head = [esc(it.company), esc(it.period), esc(it.role)].filter(Boolean).join('　|　');
+      if (head) blocks += '<div class="cl-exp">' + head + '</div>';
+      String(it.body || '').split(/\n+/).forEach(function (p) { if (p.trim()) blocks += '<p class="cl-p">' + esc(p) + '</p>'; });
+    });
+    return wrap('<div class="cl-flow">' + blocks + '</div>', opts);
+  }
+
+  // ===== 명함 (card) =====
+  function renderCard(state, cfg, opts) {
+    opts = opts || {};
+    var s = state;
+    var contacts = '';
+    if (s.tel) contacts += '<div class="cd-line"><b>T</b>' + esc(s.tel) + '</div>';
+    if (s.email) contacts += '<div class="cd-line"><b>E</b>' + esc(s.email) + '</div>';
+    if (s.website) contacts += '<div class="cd-line"><b>W</b>' + esc(s.website) + '</div>';
+    if (s.addr) contacts += '<div class="cd-line"><b>A</b>' + esc(s.addr) + '</div>';
+    var role = [esc(s.position), esc(s.dept)].filter(Boolean).join('　·　');
+    var inner =
+      '<div class="cd" style="--accent:' + (esc(s.cardColor) || cfg.accent || '#1e3a8a') + '">' +
+        '<div class="cd-top">' +
+          '<div class="cd-brand">' +
+            (s.logo ? '<img class="cd-logo" src="' + s.logo + '" alt="로고">' : '') +
+            '<span class="cd-company">' + (esc(s.company) || '&nbsp;') + '</span>' +
+          '</div>' +
+          (s.slogan ? '<span class="cd-slogan">' + esc(s.slogan) + '</span>' : '') + '</div>' +
+        '<div class="cd-id"><span class="cd-name">' + (esc(s.name) || '&nbsp;') + '</span>' +
+          (role ? '<span class="cd-role">' + role + '</span>' : '') + '</div>' +
+        '<div class="cd-divider"></div>' +
+        '<div class="cd-contacts">' + contacts + '</div>' +
+      '</div>';
+    return wrap(inner, opts, 'card');
+  }
+
+  // ===== 가정통신문·안내문 (notice) =====
+  function renderNotice(state, cfg, opts) {
+    opts = opts || {};
+    var s = state;
+    var reply = (cfg.reply === false) ? '' :
+      '<div class="nt-cut"><span>✂ 절취선</span></div>' +
+      '<div class="nt-reply-confirm">' + (esc(s.reply) || '위 가정통신문 내용을 확인하였습니다.') + '</div>' +
+      '<table class="nt-reply-tbl"><tbody><tr>' +
+        '<td class="k">학년 / 반</td><td class="v">&nbsp;</td>' +
+        '<td class="k">학생 이름</td><td class="v">&nbsp;</td>' +
+        '<td class="k">학부모</td><td class="v">(서명)</td>' +
+      '</tr></tbody></table>';
+    var inner =
+      '<div class="nt-page">' +
+        '<div class="nt-content">' +
+          '<div class="nt-head">' + (esc(s.orgName) || '&nbsp;') + '</div>' +
+          '<div class="nt-meta"><span>' + esc(cfg.docTitle) + '</span><span>' + (s.docNo ? '제 ' + esc(s.docNo) + ' 호' : '') + '</span></div>' +
+          '<div class="nt-title">' + (esc(s.title) || '&nbsp;') + '</div>' +
+          '<div class="nt-body">' + (esc(s.body) || '') + '</div>' +
+          '<div class="nt-date">' + korDate(s.date) + '</div>' +
+          '<div class="nt-sender">' + (esc(s.sender) || '&nbsp;') + sealHTML(s, cfg) + '</div>' +
+        '</div>' +
+        (reply ? '<div class="nt-reply-block">' + reply + '</div>' : '') +
+      '</div>';
     return wrap(inner, opts);
   }
 
@@ -366,6 +459,85 @@
     return wrap(inner, opts);
   }
 
+  // ===== 차용증·위임장 (legal) =====
+  function lgRows(pairs) {
+    return pairs.map(function (p) {
+      return '<tr><td class="k">' + p[0] + '</td><td class="v">' + p[1] + '</td></tr>';
+    }).join('');
+  }
+  function lgParty(title, pairs) {
+    return '<div class="lg-party">' +
+      '<div class="lg-party-t">' + title + '</div>' +
+      '<table class="lg-ptbl"><tbody>' + lgRows(pairs) + '</tbody></table></div>';
+  }
+  function vOr(v) { return esc(v) || '&nbsp;'; }
+  // YYYY-MM-DD면 한글 날짜로, 아니면 그대로 (변제기일은 "만기 시" 등 자유 입력도 허용)
+  function lgDate(v) { return /^\d{4}-\d{2}-\d{2}$/.test(v) ? korDate(v) : vOr(v); }
+  function renderLoan(state, cfg) {
+    var s = state;
+    var amount = Number(s.amount) || 0;
+    var terms = [
+      ['이　자　율', s.rate ? '연 ' + esc(s.rate) + ' %' : '없음 (무이자)'],
+      ['변 제 기 일', lgDate(s.dueDate)],
+      ['변 제 방 법', vOr(s.repayMethod)],
+    ];
+    if (s.delayRate) terms.push(['지연손해금', '연 ' + esc(s.delayRate) + ' %']);
+    // 표준 순서: 채권자·채무자 정보(상단) → 차용금액 → 본문(영수) → 조건 → 특약 → 날짜 → 서명(양 당사자)
+    var creditor = lgParty('채권자 (빌려준 사람)', [
+      ['성　명', vOr(s.crName)], ['주민등록번호', vOr(s.crId)],
+      ['주　소', vOr(s.crAddr)], ['연　락　처', vOr(s.crTel)],
+    ]);
+    var debtor = lgParty('채무자 (빌린 사람)', [
+      ['성　명', vOr(s.dbName)], ['주민등록번호', vOr(s.dbId)],
+      ['주　소', vOr(s.dbAddr)], ['연　락　처', vOr(s.dbTel)],
+    ]);
+    return '<div class="lg-page">' +
+      '<div class="lg-title">' + esc(cfg.docTitle) + '</div>' +
+      '<div class="lg-parties">' + creditor + debtor + '</div>' +
+      '<div class="lg-amount"><div class="lg-amount-kr">일금 ' + (amount > 0 ? calc.korAmount(amount) + '원정' : '&nbsp;') + '</div>' +
+        '<div class="lg-amount-num">₩ ' + comma(amount) + '</div></div>' +
+      '<div class="lg-body">' + (esc(s.body) || '위 채무자는 위 금액을 채권자로부터 틀림없이 차용하고 영수하였으며, 아래에 정한 바에 따라 원리금을 변제할 것을 확약합니다.') + '</div>' +
+      '<table class="lg-terms"><tbody>' + lgRows(terms) + '</tbody></table>' +
+      (s.special ? '<div class="lg-sec">특약사항</div><div class="lg-special">' + esc(s.special) + '</div>' : '') +
+      '<div class="lg-date">' + korDate(s.date) + '</div>' +
+      '<div class="lg-signrow">' +
+        '<span class="lg-signcell">채권자　<span class="lg-sign">' + vOr(s.crName) + '<span class="qt-seal">(인)</span></span></span>' +
+        '<span class="lg-signcell">채무자　<span class="lg-sign">' + vOr(s.dbName) + sealHTML(s, cfg) + '</span></span>' +
+      '</div>' +
+    '</div>';
+  }
+  function renderMandate(state, cfg) {
+    var s = state;
+    // 표준 순서: 위임인(본인) → 수임인(대리인) → 위임내용 → 선언문 → 날짜 → 위임인 서명
+    var principal = lgParty('위임인 (본인)', [
+      ['성　명', vOr(s.prName)], ['주민등록번호', vOr(s.prId)],
+      ['주　소', vOr(s.prAddr)], ['연　락　처', vOr(s.prTel)],
+    ]);
+    var agent = lgParty('수임인 (대리인)', [
+      ['성　명', vOr(s.agName)], ['주민등록번호', vOr(s.agId)],
+      ['주　소', vOr(s.agAddr)], ['연　락　처', vOr(s.agTel)],
+      ['위임인과의 관계', vOr(s.relation)],
+    ]);
+    var extra = [];
+    if (s.period) extra.push(['위 임 기 간', esc(s.period)]);
+    if (s.attach) extra.push(['첨 부 서 류', esc(s.attach)]);
+    return '<div class="lg-page">' +
+      '<div class="lg-title">' + esc(cfg.docTitle) + '</div>' +
+      '<div class="lg-parties lg-parties-col">' + principal + agent + '</div>' +
+      '<div class="lg-sec">위임 내용</div>' +
+      '<div class="lg-content">' + (esc(s.content) || '&nbsp;') + '</div>' +
+      (extra.length ? '<table class="lg-terms"><tbody>' + lgRows(extra) + '</tbody></table>' : '') +
+      '<div class="lg-decl">' + (esc(s.lead) || '위 본인은 위 사람을 대리인으로 정하여, 위 위임 내용에 관한 일체의 권한을 위임합니다.') + '</div>' +
+      '<div class="lg-date">' + korDate(s.date) + '</div>' +
+      '<div class="lg-signline">위임인　<span class="lg-sign">' + vOr(s.prName) + sealHTML(s, cfg) + '</span></div>' +
+    '</div>';
+  }
+  function legal(state, cfg, opts) {
+    opts = opts || {};
+    var inner = cfg.variant === 'mandate' ? renderMandate(state, cfg) : renderLoan(state, cfg);
+    return wrap(inner, opts);
+  }
+
   // 무료: 항상 1페이지 (품목은 app에서 14개로 캡). cfg.layout으로 문서별 레이아웃 분기
   function businessInvoice(state, cfg, opts) {
     opts = opts || {};
@@ -377,5 +549,10 @@
     'business-invoice': businessInvoice,
     'resume': renderResume,
     'certificate': certificate,
+    'notice': renderNotice,
+    'card': renderCard,
+    'cover-letter': renderCoverLetter,
+    'career': renderCareer,
+    'legal': legal,
   };
 })(typeof window !== 'undefined' ? window : this);

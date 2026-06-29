@@ -12,6 +12,13 @@
 <meta property="og:description" content="가입 없이 웹에서 입력하면 견적서·거래명세서 같은 실무 문서가 바로 완성 PDF로 나오는 한국형 문서 자동작성 도구." />
 <meta property="og:url" content="https://formda.kr/" />
 <meta property="og:site_name" content="폼다" />
+<meta property="og:image" content="https://formda.kr/assets/og.png" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="견적서 PDF 무료 만들기 - 입력하면 바로 완성 | 폼다" />
+<meta name="twitter:description" content="가입 없이 웹에서 입력하면 견적서·거래명세서 같은 실무 문서가 바로 완성 PDF로 나오는 한국형 문서 자동작성 도구." />
+<meta name="twitter:image" content="https://formda.kr/assets/og.png" />
 <link rel="icon" href="/assets/favicon.png" type="image/png" />
 <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png" />
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" />
@@ -22,6 +29,11 @@
   <div class="header-in">
     <a class="logo" href="/"><img class="logo-img" src="/assets/logo.png" alt="폼다" onerror="this.replaceWith(Object.assign(document.createElement('span'),{className:'logo-text',textContent:'폼다'}))"></a>
     <nav class="nav"><a href="/category/business.html">비즈니스</a><a href="/category/job.html">취업</a><a href="/category/life.html">생활</a><a href="/category/text.html">텍스트</a><a href="/guides/">가이드</a></nav>
+    <div class="hdr-search">
+      <svg class="hdr-search-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.2-3.2"></path></svg>
+      <input id="site-search" type="search" placeholder="문서 검색" autocomplete="off" aria-label="문서 검색">
+      <div id="search-results" class="search-results" role="listbox"></div>
+    </div>
   </div>
 </header>
 
@@ -50,21 +62,16 @@
 </section>
 
 <main class="wrap">
-  <!-- 자주 쓰는 문서: 사용 가능한 도구 균일 그리드 (히어로가 대표 견적서를 이미 강조) -->
-  <div class="section-h reveal" id="tools">자주 쓰는 문서</div>
+  <!-- 자주 쓰는 문서: 카테고리 고르게 인기 6종만 큐레이션 (전체 목록은 아래 카테고리 섹션) -->
+  <div class="home-sec-head reveal" id="tools">
+    <h2 class="section-h">자주 쓰는 문서</h2>
+    <a class="sec-more" href="#cats">전체 보기 →</a>
+  </div>
   <div class="grid reveal"><a class="tool-card" href="/tools/estimate.html" style="--accent:#4f46e5">
     <div class="thumb"><div class="thumb-doc"><div class="doc-page"><div class="doc-fit"><div class="qt-title">견 적 서</div><div class="qt-meta"><span>견적일자 : 2026-06-24</span><span>견적번호 : 2026-001</span></div><div class="qt-head"><div class="qt-recv"><div class="qt-recv-name">○○ 주식회사 <b>귀하</b></div><div class="qt-recv-sub">아래와 같이 견적합니다.</div></div><table class="qt-supplier"><tbody><tr><th class="qt-side" rowspan="6">공급자</th><td class="k">등록번호</td><td class="v">123-45-67890</td></tr><tr><td class="k">상　호</td><td class="v">폼다상사</td></tr><tr><td class="k">대표자</td><td class="v"><span>김폼다</span><span class="qt-seal">(인)</span></td></tr><tr><td class="k">주　소</td><td class="v">서울시 강남구 테헤란로 1</td></tr><tr><td class="k">업태/종목</td><td class="v">서비스 / 소프트웨어 개발</td></tr><tr><td class="k">전　화</td><td class="v">02-1234-5678</td></tr></tbody></table></div><div class="qt-amount"><div class="k">합계금액</div><div class="v"><b>一金 삼백육십삼만원整</b><span>(₩3,630,000)</span></div></div><table class="qt-items"><colgroup><col class="c-no"><col class="c-item"><col class="c-spec"><col class="c-qty"><col class="c-price"><col class="c-amt"></colgroup><thead><tr><th>No</th><th>품　목</th><th>규격</th><th>수량</th><th>단가</th><th>금액</th></tr></thead><tbody><tr><td class="c">1</td><td class="l">웹사이트 제작</td><td class="c">반응형</td><td class="c">1</td><td class="r">3,000,000</td><td class="r">3,000,000</td></tr><tr><td class="c">2</td><td class="l">유지보수 (월)</td><td class="c">정기 점검</td><td class="c">3</td><td class="r">100,000</td><td class="r">300,000</td></tr><tr class="qt-er"><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr class="qt-er"><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr class="qt-er"><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr class="qt-er"><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr class="qt-er"><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr class="qt-er"><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr class="qt-er"><td></td><td></td><td></td><td></td><td></td><td></td></tr></tbody></table><table class="qt-tot"><tbody><tr><td class="k">공급가액</td><td class="v">3,300,000 원</td></tr><tr><td class="k">부 가 세</td><td class="v">330,000 원</td></tr><tr class="sum"><td class="k">합　계</td><td class="v">3,630,000 원</td></tr></tbody></table><div class="qt-validity">견적 유효기간 : 발행일로부터 30일</div><div class="qt-note">입금계좌: 폼다은행 123-456-7890</div></div></div></div></div>
     <div class="tool-meta">
       <div class="nm"><span class="tool-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2.5h8l4 4v15H6z"/><path d="M14 2.5V6.5h4"/><path d="M9 11h6M9 14.5h6M9 17.5h4"/></svg></span>견적서 작성기</div>
       <p class="de">거래 전에 품목과 금액을 제안할 때 사용합니다.</p>
-      <div class="meta-row"><span class="tag free">무료</span><span class="tag alt">PDF·PNG</span><span class="go">만들기 →</span></div>
-    </div>
-  </a><a class="tool-card" href="/tools/statement.html" style="--accent:#0d9488">
-    <div class="thumb"><div class="thumb-doc"><div class="doc-page"><div class="doc-fit"><div class="qt-title">거 래 명 세 서</div><div class="qt-meta"><span>거래일자 : 2026-06-24</span><span>명세서번호 : 2026-001</span></div><div class="qt-lead">아래와 같이 거래 내역을 명세합니다.</div><div class="qt-parties"><table class="qt-supplier"><tbody><tr><th class="qt-side" rowspan="5">공급받는자</th><td class="k">등록번호</td><td class="v">210-81-12345</td></tr><tr><td class="k">상　호</td><td class="v">○○ 주식회사</td></tr><tr><td class="k">대표자</td><td class="v"><span>이대표</span></td></tr><tr><td class="k">주　소</td><td class="v">서울시 서초구 서초대로 100</td></tr><tr><td class="k">전　화</td><td class="v">02-9876-5432</td></tr></tbody></table><table class="qt-supplier"><tbody><tr><th class="qt-side" rowspan="5">공급자</th><td class="k">등록번호</td><td class="v">123-45-67890</td></tr><tr><td class="k">상　호</td><td class="v">폼다상사</td></tr><tr><td class="k">대표자</td><td class="v"><span>김폼다</span><span class="qt-seal">(인)</span></td></tr><tr><td class="k">주　소</td><td class="v">서울시 강남구 테헤란로 1</td></tr><tr><td class="k">전　화</td><td class="v">02-1234-5678</td></tr></tbody></table></div><div class="qt-amount"><div class="k">합계금액</div><div class="v"><b>一金 일백팔십일만오천원整</b><span>(₩1,815,000)</span></div></div><table class="qt-items tax"><colgroup><col class="c-date"><col class="c-item"><col class="c-spec"><col class="c-qty"><col class="c-price"><col class="c-supply"><col class="c-tax"></colgroup><thead><tr><th>월일</th><th>품　목</th><th>규격</th><th>수량</th><th>단가</th><th>공급가액</th><th>세액</th></tr></thead><tbody><tr><td class="c">06/24</td><td class="l">제품 카탈로그 제작</td><td class="c">A4 16p</td><td class="c">1</td><td class="r">1,200,000</td><td class="r">1,200,000</td><td class="r">120,000</td></tr><tr><td class="c">06/24</td><td class="l">카탈로그 인쇄</td><td class="c">500부</td><td class="c">1</td><td class="r">450,000</td><td class="r">450,000</td><td class="r">45,000</td></tr><tr class="qt-er"><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr class="qt-er"><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr class="qt-er"><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr class="qt-er"><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr class="qt-er"><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr class="qt-er"><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr class="qt-er"><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr></tbody></table><table class="qt-tot"><tbody><tr><td class="k">공급가액 합계</td><td class="v">1,650,000 원</td></tr><tr><td class="k">세　액</td><td class="v">165,000 원</td></tr><tr class="sum"><td class="k">합계금액</td><td class="v">1,815,000 원</td></tr></tbody></table><table class="qt-balance"><tbody><tr><td class="k">전잔액</td><td class="v">500,000</td><td class="k">당월 거래액</td><td class="v">1,815,000</td><td class="k">입금액</td><td class="v">1,000,000</td><td class="k hl">미수 잔액</td><td class="v hl">1,315,000</td></tr></tbody></table><div class="qt-note">입금 계좌: 폼다은행 123-456-7890
-세금계산서는 입금 확인 후 발행됩니다.</div><div class="qt-receiver">인수자 <span class="qt-sign"></span> (인)</div></div></div></div></div>
-    <div class="tool-meta">
-      <div class="nm"><span class="tool-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3h14v18l-3-2-2 2-2-2-2 2-2-2-1 2z"/><path d="M8 8h8M8 12h8M8 16h5"/></svg></span>거래명세서 작성기</div>
-      <p class="de">납품한 품목과 수량, 금액 등 거래 내역을 정리할 때 사용합니다.</p>
       <div class="meta-row"><span class="tag free">무료</span><span class="tag alt">PDF·PNG</span><span class="go">만들기 →</span></div>
     </div>
   </a><a class="tool-card" href="/tools/receipt.html" style="--accent:#d97706">
@@ -74,18 +81,13 @@
       <p class="de">대금을 받았음을 증빙으로 남길 때 사용합니다.</p>
       <div class="meta-row"><span class="tag free">무료</span><span class="tag alt">PDF·PNG</span><span class="go">만들기 →</span></div>
     </div>
-  </a><a class="tool-card" href="/tools/order.html" style="--accent:#16a34a">
-    <div class="thumb"><div class="thumb-doc"><div class="doc-page"><div class="doc-fit"><div class="qt-title">발 주 서</div><div class="qt-meta"><span>발주일자 : 2026-06-24</span><span>발주번호 : 2026-001</span></div><div class="qt-lead">아래와 같이 발주하오니 기일 내 납품하여 주시기 바랍니다.</div><div class="qt-parties"><table class="qt-supplier"><tbody><tr><th class="qt-side" rowspan="5">공급처</th><td class="k">등록번호</td><td class="v">210-81-12345</td></tr><tr><td class="k">상　호</td><td class="v">○○ 산업</td></tr><tr><td class="k">대표자</td><td class="v"><span>이대표</span></td></tr><tr><td class="k">주　소</td><td class="v">경기도 안산시 단원구 산단로 50</td></tr><tr><td class="k">전　화</td><td class="v">031-987-6543</td></tr></tbody></table><table class="qt-supplier"><tbody><tr><th class="qt-side" rowspan="5">발주자</th><td class="k">등록번호</td><td class="v">123-45-67890</td></tr><tr><td class="k">상　호</td><td class="v">폼다상사</td></tr><tr><td class="k">대표자</td><td class="v"><span>김폼다</span><span class="qt-seal">(인)</span></td></tr><tr><td class="k">주　소</td><td class="v">서울시 강남구 테헤란로 1</td></tr><tr><td class="k">전　화</td><td class="v">02-1234-5678</td></tr></tbody></table></div><div class="qt-amount"><div class="k">합계금액</div><div class="v"><b>一金 일백칠십사만구천원整</b><span>(₩1,749,000)</span></div></div><table class="qt-items"><colgroup><col class="c-no"><col class="c-item"><col class="c-spec"><col class="c-qty"><col class="c-price"><col class="c-amt"></colgroup><thead><tr><th>No</th><th>품　목</th><th>규격</th><th>수량</th><th>단가</th><th>금액</th></tr></thead><tbody><tr><td class="c">1</td><td class="l">사무용 의자</td><td class="c">메쉬 / 블랙</td><td class="c">10</td><td class="r">89,000</td><td class="r">890,000</td></tr><tr><td class="c">2</td><td class="l">책상</td><td class="c">W1400</td><td class="c">5</td><td class="r">140,000</td><td class="r">700,000</td></tr><tr class="qt-er"><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr class="qt-er"><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr class="qt-er"><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr class="qt-er"><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr class="qt-er"><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr class="qt-er"><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr class="qt-er"><td></td><td></td><td></td><td></td><td></td><td></td></tr></tbody></table><table class="qt-tot"><tbody><tr><td class="k">공급가액</td><td class="v">1,590,000 원</td></tr><tr><td class="k">부 가 세</td><td class="v">159,000 원</td></tr><tr class="sum"><td class="k">합　계</td><td class="v">1,749,000 원</td></tr></tbody></table><table class="qt-terms"><tbody><tr><td class="k">납기일자</td><td class="v">2026-07-15</td><td class="k">납품장소</td><td class="v">발주자 본사 1층 자재창고</td></tr><tr><td class="k">결제조건</td><td class="v" colspan="3">납품 검수 후 30일 이내 계좌이체</td></tr></tbody></table><div class="qt-note">납품 시 거래명세서를 동봉해 주시고, 세금계산서는 검수 완료 후 발행 바랍니다.</div></div></div></div></div>
+  </a><a class="tool-card" href="/tools/resume.html" style="--accent:#0ea5e9">
+    <div class="thumb"><div class="thumb-doc"><div class="doc-page"><div class="doc-fit"><div class="rs-page"><div class="rs-title">이 력 서</div><div class="rs-top"><div class="rs-info-wrap"><table class="rs-info"><tbody><tr><td class="k">성　명</td><td class="v">홍길동</td></tr><tr><td class="k">생년월일</td><td class="v">1995-03-12</td></tr><tr><td class="k">연락처</td><td class="v">010-1234-5678</td></tr><tr><td class="k">이메일</td><td class="v">hong@example.com</td></tr><tr><td class="k">주　소</td><td class="v">서울특별시 강남구 테헤란로 1</td></tr></tbody></table></div><div class="rs-photo"><span>사진<br>3 × 4</span></div></div><div class="rs-sec">학력사항</div><table class="rs-table"><thead><tr><th>재학기간</th><th>학교명</th><th>전공·학위</th><th>졸업구분</th></tr></thead><tbody><tr><td class="c">2014.03 ~ 2018.02</td><td class="l">○○대학교</td><td class="l">경영학과 (학사)</td><td class="c">졸업</td></tr><tr><td class="c">2011.03 ~ 2014.02</td><td class="l">○○고등학교</td><td class="l">인문계</td><td class="c">졸업</td></tr><tr><td class="c"></td><td class="l"></td><td class="l"></td><td class="c"></td></tr></tbody></table><div class="rs-sec">경력사항</div><table class="rs-table"><thead><tr><th>근무기간</th><th>회사명</th><th>직위·부서</th><th>담당업무</th></tr></thead><tbody><tr><td class="c">2018.03 ~ 2021.12</td><td class="l">○○주식회사</td><td class="l">마케팅팀 대리</td><td class="l">브랜드 마케팅 기획·운영</td></tr><tr><td class="c">2022.01 ~ 재직중</td><td class="l">△△컴퍼니</td><td class="l">그로스팀 과장</td><td class="l">퍼포먼스 광고·데이터 분석</td></tr><tr><td class="c"></td><td class="l"></td><td class="l"></td><td class="l"></td></tr><tr><td class="c"></td><td class="l"></td><td class="l"></td><td class="l"></td></tr></tbody></table><div class="rs-sec">자격·기타</div><div class="rs-etc">컴퓨터활용능력 1급 (2019)
+TOEIC 900 (2020)
+운전면허 1종 보통</div><div class="rs-foot"><span>작성일 : 2026-06-24</span><span>작성자 : 홍길동 (인)</span></div></div></div></div></div></div>
     <div class="tool-meta">
-      <div class="nm"><span class="tool-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2.5h8l4 4v15H6z"/><path d="M14 2.5V6.5h4"/><path d="m9 13 2 2 4-4"/></svg></span>발주서 작성기</div>
-      <p class="de">공급처에 주문할 품목과 납기·결제 조건을 전달할 때 사용합니다.</p>
-      <div class="meta-row"><span class="tag free">무료</span><span class="tag alt">PDF·PNG</span><span class="go">만들기 →</span></div>
-    </div>
-  </a><a class="tool-card" href="/tools/invoice.html" style="--accent:#e11d48">
-    <div class="thumb"><div class="thumb-doc"><div class="doc-page"><div class="doc-fit"><div class="qt-title">청 구 서</div><div class="qt-meta"><span>청구일자 : 2026-06-24</span><span>청구번호 : 2026-001</span></div><div class="qt-lead">아래와 같이 대금을 청구합니다.</div><div class="qt-parties"><table class="qt-supplier"><tbody><tr><th class="qt-side" rowspan="5">공급받는자</th><td class="k">등록번호</td><td class="v">210-81-12345</td></tr><tr><td class="k">상　호</td><td class="v">○○ 주식회사</td></tr><tr><td class="k">대표자</td><td class="v"><span>이대표</span></td></tr><tr><td class="k">주　소</td><td class="v">서울시 서초구 서초대로 100</td></tr><tr><td class="k">전　화</td><td class="v">02-9876-5432</td></tr></tbody></table><table class="qt-supplier"><tbody><tr><th class="qt-side" rowspan="5">공급자</th><td class="k">등록번호</td><td class="v">123-45-67890</td></tr><tr><td class="k">상　호</td><td class="v">폼다상사</td></tr><tr><td class="k">대표자</td><td class="v"><span>김폼다</span><span class="qt-seal">(인)</span></td></tr><tr><td class="k">주　소</td><td class="v">서울시 강남구 테헤란로 1</td></tr><tr><td class="k">전　화</td><td class="v">02-1234-5678</td></tr></tbody></table></div><div class="qt-amount"><div class="k">청구금액</div><div class="v"><b>一金 일백일십만원整</b><span>(₩1,100,000)</span></div></div><table class="qt-items"><colgroup><col class="c-no"><col class="c-item"><col class="c-spec"><col class="c-qty"><col class="c-price"><col class="c-amt"></colgroup><thead><tr><th>No</th><th>품　목</th><th>규격</th><th>수량</th><th>단가</th><th>금액</th></tr></thead><tbody><tr><td class="c">1</td><td class="l">웹사이트 유지보수</td><td class="c">6월분</td><td class="c">1</td><td class="r">800,000</td><td class="r">800,000</td></tr><tr><td class="c">2</td><td class="l">서버 운영 대행</td><td class="c">6월분</td><td class="c">1</td><td class="r">200,000</td><td class="r">200,000</td></tr><tr class="qt-er"><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr class="qt-er"><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr class="qt-er"><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr class="qt-er"><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr class="qt-er"><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr class="qt-er"><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr class="qt-er"><td></td><td></td><td></td><td></td><td></td><td></td></tr></tbody></table><table class="qt-tot"><tbody><tr><td class="k">공급가액</td><td class="v">1,000,000 원</td></tr><tr><td class="k">부 가 세</td><td class="v">100,000 원</td></tr><tr class="sum"><td class="k">합　계</td><td class="v">1,100,000 원</td></tr></tbody></table><table class="qt-terms"><tbody><tr><td class="k">납부기한</td><td class="v">2026-07-31</td><td class="k">예금주</td><td class="v">폼다상사</td></tr><tr><td class="k">입금계좌</td><td class="v" colspan="3">폼다은행 123-456-7890</td></tr></tbody></table><div class="qt-note">납부기한 내 미입금 시 지연이자가 발생할 수 있습니다.</div></div></div></div></div>
-    <div class="tool-meta">
-      <div class="nm"><span class="tool-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2.5h8l4 4v15H6z"/><path d="M14 2.5V6.5h4"/><path d="M12 9v8M9.5 11h4a1.5 1.5 0 0 1 0 3h-3a1.5 1.5 0 0 0 0 3h4"/></svg></span>청구서 작성기</div>
-      <p class="de">거래 후 상대방에게 대금 지급을 요청할 때 사용합니다.</p>
+      <div class="nm"><span class="tool-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="2"/><circle cx="9" cy="8.4" r="1.8"/><path d="M6.2 13.4c.4-1.4 1.5-2.2 2.8-2.2s2.4.8 2.8 2.2"/><path d="M13.5 8h3.5M13.5 11h3.5M7 16.4h10M7 18.7h7"/></svg></span>이력서 작성기</div>
+      <p class="de">취업·아르바이트 지원에 낼 이력서를 양식 고민 없이 작성할 때 사용합니다.</p>
       <div class="meta-row"><span class="tag free">무료</span><span class="tag alt">PDF·PNG</span><span class="go">만들기 →</span></div>
     </div>
   </a><a class="tool-card" href="/tools/char-count.html" style="--accent:#0ea5e9">
@@ -98,74 +100,50 @@
       <p class="de">자기소개서·SNS·과제 등 글자수 제한을 확인할 때 사용합니다.</p>
       <div class="meta-row"><span class="tag free">무료</span><span class="tag alt">PDF·PNG</span><span class="go">만들기 →</span></div>
     </div>
-  </a><a class="tool-card" href="/tools/name-roman.html" style="--accent:#8b5cf6">
-    <div class="thumb"><div class="thumb-doc"><div class="tt-thumb" style="--accent:#8b5cf6">
-    <div class="tt-thumb-head"><span class="tt-thumb-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 18 8 6l4 12"/><path d="M5.5 14h5"/><path d="M14 11h6M17 8v9"/></svg></span><span>영문이름 변환</span></div>
-    <div class="tt-thumb-body name-roman"><div class="ttt-io"><div class="ttt-ko">홍길동</div><div class="ttt-arrow">↓</div><div class="ttt-en">Hong Gildong</div></div></div>
-  </div></div></div>
+  </a><a class="tool-card" href="/tools/business-card.html" style="--accent:#1e3a8a">
+    <div class="thumb"><div class="thumb-doc"><div class="doc-page card"><div class="doc-fit"><div class="cd" style="--accent:#1e3a8a"><div class="cd-top"><div class="cd-brand"><span class="cd-company">폼다 주식회사</span></div><span class="cd-slogan">입력하면 바로 완성되는 문서</span></div><div class="cd-id"><span class="cd-name">홍길동</span><span class="cd-role">마케팅팀 팀장</span></div><div class="cd-divider"></div><div class="cd-contacts"><div class="cd-line"><b>T</b>010-1234-5678</div><div class="cd-line"><b>E</b>hong@formda.kr</div><div class="cd-line"><b>W</b>www.formda.kr</div><div class="cd-line"><b>A</b>서울특별시 강남구 테헤란로 1</div></div></div></div></div></div></div>
     <div class="tool-meta">
-      <div class="nm"><span class="tool-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 18 8 6l4 12"/><path d="M5.5 14h5"/><path d="M14 11h6M17 8v9"/></svg></span>영문이름 변환</div>
-      <p class="de">여권·해외서류·명함에 쓸 한글 이름의 영문 표기를 정할 때 사용합니다.</p>
-      <div class="meta-row"><span class="tag free">무료</span><span class="tag alt">PDF·PNG</span><span class="go">만들기 →</span></div>
-    </div>
-  </a><a class="tool-card" href="/tools/address-roman.html" style="--accent:#f59e0b">
-    <div class="thumb"><div class="thumb-doc"><div class="tt-thumb" style="--accent:#f59e0b">
-    <div class="tt-thumb-head"><span class="tt-thumb-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s6-5.3 6-10a6 6 0 1 0-12 0c0 4.7 6 10 6 10z"/><circle cx="12" cy="11" r="2.3"/></svg></span><span>주소 변환</span></div>
-    <div class="tt-thumb-body address-roman"><div class="ttt-io"><div class="ttt-ko sm">서울특별시 강남구<br>테헤란로 152</div><div class="ttt-arrow">↓</div><div class="ttt-en sm">152 Teheran-ro,<br>Gangnam-gu, Seoul</div></div></div>
-  </div></div></div>
-    <div class="tool-meta">
-      <div class="nm"><span class="tool-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s6-5.3 6-10a6 6 0 1 0-12 0c0 4.7 6 10 6 10z"/><circle cx="12" cy="11" r="2.3"/></svg></span>주소 변환</div>
-      <p class="de">해외직구·국제배송·해외서류에 쓸 영문 주소가 필요할 때 사용합니다.</p>
-      <div class="meta-row"><span class="tag free">무료</span><span class="tag alt">PDF·PNG</span><span class="go">만들기 →</span></div>
-    </div>
-  </a><a class="tool-card" href="/tools/text-align.html" style="--accent:#10b981">
-    <div class="thumb"><div class="thumb-doc"><div class="tt-thumb" style="--accent:#10b981">
-    <div class="tt-thumb-head"><span class="tt-thumb-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M4 10h10M4 14h16M4 18h10"/></svg></span><span>텍스트 정렬</span></div>
-    <div class="tt-thumb-body text-align"><div class="ttt-cols"><ul class="ttt-list before"><li>다람쥐</li><li>가오리</li><li>나비</li><li>다람쥐</li></ul><span class="ttt-arrow">→</span><ul class="ttt-list after"><li>가오리</li><li>나비</li><li>다람쥐</li></ul></div></div>
-  </div></div></div>
-    <div class="tool-meta">
-      <div class="nm"><span class="tool-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M4 10h10M4 14h16M4 18h10"/></svg></span>텍스트 정렬</div>
-      <p class="de">명단·리스트·키워드를 정렬하거나 중복을 제거해 정리할 때 사용합니다.</p>
-      <div class="meta-row"><span class="tag free">무료</span><span class="tag alt">PDF·PNG</span><span class="go">만들기 →</span></div>
-    </div>
-  </a><a class="tool-card" href="/tools/resume.html" style="--accent:#0ea5e9">
-    <div class="thumb"><div class="thumb-doc"><div class="doc-page"><div class="doc-fit"><div class="rs-page"><div class="rs-title">이 력 서</div><div class="rs-top"><div class="rs-info-wrap"><table class="rs-info"><tbody><tr><td class="k">성　명</td><td class="v">홍길동</td></tr><tr><td class="k">생년월일</td><td class="v">1995-03-12</td></tr><tr><td class="k">연락처</td><td class="v">010-1234-5678</td></tr><tr><td class="k">이메일</td><td class="v">hong@example.com</td></tr><tr><td class="k">주　소</td><td class="v">서울특별시 강남구 테헤란로 1</td></tr></tbody></table></div><div class="rs-photo"><span>사진<br>3 × 4</span></div></div><div class="rs-sec">학력사항</div><table class="rs-table"><thead><tr><th>재학기간</th><th>학교명</th><th>전공·학위</th><th>졸업구분</th></tr></thead><tbody><tr><td class="c">2014.03 ~ 2018.02</td><td class="l">○○대학교</td><td class="l">경영학과 (학사)</td><td class="c">졸업</td></tr><tr><td class="c">2011.03 ~ 2014.02</td><td class="l">○○고등학교</td><td class="l">인문계</td><td class="c">졸업</td></tr><tr><td class="c"></td><td class="l"></td><td class="l"></td><td class="c"></td></tr></tbody></table><div class="rs-sec">경력사항</div><table class="rs-table"><thead><tr><th>근무기간</th><th>회사명</th><th>직위·부서</th><th>담당업무</th></tr></thead><tbody><tr><td class="c">2018.03 ~ 2021.12</td><td class="l">○○주식회사</td><td class="l">마케팅팀 대리</td><td class="l">브랜드 마케팅 기획·운영</td></tr><tr><td class="c">2022.01 ~ 재직중</td><td class="l">△△컴퍼니</td><td class="l">그로스팀 과장</td><td class="l">퍼포먼스 광고·데이터 분석</td></tr><tr><td class="c"></td><td class="l"></td><td class="l"></td><td class="l"></td></tr><tr><td class="c"></td><td class="l"></td><td class="l"></td><td class="l"></td></tr></tbody></table><div class="rs-sec">자격·기타</div><div class="rs-etc">컴퓨터활용능력 1급 (2019)
-TOEIC 900 (2020)
-운전면허 1종 보통</div><div class="rs-foot"><span>작성일 : 2026-06-24</span><span>작성자 : 홍길동 (인)</span></div></div></div></div></div></div>
-    <div class="tool-meta">
-      <div class="nm"><span class="tool-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="2"/><circle cx="9" cy="8.4" r="1.8"/><path d="M6.2 13.4c.4-1.4 1.5-2.2 2.8-2.2s2.4.8 2.8 2.2"/><path d="M13.5 8h3.5M13.5 11h3.5M7 16.4h10M7 18.7h7"/></svg></span>이력서 작성기</div>
-      <p class="de">취업·아르바이트 지원에 낼 이력서를 양식 고민 없이 작성할 때 사용합니다.</p>
-      <div class="meta-row"><span class="tag free">무료</span><span class="tag alt">PDF·PNG</span><span class="go">만들기 →</span></div>
-    </div>
-  </a><a class="tool-card" href="/tools/employment.html" style="--accent:#6366f1">
-    <div class="thumb"><div class="thumb-doc"><div class="doc-page"><div class="doc-fit"><div class="ct-page"><div class="ct-top"><div class="ct-docno">제 2026-001 호</div><div class="ct-title">재 직 증 명 서</div><table class="ct-info"><tbody><tr><td class="k">성　명</td><td class="v">홍길동</td></tr><tr><td class="k">생년월일</td><td class="v">1990-05-20</td></tr><tr><td class="k">주　소</td><td class="v">서울특별시 마포구 월드컵로 100</td></tr><tr><td class="k">소　속</td><td class="v">경영지원팀</td></tr><tr><td class="k">직　위</td><td class="v">과장</td></tr><tr><td class="k">재직기간</td><td class="v">2018년 3월 1일 ~ 현재</td></tr></tbody></table><div class="ct-body">위 사람은 당사에 위와 같이 재직하고 있음을 증명합니다.</div><div class="ct-purpose">용　도 : 관공서 제출용</div></div><div class="ct-bottom"><div class="ct-date">2026년 6월 24일</div><div class="ct-issuer"><div class="ct-org">폼다 주식회사</div><div class="ct-ceo">대표이사 김폼다<span class="qt-seal">(인)</span></div><div class="ct-meta">사업자등록번호 123-45-67890　·　전화 02-1234-5678　·　서울특별시 강남구 테헤란로 1</div></div></div></div></div></div></div></div>
-    <div class="tool-meta">
-      <div class="nm"><span class="tool-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M7.5 8h9M7.5 11h9M7.5 14h4"/><circle cx="15" cy="16.5" r="2.4"/><path d="m13.8 18.2-.6 2.3 1.8-1 1.8 1-.6-2.3"/></svg></span>재직증명서 작성기</div>
-      <p class="de">직원의 재직 사실을 증명하는 서류가 필요할 때 사용합니다.</p>
-      <div class="meta-row"><span class="tag free">무료</span><span class="tag alt">PDF·PNG</span><span class="go">만들기 →</span></div>
-    </div>
-  </a><a class="tool-card" href="/tools/resignation.html" style="--accent:#64748b">
-    <div class="thumb"><div class="thumb-doc"><div class="doc-page"><div class="doc-fit"><div class="ct-page"><div class="ct-top"><div class="ct-title">사 직 서</div><table class="ct-info"><tbody><tr><td class="k">소　속</td><td class="v">경영지원팀</td></tr><tr><td class="k">직　위</td><td class="v">과장</td></tr><tr><td class="k">성　명</td><td class="v">홍길동</td></tr><tr><td class="k">생년월일</td><td class="v">1990-05-20</td></tr><tr><td class="k">입사일자</td><td class="v">2018년 3월 1일</td></tr><tr><td class="k">퇴직희망일</td><td class="v">2026년 7월 31일</td></tr></tbody></table><div class="ct-body ct-letter">상기 본인은 2018년 3월 1일 입사하여 경영지원팀에서 근무하여 왔으나, 일신상의 사유로 인하여 부득이 사직하고자 본 사직서를 제출합니다. 퇴직 희망일은 2026년 7월 31일이며, 그때까지 담당하던 업무를 후임자에게 차질 없이 인수인계하도록 하겠습니다. 재직 기간 동안 베풀어 주신 배려와 가르침에 깊이 감사드리며, 회사의 무궁한 발전을 진심으로 기원합니다. 아무쪼록 재가하여 주시기 바랍니다.</div><div class="ct-sec">인수인계 사항</div><div class="ct-handover">1. 담당 업무
-   - 임직원 급여·4대보험 관리, 사무용품·비품 구매 및 자산 관리
-   - 거래처 계약서 및 증빙 서류 보관·관리
-2. 진행 중 업무
-   - 2026년 상반기 결산 자료 정리 (7월 중순 완료 예정)
-   - 신규 입사자 온보딩 진행 (7월 15일자 2명)
-3. 인수인계 일정
-   - 후임자 : 팀 내 협의 후 지정 / 기간 : 2026. 7. 1 ~ 7. 31</div></div><div class="ct-bottom"><div class="ct-date">2026년 6월 24일</div><div class="ct-signer">작성자 : 홍길동<span class="qt-seal">(인)</span></div><div class="ct-recipient">폼다 주식회사 대표이사 귀하</div></div></div></div></div></div></div>
-    <div class="tool-meta">
-      <div class="nm"><span class="tool-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M7.5 8h9M7.5 11h5"/><path d="m11.5 18 5.2-5.2a1.6 1.6 0 0 1 2.3 2.3L13.8 20.3l-3 .7.7-3z"/></svg></span>사직서 작성기</div>
-      <p class="de">퇴사 의사를 회사에 공식적으로 전달할 때 사용합니다.</p>
-      <div class="meta-row"><span class="tag free">무료</span><span class="tag alt">PDF·PNG</span><span class="go">만들기 →</span></div>
-    </div>
-  </a><a class="tool-card" href="/tools/award.html" style="--accent:#b45309">
-    <div class="thumb"><div class="thumb-doc"><div class="doc-page"><div class="doc-fit"><div class="aw-page"><div class="aw-top"><div class="ct-docno">제 2026-001 호</div><div class="aw-title">상 장</div></div><div class="aw-mid"><div class="aw-recipient"><div class="aw-sub">경영지원팀 과장</div><div class="aw-name">홍 길 동</div></div><div class="aw-body">위 사람은 평소 맡은 바 직무에 성실하고 그 성과가 우수하여 다른 직원의 모범이 되었으므로, 그 공로를 기리어 이 상장을 수여합니다.</div></div><div class="aw-bottom"><div class="aw-date">2026년 6월 24일</div><div class="aw-issuer"><div class="aw-org">폼다 주식회사</div><div class="aw-ceo">대표이사　김폼다<span class="qt-seal">(인)</span></div></div></div></div></div></div></div></div>
-    <div class="tool-meta">
-      <div class="nm"><span class="tool-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="9" r="5.2"/><path d="m9 13.4-1.6 7.1 4.6-2.4 4.6 2.4-1.6-7.1"/><path d="m12 6.4.9 1.8 2 .3-1.45 1.4.35 2-1.8-.95-1.8.95.35-2L9.1 8.5l2-.3z"/></svg></span>상장·표창장 작성기</div>
-      <p class="de">수상자와 수상 내용을 격식 있는 상장으로 남길 때 사용합니다.</p>
+      <div class="nm"><span class="tool-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="12" rx="2"/><circle cx="8" cy="11" r="1.8"/><path d="M5.5 15.2c.4-1.2 1.3-1.9 2.5-1.9s2.1.7 2.5 1.9"/><path d="M13.5 10h4.5M13.5 13h4.5"/></svg></span>명함 작성기</div>
+      <p class="de">연락처와 직함을 담은 명함이 필요할 때 사용합니다.</p>
       <div class="meta-row"><span class="tag free">무료</span><span class="tag alt">PDF·PNG</span><span class="go">만들기 →</span></div>
     </div>
   </a></div>
+
+  <!-- 카테고리: 인기 바로 아래에서 전체 탐색 이어가기 -->
+  <section class="home-sec reveal" id="cats">
+    <div class="home-sec-head">
+      <h2 class="home-sec-h">어떤 문서가 필요하세요?</h2>
+    </div>
+    <div class="cat-list"><div class="cat-row">
+    <div class="cat-row-head">
+      <a class="cat-row-name" href="/category/business.html">비즈니스 문서</a>
+      <a class="cat-more" href="/category/business.html">전체 보기 ›</a>
+    </div>
+    <div class="cat-row-tools"><a class="t-live" href="/tools/estimate.html">견적서</a><a class="t-live" href="/tools/order.html">발주서</a><a class="t-live" href="/tools/statement.html">거래명세서</a><a class="t-live" href="/tools/invoice.html">청구서</a><a class="t-live" href="/tools/receipt.html">영수증</a></div>
+    
+  </div><div class="cat-row">
+    <div class="cat-row-head">
+      <a class="cat-row-name" href="/category/job.html">취업/자기PR</a>
+      <a class="cat-more" href="/category/job.html">전체 보기 ›</a>
+    </div>
+    <div class="cat-row-tools"><a class="t-live" href="/tools/resume.html">이력서</a><a class="t-live" href="/tools/cover-letter.html">자기소개서</a><a class="t-live" href="/tools/career.html">경력기술서</a><a class="t-live" href="/tools/employment.html">재직증명서</a><a class="t-live" href="/tools/resignation.html">사직서</a></div>
+    
+  </div><div class="cat-row">
+    <div class="cat-row-head">
+      <a class="cat-row-name" href="/category/life.html">생활/행정</a>
+      <a class="cat-more" href="/category/life.html">전체 보기 ›</a>
+    </div>
+    <div class="cat-row-tools"><a class="t-live" href="/tools/award.html">상장·표창장</a><a class="t-live" href="/tools/notice.html">가정통신문</a><a class="t-live" href="/tools/business-card.html">명함</a><a class="t-live" href="/tools/loan.html">차용증</a><a class="t-live" href="/tools/mandate.html">위임장</a></div>
+    
+  </div><div class="cat-row">
+    <div class="cat-row-head">
+      <a class="cat-row-name" href="/category/text.html">텍스트 도구</a>
+      <a class="cat-more" href="/category/text.html">전체 보기 ›</a>
+    </div>
+    <div class="cat-row-tools"><a class="t-live" href="/tools/char-count.html">글자수 세기</a><a class="t-live" href="/tools/name-roman.html">영문이름 변환</a><a class="t-live" href="/tools/address-roman.html">주소 변환</a><a class="t-live" href="/tools/text-align.html">텍스트 정렬</a><a class="t-live" href="/tools/qr.html">QR코드</a></div>
+    
+  </div></div>
+  </section>
 
   <!-- 3단계 -->
   <section class="home-sec reveal">
@@ -188,43 +166,6 @@ TOEIC 900 (2020)
       <div class="why-item"><b>입력 정보 서버 저장 없음</b><p>작성 내용은 서버로 전송되지 않고 브라우저에서만 처리됩니다.</p></div>
       <div class="why-item"><b>모바일에서도 사용</b><p>PC뿐 아니라 모바일에서도 문서를 만들고 저장할 수 있습니다.</p></div>
     </div>
-  </section>
-
-  <!-- 카테고리 (텍스트형, 준비중은 작게) -->
-  <section class="home-sec reveal">
-    <div class="home-sec-head">
-      <h2 class="home-sec-h">어떤 문서가 필요하세요?</h2>
-      <div class="cat-legend"><span class="lg lg-live">바로 사용 가능</span><span class="lg lg-soon">곧 준비 중</span></div>
-    </div>
-    <div class="cat-list"><div class="cat-row">
-    <div class="cat-row-head">
-      <a class="cat-row-name" href="/category/business.html">비즈니스 문서</a>
-      <a class="cat-more" href="/category/business.html">전체 보기 ›</a>
-    </div>
-    <div class="cat-row-tools"><a class="t-live" href="/tools/estimate.html">견적서</a><a class="t-live" href="/tools/statement.html">거래명세서</a><a class="t-live" href="/tools/receipt.html">영수증</a><a class="t-live" href="/tools/order.html">발주서</a><a class="t-live" href="/tools/invoice.html">청구서</a></div>
-    
-  </div><div class="cat-row">
-    <div class="cat-row-head">
-      <a class="cat-row-name" href="/category/job.html">취업/자기PR</a>
-      <a class="cat-more" href="/category/job.html">전체 보기 ›</a>
-    </div>
-    <div class="cat-row-tools"><a class="t-live" href="/tools/resume.html">이력서</a><a class="t-live" href="/tools/employment.html">재직증명서</a><a class="t-live" href="/tools/resignation.html">사직서</a></div>
-    <div class="cat-soon-line">곧 추가: 자기소개서 · 경력기술서</div>
-  </div><div class="cat-row">
-    <div class="cat-row-head">
-      <a class="cat-row-name" href="/category/life.html">생활/행정</a>
-      <a class="cat-more" href="/category/life.html">전체 보기 ›</a>
-    </div>
-    <div class="cat-row-tools"><a class="t-live" href="/tools/award.html">상장·표창장</a></div>
-    <div class="cat-soon-line">곧 추가: 명함 · QR코드 · 가정통신문</div>
-  </div><div class="cat-row">
-    <div class="cat-row-head">
-      <a class="cat-row-name" href="/category/text.html">텍스트 도구</a>
-      <a class="cat-more" href="/category/text.html">전체 보기 ›</a>
-    </div>
-    <div class="cat-row-tools"><a class="t-live" href="/tools/char-count.html">글자수 세기</a><a class="t-live" href="/tools/name-roman.html">영문이름 변환</a><a class="t-live" href="/tools/address-roman.html">주소 변환</a><a class="t-live" href="/tools/text-align.html">텍스트 정렬</a></div>
-    
-  </div></div>
   </section>
 
   <!-- 가이드 -->
@@ -253,5 +194,7 @@ TOEIC 900 (2020)
     <div class="footer-copy">© 폼다 · 입력하면 바로 완성되는 무료 문서 도구</div>
   </div>
 </footer>
+<script src="/search-index.js" defer></script>
+<script src="/engine/search.js" defer></script>
 </body>
 </html>

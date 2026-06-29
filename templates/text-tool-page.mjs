@@ -26,6 +26,7 @@ ${header(tool.category)}
 
 ${footer()}
 
+${tool.kind === 'qr' ? '<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>' : ''}
 <script>window.FORMDA_TEXT_TOOL = ${JSON.stringify(cfg)};</script>
 <script src="/engine/text-engine.js"></script>
 ${jsonLd(tool)}
@@ -47,6 +48,17 @@ export function textThumb(tool) {
     'text-align':
       '<div class="ttt-cols"><ul class="ttt-list before"><li>다람쥐</li><li>가오리</li><li>나비</li><li>다람쥐</li></ul>' +
       '<span class="ttt-arrow">→</span><ul class="ttt-list after"><li>가오리</li><li>나비</li><li>다람쥐</li></ul></div>',
+    'qr':
+      '<div class="ttt-qr"><svg viewBox="0 0 84 84" width="230" height="230" xmlns="http://www.w3.org/2000/svg"><g fill="#1a1a1a">' +
+        '<path fill-rule="evenodd" d="M2 2h22v22H2zM7 7v12h12V7z"/><rect x="10" y="10" width="6" height="6"/>' +
+        '<path fill-rule="evenodd" d="M60 2h22v22H60zM65 7v12h12V7z"/><rect x="68" y="10" width="6" height="6"/>' +
+        '<path fill-rule="evenodd" d="M2 60h22v22H2zM7 65v12h12V65z"/><rect x="10" y="68" width="6" height="6"/>' +
+        '<rect x="30" y="6" width="6" height="6"/><rect x="42" y="6" width="6" height="6"/><rect x="6" y="30" width="6" height="6"/>' +
+        '<rect x="30" y="30" width="6" height="6"/><rect x="48" y="30" width="6" height="6"/><rect x="66" y="30" width="6" height="6"/>' +
+        '<rect x="6" y="42" width="6" height="6"/><rect x="30" y="42" width="6" height="6"/><rect x="60" y="42" width="6" height="6"/>' +
+        '<rect x="42" y="48" width="6" height="6"/><rect x="72" y="48" width="6" height="6"/>' +
+        '<rect x="30" y="60" width="6" height="6"/><rect x="42" y="66" width="6" height="6"/><rect x="60" y="60" width="6" height="6"/><rect x="66" y="72" width="6" height="6"/>' +
+      '</g></svg></div>',
   }[tool.slug] || '';
   return `<div class="tt-thumb" style="--accent:${a}">
     <div class="tt-thumb-head"><span class="tt-thumb-ic">${svg(tool.icon)}</span><span>${tool.navTitle}</span></div>

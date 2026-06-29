@@ -5,13 +5,20 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <script>document.documentElement.classList.add('js')</script>
 <title>이용약관 | 폼다</title>
-<meta name="description" content="폼다 서비스 이용약관입니다." />
+<meta name="description" content="폼다 서비스 이용약관입니다. 서비스의 성격, 이용자의 의무, 면책과 책임 제한을 안내합니다." />
 <link rel="canonical" href="https://formda.kr/pages/terms.html" />
 <meta property="og:type" content="website" />
 <meta property="og:title" content="이용약관 | 폼다" />
-<meta property="og:description" content="폼다 서비스 이용약관입니다." />
+<meta property="og:description" content="폼다 서비스 이용약관입니다. 서비스의 성격, 이용자의 의무, 면책과 책임 제한을 안내합니다." />
 <meta property="og:url" content="https://formda.kr/pages/terms.html" />
 <meta property="og:site_name" content="폼다" />
+<meta property="og:image" content="https://formda.kr/assets/og.png" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="이용약관 | 폼다" />
+<meta name="twitter:description" content="폼다 서비스 이용약관입니다. 서비스의 성격, 이용자의 의무, 면책과 책임 제한을 안내합니다." />
+<meta name="twitter:image" content="https://formda.kr/assets/og.png" />
 <link rel="icon" href="/assets/favicon.png" type="image/png" />
 <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png" />
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" />
@@ -22,6 +29,11 @@
   <div class="header-in">
     <a class="logo" href="/"><img class="logo-img" src="/assets/logo.png" alt="폼다" onerror="this.replaceWith(Object.assign(document.createElement('span'),{className:'logo-text',textContent:'폼다'}))"></a>
     <nav class="nav"><a href="/category/business.html">비즈니스</a><a href="/category/job.html">취업</a><a href="/category/life.html">생활</a><a href="/category/text.html">텍스트</a><a href="/guides/">가이드</a></nav>
+    <div class="hdr-search">
+      <svg class="hdr-search-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.2-3.2"></path></svg>
+      <input id="site-search" type="search" placeholder="문서 검색" autocomplete="off" aria-label="문서 검색">
+      <div id="search-results" class="search-results" role="listbox"></div>
+    </div>
   </div>
 </header>
 <main class="wrap">
@@ -29,18 +41,38 @@
   <article class="legal-page">
     <h1>이용약관</h1>
     
+    <p class="legal-meta">시행일: 2026년 6월 29일</p>
     <h2>제1조 (목적)</h2>
-    <p>본 약관은 폼다(이하 "서비스")가 제공하는 문서 자동작성 도구의 이용 조건과 절차, 이용자와 서비스의 권리·의무를 규정함을 목적으로 합니다.</p>
-    <h2>제2조 (서비스의 성격)</h2>
+    <p>본 약관은 폼다(이하 "서비스")가 제공하는 문서 자동작성 도구의 이용 조건과 절차, 이용자와 서비스 운영자의 권리·의무 및 책임 사항을 규정함을 목적으로 합니다.</p>
+    <h2>제2조 (정의)</h2>
     <ul>
-      <li>서비스는 이용자가 입력한 내용을 바탕으로 문서 양식을 화면에 구성하고 PDF·이미지로 내려받도록 돕는 도구입니다.</li>
-      <li>서비스는 문서의 내용·법적 효력·정확성을 보증하지 않으며, 작성된 문서의 사용 책임은 전적으로 이용자에게 있습니다.</li>
-      <li>서비스는 세무·법률 자문을 제공하지 않습니다.</li>
+      <li>"서비스"란 이용자가 입력한 내용을 바탕으로 문서를 화면에 구성하고 PDF·이미지로 내려받도록 제공하는 폼다의 도구 일체를 말합니다.</li>
+      <li>"이용자"란 본 약관에 따라 서비스를 이용하는 모든 방문자를 말합니다.</li>
     </ul>
-    <h2>제3조 (이용자의 의무)</h2>
-    <p>이용자는 관련 법령을 준수해야 하며, 허위 문서 작성 등 부정한 목적으로 서비스를 이용해서는 안 됩니다.</p>
-    <h2>제4조 (면책)</h2>
-    <p>서비스는 이용자가 작성·활용한 문서로 발생한 어떠한 손해에 대해서도 책임을 지지 않습니다.</p>
+    <h2>제3조 (서비스의 성격)</h2>
+    <ul>
+      <li>서비스는 이용자가 입력한 내용을 이용자의 브라우저 안에서 문서 양식으로 구성하고 PDF·이미지로 내려받도록 돕는 도구입니다.</li>
+      <li>서비스는 문서의 내용·법적 효력·정확성을 보증하지 않으며, 작성된 문서의 사용 책임은 전적으로 이용자에게 있습니다.</li>
+      <li>서비스는 세무·법률·회계 등 전문 자문을 제공하지 않습니다. 각 문서 페이지의 안내는 일반적인 참고 정보이며 법률 자문이 아닙니다.</li>
+    </ul>
+    <h2>제4조 (서비스의 제공·변경·중단)</h2>
+    <ul>
+      <li>서비스는 무료로 제공되며, 별도의 가입 절차가 없습니다.</li>
+      <li>운영자는 서비스의 내용·구성·도구를 사전 고지 없이 변경하거나 중단할 수 있습니다.</li>
+    </ul>
+    <h2>제5조 (이용자의 의무)</h2>
+    <p>이용자는 관련 법령을 준수해야 하며, 허위·위조 문서 작성, 타인의 권리 침해, 기타 부정한 목적으로 서비스를 이용해서는 안 됩니다. 이를 위반하여 발생한 모든 책임은 이용자에게 있습니다.</p>
+    <h2>제6조 (지적재산권)</h2>
+    <ul>
+      <li>서비스의 디자인, 코드, 양식 구성 등에 관한 권리는 운영자에게 있습니다.</li>
+      <li>이용자가 직접 입력하여 작성한 문서의 내용에 관한 권리는 이용자에게 있습니다.</li>
+    </ul>
+    <h2>제7조 (면책 및 책임의 제한)</h2>
+    <p>서비스는 이용자가 작성·활용한 문서로 발생한 직접·간접의 어떠한 손해에 대해서도 책임을 지지 않습니다. 서비스는 "있는 그대로(as-is)" 제공되며, 특정 목적에의 적합성이나 무결성을 보증하지 않습니다.</p>
+    <h2>제8조 (준거법 및 분쟁 해결)</h2>
+    <p>본 약관은 대한민국 법령에 따라 해석되며, 서비스 이용과 관련한 분쟁은 관계 법령이 정한 절차에 따릅니다.</p>
+    <h2>부칙</h2>
+    <p>본 약관은 2026년 6월 29일부터 시행합니다.</p>
   </article>
 </main>
 <footer class="footer">
@@ -50,5 +82,7 @@
     <div class="footer-copy">© 폼다 · 입력하면 바로 완성되는 무료 문서 도구</div>
   </div>
 </footer>
+<script src="/search-index.js" defer></script>
+<script src="/engine/search.js" defer></script>
 </body>
 </html>

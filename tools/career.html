@@ -4,15 +4,22 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <script>document.documentElement.classList.add('js')</script>
-<title>경력기술서 만들기 - 준비중 | 폼다</title>
-<meta name="description" content="경력기술서 자동작성 도구는 곧 추가됩니다." />
-<meta name="robots" content="noindex,follow" />
+<title>경력기술서 양식 무료 - 경력별 입력하면 바로 완성 PDF | 폼다</title>
+<meta name="description" content="가입 없이 회사·기간·직위와 담당 업무·성과만 입력하면 경력기술서가 바로 완성됩니다. 길이에 따라 자동 페이지 분할, PDF·PNG 다운로드까지 무료. 폼다 경력기술서 만들기." />
+<meta name="keywords" content="경력기술서 양식, 경력기술서 무료, 경력기술서 만들기, 경력기술서 작성, 경력기술서 PDF, 경력직 이력서" />
 <link rel="canonical" href="https://formda.kr/tools/career.html" />
 <meta property="og:type" content="website" />
-<meta property="og:title" content="경력기술서 만들기 - 준비중 | 폼다" />
-<meta property="og:description" content="경력기술서 자동작성 도구는 곧 추가됩니다." />
+<meta property="og:title" content="경력기술서 양식 무료 - 경력별 입력하면 바로 완성 PDF | 폼다" />
+<meta property="og:description" content="가입 없이 회사·기간·직위와 담당 업무·성과만 입력하면 경력기술서가 바로 완성됩니다. 길이에 따라 자동 페이지 분할, PDF·PNG 다운로드까지 무료. 폼다 경력기술서 만들기." />
 <meta property="og:url" content="https://formda.kr/tools/career.html" />
 <meta property="og:site_name" content="폼다" />
+<meta property="og:image" content="https://formda.kr/assets/og.png" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="경력기술서 양식 무료 - 경력별 입력하면 바로 완성 PDF | 폼다" />
+<meta name="twitter:description" content="가입 없이 회사·기간·직위와 담당 업무·성과만 입력하면 경력기술서가 바로 완성됩니다. 길이에 따라 자동 페이지 분할, PDF·PNG 다운로드까지 무료. 폼다 경력기술서 만들기." />
+<meta name="twitter:image" content="https://formda.kr/assets/og.png" />
 <link rel="icon" href="/assets/favicon.png" type="image/png" />
 <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png" />
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" />
@@ -23,20 +30,91 @@
   <div class="header-in">
     <a class="logo" href="/"><img class="logo-img" src="/assets/logo.png" alt="폼다" onerror="this.replaceWith(Object.assign(document.createElement('span'),{className:'logo-text',textContent:'폼다'}))"></a>
     <nav class="nav"><a href="/category/business.html">비즈니스</a><a href="/category/job.html" class="on">취업</a><a href="/category/life.html">생활</a><a href="/category/text.html">텍스트</a><a href="/guides/">가이드</a></nav>
-  </div>
-</header>
-<main class="wrap">
-  <div class="crumb"><a href="/">홈</a> › <a href="/category/job.html">취업/자기PR</a> › 경력기술서</div>
-  <div class="stub-page">
-    <span class="stub-badge">준비중</span>
-    <h1>경력기술서 작성기</h1>
-    <p>경력기술서 자동작성 도구를 준비하고 있어요. 견적서처럼 입력하면 바로 완성되는 경력기술서로 곧 찾아옵니다.</p>
-    <div class="hero-cta" style="justify-content:center">
-      <a class="btn-cta primary" href="/tools/estimate.html">지금은 견적서 만들기</a>
-      <a class="btn-cta ghost" href="/category/job.html">취업/자기PR 전체 보기</a>
+    <div class="hdr-search">
+      <svg class="hdr-search-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.2-3.2"></path></svg>
+      <input id="site-search" type="search" placeholder="문서 검색" autocomplete="off" aria-label="문서 검색">
+      <div id="search-results" class="search-results" role="listbox"></div>
     </div>
   </div>
+</header>
+
+<main class="wrap">
+  <div class="crumb"><a href="/">홈</a> › <a href="/category/job.html">취업/자기PR</a> › 경력기술서</div>
+  <h1 class="title">경력기술서 작성기</h1>
+  <p class="subtitle">회사 정보와 품목만 입력하면 경력기술서 PDF·PNG를 바로 만들 수 있습니다. 가입 없이 무료.</p>
+  <div class="trust">🔒 입력 정보는 <b>서버에 저장되지 않고</b> 브라우저에서만 처리됩니다.</div>
+  <div class="steps">
+    <span class="step"><span class="num">1</span>입력</span><span class="arrow">→</span>
+    <span class="step"><span class="num">2</span>실시간 미리보기</span><span class="arrow">→</span>
+    <span class="step"><span class="num">3</span>PDF·PNG 다운로드</span>
+  </div>
+
+  <div class="tabs no-print">
+    <button id="tabInput" class="on" onclick="Formda.app.showPane('input')">입력</button>
+    <button id="tabPreview" onclick="Formda.app.showPane('preview')">미리보기</button>
+  </div>
+
+  <div class="editor">
+  <div class="cols">
+    <section class="pane-input">
+      <div class="pane-head">
+        <span class="pv-label">입력</span>
+        <div class="head-actions no-print">
+          <button class="mini-btn" type="button" onclick="Formda.app.loadSample()">샘플 불러오기</button>
+          <button class="mini-btn danger" type="button" onclick="Formda.app.clearAll()">전체 비우기</button>
+        </div>
+      </div>
+      <div class="form-scroll"><div id="formPanel"><!-- 입력폼: 엔진이 렌더 --></div></div>
+    </section>
+
+    <section class="pane-preview">
+      <div class="pane-head">
+        <span class="pv-label">미리보기</span>
+        <div class="zoom no-print">
+          <button type="button" onclick="Formda.app.zoomOut()" aria-label="축소">−</button>
+          <button type="button" class="zoom-pct" onclick="Formda.app.zoomReset()" aria-label="맞춤"><span id="zoomLabel">100%</span></button>
+          <button type="button" onclick="Formda.app.zoomIn()" aria-label="확대">+</button>
+        </div>
+      </div>
+      <div class="preview-wrap">
+        <div class="doc-viewport" id="doc"><!-- 미리보기: 엔진이 A4 페이지로 렌더 --></div>
+        <div class="actions no-print">
+          <button class="btn btn-ghost" onclick="Formda.app.print()">인쇄</button>
+          <button class="btn btn-ghost" onclick="Formda.app.downloadPNG(this)">PNG 저장</button>
+          <button class="btn btn-primary btn-pdf" onclick="Formda.app.downloadPDF(this)">PDF 다운로드</button>
+        </div>
+      </div>
+    </section>
+  </div>
+  </div>
+
+  <section class="guide" style="--accent:#0d9488">
+    <h2 class="guide-title">경력기술서 작성 가이드</h2>
+    <p class="guide-lead">경력기술서는 경력직 지원에서 수행한 업무와 성과를 회사나 프로젝트 단위로 상세히 기술하는 문서입니다. 인적사항과 경력을 요약하는 이력서와 달리, 경력기술서는 "무엇을 어떻게 해서 어떤 성과를 냈는지"를 구체적으로 보여 주는 것이 핵심입니다. 폼다 경력기술서 만들기는 회사·기간·직위와 담당 업무를 입력하면 깔끔하게 정렬된 경력기술서를 완성하고, 내용이 길어지면 자동으로 여러 장에 나눠 담아 줍니다.</p>
+    <div class="guide-cards">
+      <article class="g-card"><div class="g-card-head"><span class="g-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="4.5" y="3" width="15" height="18" rx="2.5"/><path d="m7.5 9 1.4 1.4L11.4 8"/><path d="M13.5 9.2h3"/><path d="m7.5 15 1.4 1.4 2.5-2.4"/><path d="M13.5 15.2h3"/></svg></span><h3>경력기술서, 이렇게 구성합니다</h3></div>
+<p>경력을 최근 순으로, 각 경력마다 아래 내용을 담으면 읽는 사람이 빠르게 파악합니다.</p><div class="tbl-scroll"><table class="g-table"><thead><tr><th>항목</th><th>내용</th></tr></thead><tbody><tr><td>경력 요약</td><td>총 경력과 핵심 역량 2~3줄</td></tr><tr><td>회사·기간·직위</td><td>근무 회사, 재직 기간, 직위</td></tr><tr><td>담당 업무</td><td>맡은 역할과 주요 업무</td></tr><tr><td>성과</td><td>수치로 보여 주는 구체적 결과</td></tr></tbody></table></div></article>
+<article class="g-card"><div class="g-card-head"><span class="g-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 18.5h5"/><path d="M10.2 21.5h3.6"/><path d="M12 2.5a6.3 6.3 0 0 0-3.9 11.3c.7.6 1 1.2 1 2.2h5.8c0-1 .3-1.6 1-2.2A6.3 6.3 0 0 0 12 2.5z"/></svg></span><h3>성과는 수치로 보여 줍니다</h3></div>
+<p>경력기술서의 설득력은 성과를 얼마나 구체적으로 적느냐에 달려 있습니다. "마케팅을 담당했다"보다 "퍼포먼스 광고 효율을 35% 개선했다"처럼 수치와 결과를 함께 적으면 훨씬 강합니다. 업무를 나열만 하지 말고, 그 일을 통해 무엇이 좋아졌는지를 한 줄씩 붙이세요. 폼다는 경력별로 항목을 나눠 담고 길이에 따라 자동으로 페이지를 넘겨 줍니다.</p></article>
+<article class="g-card"><div class="g-card-head"><span class="g-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 18.5h5"/><path d="M10.2 21.5h3.6"/><path d="M12 2.5a6.3 6.3 0 0 0-3.9 11.3c.7.6 1 1.2 1 2.2h5.8c0-1 .3-1.6 1-2.2A6.3 6.3 0 0 0 12 2.5z"/></svg></span><h3>담당 업무는 한 줄 불릿으로</h3></div>
+<p>담당 업무는 줄글보다 한 줄짜리 불릿으로 적어야 한눈에 들어옵니다. <b>"무엇을 했다 → 그래서 어떤 결과가 났다"</b> 구조로, 가능하면 동사로 시작하고 끝에 수치를 붙이세요.</p><ul><li>약함: 퍼포먼스 마케팅을 담당함</li><li><b>강함: 퍼포먼스 광고 채널 믹스를 최적화해 ROAS를 35% 개선</b></li><li>약함: 신규 채널을 발굴함</li><li><b>강함: 신규 유입 채널 3종을 발굴하고 A/B 테스트 체계를 구축</b></li></ul></article>
+<article class="g-card"><div class="g-card-head"><span class="g-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="4.5" y="3" width="15" height="18" rx="2.5"/><path d="m7.5 9 1.4 1.4L11.4 8"/><path d="M13.5 9.2h3"/><path d="m7.5 15 1.4 1.4 2.5-2.4"/><path d="M13.5 15.2h3"/></svg></span><h3>직무별로 강조점이 다릅니다</h3></div>
+<p>같은 경력기술서라도 직무에 따라 부각할 성과가 다릅니다. 지원 직무가 중요하게 보는 지표 중심으로 정리하세요.</p><div class="tbl-scroll"><table class="g-table"><thead><tr><th>직무</th><th>강조할 성과 지표</th></tr></thead><tbody><tr><td>마케팅·영업</td><td>매출, 전환율, ROAS, 신규 고객 수</td></tr><tr><td>개발·기술</td><td>처리 속도, 장애·오류 감소, 자동화, 배포 주기</td></tr><tr><td>기획·운영</td><td>프로세스 개선, 비용 절감, 만족도</td></tr><tr><td>디자인·콘텐츠</td><td>조회수, 전환, 제작 효율</td></tr></tbody></table></div></article>
+      <article class="g-card g-faq"><div class="g-card-head"><span class="g-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9.6 9.4a2.5 2.5 0 0 1 4.3 1.7c0 1.6-2.4 1.9-2.4 3.4"/><path d="M11.5 17.4h.02"/></svg></span><h3>자주 묻는 질문</h3></div><div class="g-faq-item"><p class="faq-q">Q. 경력 요약과 핵심 역량은 꼭 써야 하나요?</p><p>필수는 아니지만, 맨 위에 총 경력과 핵심 역량을 2~3줄로 요약해 두면 채용 담당자가 첫눈에 지원자를 파악할 수 있어 권장됩니다. 특히 핵심 역량은 이직 시 가장 먼저 보는 항목이므로, 보유 기술과 강점을 줄 단위로 정리해 두면 좋습니다.</p></div>
+<div class="g-faq-item"><p class="faq-q">Q. 경력기술서와 이력서는 어떻게 다른가요?</p><p>이력서는 인적사항과 학력·경력을 표로 요약한 사실 정보 문서이고, 경력기술서는 수행한 업무와 성과를 회사·프로젝트 단위로 상세히 풀어 쓰는 문서입니다. 신입은 이력서와 자기소개서를 내고, 경력직은 여기에 경력기술서를 더해 자신의 실무 역량을 구체적으로 보여 줍니다. 폼다에서 이력서와 경력기술서를 각각 만들어 함께 제출하면 됩니다.</p></div>
+<div class="g-faq-item"><p class="faq-q">Q. 경력이 여러 개면 어떻게 적나요?</p><p>최근 경력을 맨 위에 두고, 회사나 프로젝트 단위로 항목을 추가해 각각의 담당 업무와 성과를 적으면 됩니다. 폼다는 경력 추가 버튼으로 항목을 얼마든지 늘릴 수 있고, 전체 분량이 한 장을 넘으면 자동으로 다음 장으로 나눠 담습니다. 너무 오래된 경력은 간략히 적거나 생략해 핵심 경력에 집중하는 것이 좋습니다.</p></div>
+<div class="g-faq-item"><p class="faq-q">Q. 작성한 경력기술서는 저장되나요?</p><p>폼다는 입력 내용을 서버로 전송하거나 저장하지 않습니다. 모든 처리는 사용자 브라우저 안에서만 이루어지며, PDF·PNG로 내려받은 파일만 기기에 남습니다. 경력 정보가 외부로 나가지 않으므로 안심하고 작성할 수 있습니다.</p></div></article>
+    </div>
+    <div class="sibling-section"><div class="sibling-title">관련 문서 도구</div><div class="sibling-list"><a class="sibling-link" href="/tools/resume.html">이력서</a><a class="sibling-link" href="/tools/cover-letter.html">자기소개서</a><a class="sibling-link" href="/tools/employment.html">재직증명서</a><a class="sibling-link" href="/category/job.html">취업/자기PR 전체 ›</a></div></div>
+  </section>
 </main>
+
+<!-- 모바일 하단 고정 다운로드 바 -->
+<div class="mobile-bar no-print">
+  <button class="btn btn-ghost" onclick="Formda.app.downloadPNG(this)">PNG</button>
+  <button class="btn btn-primary btn-pdf" onclick="Formda.app.downloadPDF(this)">PDF 다운로드</button>
+</div>
+
 <footer class="footer">
   <div class="footer-in">
     <div class="footer-links"><a href="/">홈</a><a href="/guides/">가이드</a><a href="/pages/about.html">소개</a><a href="/pages/terms.html">이용약관</a><a href="/pages/privacy.html">개인정보처리방침</a><a href="/pages/contact.html">문의</a></div>
@@ -44,5 +122,20 @@
     <div class="footer-copy">© 폼다 · 입력하면 바로 완성되는 무료 문서 도구</div>
   </div>
 </footer>
+<script src="/search-index.js" defer></script>
+<script src="/engine/search.js" defer></script>
 </body>
 </html>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script>window.FORMDA_TOOL = {"slug":"career","docType":"career","doc":{"docTitle":"경력기술서","flow":true,"fileName":"경력기술서"},"sample":{"name":"홍길동","contact":"010-1234-5678 / hong@example.com","summary":"8년차 마케터로, 데이터 기반 퍼포먼스 마케팅과 브랜드 캠페인을 두루 수행했습니다. 광고 효율 개선과 신규 채널 발굴에 강점이 있습니다.","skills":"퍼포먼스 마케팅 (검색·디스플레이·SNS 광고 운영)\n데이터 분석 및 리포팅 (GA4, SQL, Excel)\n브랜드 캠페인 기획·실행 및 예산 관리\n협업 툴 활용 및 대행사·디자이너 협업","items":[{"company":"△△컴퍼니","period":"2022.01 ~ 재직 중","role":"그로스팀 과장","body":"- 퍼포먼스 광고 운영 및 채널 믹스 최적화로 광고 효율(ROAS) 35% 개선\n- 신규 유입 채널 3종 발굴 및 A/B 테스트 체계 구축\n- 월간 성과 리포트 자동화로 분석 소요 시간 50% 단축"},{"company":"○○주식회사","period":"2018.03 ~ 2021.12","role":"마케팅팀 대리","body":"- 브랜드 캠페인 기획·실행, 연 2회 대형 프로모션 주도\n- 콘텐츠 마케팅으로 자사몰 신규 회원 전년 대비 40% 증가\n- 외부 대행사·디자이너 협업 및 예산 관리"}]}};</script>
+<script src="/engine/calc.js"></script>
+<script src="/engine/doc-render.js"></script>
+<script src="/engine/form-engine.js"></script>
+<script src="/engine/export.js"></script>
+<script src="/engine/app.js"></script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"경력 요약과 핵심 역량은 꼭 써야 하나요?","acceptedAnswer":{"@type":"Answer","text":"필수는 아니지만, 맨 위에 총 경력과 핵심 역량을 2~3줄로 요약해 두면 채용 담당자가 첫눈에 지원자를 파악할 수 있어 권장됩니다. 특히 핵심 역량은 이직 시 가장 먼저 보는 항목이므로, 보유 기술과 강점을 줄 단위로 정리해 두면 좋습니다."}},{"@type":"Question","name":"경력기술서와 이력서는 어떻게 다른가요?","acceptedAnswer":{"@type":"Answer","text":"이력서는 인적사항과 학력·경력을 표로 요약한 사실 정보 문서이고, 경력기술서는 수행한 업무와 성과를 회사·프로젝트 단위로 상세히 풀어 쓰는 문서입니다. 신입은 이력서와 자기소개서를 내고, 경력직은 여기에 경력기술서를 더해 자신의 실무 역량을 구체적으로 보여 줍니다. 폼다에서 이력서와 경력기술서를 각각 만들어 함께 제출하면 됩니다."}},{"@type":"Question","name":"경력이 여러 개면 어떻게 적나요?","acceptedAnswer":{"@type":"Answer","text":"최근 경력을 맨 위에 두고, 회사나 프로젝트 단위로 항목을 추가해 각각의 담당 업무와 성과를 적으면 됩니다. 폼다는 경력 추가 버튼으로 항목을 얼마든지 늘릴 수 있고, 전체 분량이 한 장을 넘으면 자동으로 다음 장으로 나눠 담습니다. 너무 오래된 경력은 간략히 적거나 생략해 핵심 경력에 집중하는 것이 좋습니다."}},{"@type":"Question","name":"작성한 경력기술서는 저장되나요?","acceptedAnswer":{"@type":"Answer","text":"폼다는 입력 내용을 서버로 전송하거나 저장하지 않습니다. 모든 처리는 사용자 브라우저 안에서만 이루어지며, PDF·PNG로 내려받은 파일만 기기에 남습니다. 경력 정보가 외부로 나가지 않으므로 안심하고 작성할 수 있습니다."}}]}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"폼다 경력기술서 작성기","url":"https://formda.kr/tools/career.html","applicationCategory":"BusinessApplication","operatingSystem":"All","inLanguage":"ko","description":"가입 없이 회사·기간·직위와 담당 업무·성과만 입력하면 경력기술서가 바로 완성됩니다. 길이에 따라 자동 페이지 분할, PDF·PNG 다운로드까지 무료. 폼다 경력기술서 만들기.","offers":{"@type":"Offer","price":"0","priceCurrency":"KRW"},"publisher":{"@type":"Organization","name":"폼다","url":"https://formda.kr/"}}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"HowTo","name":"경력기술서 만드는 방법","inLanguage":"ko","step":[{"@type":"HowToStep","position":1,"name":"정보 입력","text":"회사 정보와 품목·금액을 입력합니다."},{"@type":"HowToStep","position":2,"name":"실시간 미리보기","text":"입력하는 즉시 A4 문서에 그대로 반영됩니다."},{"@type":"HowToStep","position":3,"name":"PDF·PNG 저장","text":"완성된 문서를 PDF·PNG로 저장하거나 인쇄합니다."}]}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"홈","item":"https://formda.kr/"},{"@type":"ListItem","position":2,"name":"취업/자기PR","item":"https://formda.kr/category/job.html"},{"@type":"ListItem","position":3,"name":"경력기술서"}]}</script>

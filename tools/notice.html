@@ -4,15 +4,22 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <script>document.documentElement.classList.add('js')</script>
-<title>가정통신문 만들기 - 준비중 | 폼다</title>
-<meta name="description" content="가정통신문 자동작성 도구는 곧 추가됩니다." />
-<meta name="robots" content="noindex,follow" />
+<title>가정통신문 양식 무료 - 입력하면 바로 완성 PDF | 폼다</title>
+<meta name="description" content="가입 없이 학교·기관명과 안내 내용만 입력하면 가정통신문이 바로 완성됩니다. 회신란·절취선 포함 표준 양식, 직인 첨부, PDF·PNG 다운로드까지 무료. 폼다 가정통신문 만들기." />
+<meta name="keywords" content="가정통신문 양식, 가정통신문 무료, 가정통신문 만들기, 안내문 양식, 가정통신문 PDF, 학교 가정통신문 양식" />
 <link rel="canonical" href="https://formda.kr/tools/notice.html" />
 <meta property="og:type" content="website" />
-<meta property="og:title" content="가정통신문 만들기 - 준비중 | 폼다" />
-<meta property="og:description" content="가정통신문 자동작성 도구는 곧 추가됩니다." />
+<meta property="og:title" content="가정통신문 양식 무료 - 입력하면 바로 완성 PDF | 폼다" />
+<meta property="og:description" content="가입 없이 학교·기관명과 안내 내용만 입력하면 가정통신문이 바로 완성됩니다. 회신란·절취선 포함 표준 양식, 직인 첨부, PDF·PNG 다운로드까지 무료. 폼다 가정통신문 만들기." />
 <meta property="og:url" content="https://formda.kr/tools/notice.html" />
 <meta property="og:site_name" content="폼다" />
+<meta property="og:image" content="https://formda.kr/assets/og.png" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="가정통신문 양식 무료 - 입력하면 바로 완성 PDF | 폼다" />
+<meta name="twitter:description" content="가입 없이 학교·기관명과 안내 내용만 입력하면 가정통신문이 바로 완성됩니다. 회신란·절취선 포함 표준 양식, 직인 첨부, PDF·PNG 다운로드까지 무료. 폼다 가정통신문 만들기." />
+<meta name="twitter:image" content="https://formda.kr/assets/og.png" />
 <link rel="icon" href="/assets/favicon.png" type="image/png" />
 <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png" />
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" />
@@ -23,20 +30,89 @@
   <div class="header-in">
     <a class="logo" href="/"><img class="logo-img" src="/assets/logo.png" alt="폼다" onerror="this.replaceWith(Object.assign(document.createElement('span'),{className:'logo-text',textContent:'폼다'}))"></a>
     <nav class="nav"><a href="/category/business.html">비즈니스</a><a href="/category/job.html">취업</a><a href="/category/life.html" class="on">생활</a><a href="/category/text.html">텍스트</a><a href="/guides/">가이드</a></nav>
-  </div>
-</header>
-<main class="wrap">
-  <div class="crumb"><a href="/">홈</a> › <a href="/category/life.html">생활/행정</a> › 가정통신문</div>
-  <div class="stub-page">
-    <span class="stub-badge">준비중</span>
-    <h1>가정통신문 작성기</h1>
-    <p>가정통신문 자동작성 도구를 준비하고 있어요. 견적서처럼 입력하면 바로 완성되는 가정통신문로 곧 찾아옵니다.</p>
-    <div class="hero-cta" style="justify-content:center">
-      <a class="btn-cta primary" href="/tools/estimate.html">지금은 견적서 만들기</a>
-      <a class="btn-cta ghost" href="/category/life.html">생활/행정 전체 보기</a>
+    <div class="hdr-search">
+      <svg class="hdr-search-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.2-3.2"></path></svg>
+      <input id="site-search" type="search" placeholder="문서 검색" autocomplete="off" aria-label="문서 검색">
+      <div id="search-results" class="search-results" role="listbox"></div>
     </div>
   </div>
+</header>
+
+<main class="wrap">
+  <div class="crumb"><a href="/">홈</a> › <a href="/category/life.html">생활/행정</a> › 가정통신문</div>
+  <h1 class="title">가정통신문 작성기</h1>
+  <p class="subtitle">회사 정보와 품목만 입력하면 가정통신문 PDF·PNG를 바로 만들 수 있습니다. 가입 없이 무료.</p>
+  <div class="trust">🔒 입력 정보는 <b>서버에 저장되지 않고</b> 브라우저에서만 처리됩니다.</div>
+  <div class="steps">
+    <span class="step"><span class="num">1</span>입력</span><span class="arrow">→</span>
+    <span class="step"><span class="num">2</span>실시간 미리보기</span><span class="arrow">→</span>
+    <span class="step"><span class="num">3</span>PDF·PNG 다운로드</span>
+  </div>
+
+  <div class="tabs no-print">
+    <button id="tabInput" class="on" onclick="Formda.app.showPane('input')">입력</button>
+    <button id="tabPreview" onclick="Formda.app.showPane('preview')">미리보기</button>
+  </div>
+
+  <div class="editor">
+  <div class="cols">
+    <section class="pane-input">
+      <div class="pane-head">
+        <span class="pv-label">입력</span>
+        <div class="head-actions no-print">
+          <button class="mini-btn" type="button" onclick="Formda.app.loadSample()">샘플 불러오기</button>
+          <button class="mini-btn danger" type="button" onclick="Formda.app.clearAll()">전체 비우기</button>
+        </div>
+      </div>
+      <div class="form-scroll"><div id="formPanel"><!-- 입력폼: 엔진이 렌더 --></div></div>
+    </section>
+
+    <section class="pane-preview">
+      <div class="pane-head">
+        <span class="pv-label">미리보기</span>
+        <div class="zoom no-print">
+          <button type="button" onclick="Formda.app.zoomOut()" aria-label="축소">−</button>
+          <button type="button" class="zoom-pct" onclick="Formda.app.zoomReset()" aria-label="맞춤"><span id="zoomLabel">100%</span></button>
+          <button type="button" onclick="Formda.app.zoomIn()" aria-label="확대">+</button>
+        </div>
+      </div>
+      <div class="preview-wrap">
+        <div class="doc-viewport" id="doc"><!-- 미리보기: 엔진이 A4 페이지로 렌더 --></div>
+        <div class="actions no-print">
+          <button class="btn btn-ghost" onclick="Formda.app.print()">인쇄</button>
+          <button class="btn btn-ghost" onclick="Formda.app.downloadPNG(this)">PNG 저장</button>
+          <button class="btn btn-primary btn-pdf" onclick="Formda.app.downloadPDF(this)">PDF 다운로드</button>
+        </div>
+      </div>
+    </section>
+  </div>
+  </div>
+
+  <section class="guide" style="--accent:#0891b2">
+    <h2 class="guide-title">가정통신문 작성 가이드</h2>
+    <p class="guide-lead">가정통신문은 학교나 기관이 학부모나 구성원에게 안내 사항을 전달하는 공식 문서입니다. 행사 일정, 준비물, 비용, 동의 여부처럼 가정에서 확인하고 회신해야 할 내용을 담습니다. 정해진 법정 양식은 없지만 기관명과 제목, 안내 본문, 발행일과 발신자, 그리고 학부모가 확인했음을 회신하는 회신란이 들어가는 것이 일반적입니다. 폼다 가정통신문 만들기는 안내 내용만 입력하면 절취선과 회신란이 포함된 표준 양식을 한 장으로 완성합니다.</p>
+    <div class="guide-cards">
+      <article class="g-card"><div class="g-card-head"><span class="g-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="4.5" y="3" width="15" height="18" rx="2.5"/><path d="m7.5 9 1.4 1.4L11.4 8"/><path d="M13.5 9.2h3"/><path d="m7.5 15 1.4 1.4 2.5-2.4"/><path d="M13.5 15.2h3"/></svg></span><h3>가정통신문 필수 기재 항목</h3></div>
+<p>받는 사람이 한눈에 이해하고 회신할 수 있도록 아래 항목을 갖추는 것이 좋습니다.</p><div class="tbl-scroll"><table class="g-table"><thead><tr><th>항목</th><th>내용</th></tr></thead><tbody><tr><td>기관명</td><td>학교·기관명, 통신문 번호</td></tr><tr><td>제목</td><td>안내 주제(예: 현장체험학습 안내)</td></tr><tr><td>안내 본문</td><td>일시·장소·대상·준비물·비용·연락처</td></tr><tr><td>발행일·발신</td><td>발행 날짜와 발신자(학교장 등), 직인</td></tr><tr><td>회신란</td><td>절취선 아래 확인·동의 서명란</td></tr></tbody></table></div></article>
+<article class="g-card"><div class="g-card-head"><span class="g-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 18.5h5"/><path d="M10.2 21.5h3.6"/><path d="M12 2.5a6.3 6.3 0 0 0-3.9 11.3c.7.6 1 1.2 1 2.2h5.8c0-1 .3-1.6 1-2.2A6.3 6.3 0 0 0 12 2.5z"/></svg></span><h3>안내 본문은 항목별로 정리합니다</h3></div>
+<p>안내 내용은 줄글로 길게 쓰기보다 번호를 매겨 항목별로 정리하면 학부모가 빠르게 확인할 수 있습니다. 행사 안내라면 일시, 장소, 대상, 준비물, 비용을 번호로 나누고, 마지막에 문의처를 적습니다. 동의가 필요한 내용은 회신란을 통해 확인 서명을 받으면 됩니다. 폼다는 절취선과 회신란(학년·반·학생 이름·학부모 서명)을 자동으로 넣어 줍니다.</p></article>
+<article class="g-card"><div class="g-card-head"><span class="g-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="4.5" y="3" width="15" height="18" rx="2.5"/><path d="m7.5 9 1.4 1.4L11.4 8"/><path d="M13.5 9.2h3"/><path d="m7.5 15 1.4 1.4 2.5-2.4"/><path d="M13.5 15.2h3"/></svg></span><h3>이런 안내에 자주 씁니다</h3></div>
+<p>가정통신문은 가정의 확인이나 동의가 필요한 다양한 안내에 쓰입니다. 동의·신청이 필요하면 회신란을, 단순 공지면 안내만 보내면 됩니다.</p><div class="tbl-scroll"><table class="g-table"><thead><tr><th>상황</th><th>회신란</th></tr></thead><tbody><tr><td>현장체험학습·수련활동 동의</td><td>필요</td></tr><tr><td>방과후·돌봄교실 신청</td><td>필요</td></tr><tr><td>학부모 상담주간 신청</td><td>필요</td></tr><tr><td>방학·개학 일정 안내</td><td>대개 불필요</td></tr><tr><td>준비물·행사 공지</td><td>대개 불필요</td></tr></tbody></table></div></article>
+      <article class="g-card g-faq"><div class="g-card-head"><span class="g-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9.6 9.4a2.5 2.5 0 0 1 4.3 1.7c0 1.6-2.4 1.9-2.4 3.4"/><path d="M11.5 17.4h.02"/></svg></span><h3>자주 묻는 질문</h3></div><div class="g-faq-item"><p class="faq-q">Q. 회신란과 절취선은 꼭 필요한가요?</p><p>동의나 확인이 필요한 안내라면 회신란이 유용합니다. 학부모가 내용을 확인했음을 서명으로 받아 두면 전달 여부를 분명히 할 수 있습니다. 단순 공지라면 회신란 없이 안내만 보내도 됩니다. 폼다는 기본적으로 절취선과 회신란을 넣어 주며, 안내 성격에 맞게 활용하면 됩니다.</p></div>
+<div class="g-faq-item"><p class="faq-q">Q. 여러 학년·반에 보낼 때는 어떻게 하나요?</p><p>대상이나 일정이 다르면 학년·반별로 내용을 바꿔 따로 만드는 것이 명확합니다. 공통 안내는 같은 본문을 두고 대상·일시만 수정해 학년별로 PDF를 각각 저장하면 됩니다. 폼다는 입력만 바꾸면 즉시 새 통신문이 완성되므로 여러 버전을 빠르게 만들 수 있습니다.</p></div>
+<div class="g-faq-item"><p class="faq-q">Q. 직인이 꼭 들어가야 하나요?</p><p>공식 가정통신문은 발신기관의 직인이나 기관장 도장을 넣어 발송하는 경우가 많습니다. 직인이 있으면 공식 안내문으로서 신뢰를 줍니다. 폼다에서는 직인 이미지를 올리면 발신자 이름 옆에 바로 반영되므로, 인쇄해서 찍지 않아도 날인된 가정통신문을 만들 수 있습니다.</p></div>
+<div class="g-faq-item"><p class="faq-q">Q. 작성한 가정통신문은 저장되나요?</p><p>폼다는 입력 내용을 서버로 전송하거나 저장하지 않습니다. 모든 처리는 사용자 브라우저 안에서만 이루어지며, PDF·PNG로 내려받은 파일만 기기에 남습니다. 학생·학부모 정보가 외부로 나가지 않으므로 안심하고 만들 수 있습니다.</p></div></article>
+    </div>
+    <div class="sibling-section"><div class="sibling-title">관련 문서 도구</div><div class="sibling-list"><a class="sibling-link" href="/tools/award.html">상장·표창장</a><a class="sibling-link" href="/category/life.html">생활/행정 전체 ›</a></div></div>
+  </section>
 </main>
+
+<!-- 모바일 하단 고정 다운로드 바 -->
+<div class="mobile-bar no-print">
+  <button class="btn btn-ghost" onclick="Formda.app.downloadPNG(this)">PNG</button>
+  <button class="btn btn-primary btn-pdf" onclick="Formda.app.downloadPDF(this)">PDF 다운로드</button>
+</div>
+
 <footer class="footer">
   <div class="footer-in">
     <div class="footer-links"><a href="/">홈</a><a href="/guides/">가이드</a><a href="/pages/about.html">소개</a><a href="/pages/terms.html">이용약관</a><a href="/pages/privacy.html">개인정보처리방침</a><a href="/pages/contact.html">문의</a></div>
@@ -44,5 +120,20 @@
     <div class="footer-copy">© 폼다 · 입력하면 바로 완성되는 무료 문서 도구</div>
   </div>
 </footer>
+<script src="/search-index.js" defer></script>
+<script src="/engine/search.js" defer></script>
 </body>
 </html>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script>window.FORMDA_TOOL = {"slug":"notice","docType":"notice","doc":{"docTitle":"가 정 통 신 문","fileName":"가정통신문","showSeal":true,"reply":true},"sample":{"date":"today","orgName":"○○초등학교","docNo":"2026-15","title":"현장체험학습 안내","body":"안녕하십니까. 학부모님의 가정에 건강과 행복이 가득하시기를 기원합니다.\n\n우리 학교에서는 학생들의 체험 학습을 위해 아래와 같이 현장체험학습을 실시하고자 합니다. 학부모님의 많은 관심과 협조를 부탁드립니다.\n\n1. 일　시 : 2026년 7월 10일(금) 09:00 ~ 16:00\n2. 장　소 : 국립과학관\n3. 대　상 : 3학년 전체\n4. 준비물 : 도시락, 물, 필기구\n5. 참가비 : 15,000원 (현장체험학습비)\n\n자세한 사항은 담임 선생님께 문의해 주시기 바랍니다. 감사합니다.","sender":"○○초등학교장","reply":"위 현장체험학습 안내 내용을 확인하였습니다."}};</script>
+<script src="/engine/calc.js"></script>
+<script src="/engine/doc-render.js"></script>
+<script src="/engine/form-engine.js"></script>
+<script src="/engine/export.js"></script>
+<script src="/engine/app.js"></script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"회신란과 절취선은 꼭 필요한가요?","acceptedAnswer":{"@type":"Answer","text":"동의나 확인이 필요한 안내라면 회신란이 유용합니다. 학부모가 내용을 확인했음을 서명으로 받아 두면 전달 여부를 분명히 할 수 있습니다. 단순 공지라면 회신란 없이 안내만 보내도 됩니다. 폼다는 기본적으로 절취선과 회신란을 넣어 주며, 안내 성격에 맞게 활용하면 됩니다."}},{"@type":"Question","name":"여러 학년·반에 보낼 때는 어떻게 하나요?","acceptedAnswer":{"@type":"Answer","text":"대상이나 일정이 다르면 학년·반별로 내용을 바꿔 따로 만드는 것이 명확합니다. 공통 안내는 같은 본문을 두고 대상·일시만 수정해 학년별로 PDF를 각각 저장하면 됩니다. 폼다는 입력만 바꾸면 즉시 새 통신문이 완성되므로 여러 버전을 빠르게 만들 수 있습니다."}},{"@type":"Question","name":"직인이 꼭 들어가야 하나요?","acceptedAnswer":{"@type":"Answer","text":"공식 가정통신문은 발신기관의 직인이나 기관장 도장을 넣어 발송하는 경우가 많습니다. 직인이 있으면 공식 안내문으로서 신뢰를 줍니다. 폼다에서는 직인 이미지를 올리면 발신자 이름 옆에 바로 반영되므로, 인쇄해서 찍지 않아도 날인된 가정통신문을 만들 수 있습니다."}},{"@type":"Question","name":"작성한 가정통신문은 저장되나요?","acceptedAnswer":{"@type":"Answer","text":"폼다는 입력 내용을 서버로 전송하거나 저장하지 않습니다. 모든 처리는 사용자 브라우저 안에서만 이루어지며, PDF·PNG로 내려받은 파일만 기기에 남습니다. 학생·학부모 정보가 외부로 나가지 않으므로 안심하고 만들 수 있습니다."}}]}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"폼다 가정통신문 작성기","url":"https://formda.kr/tools/notice.html","applicationCategory":"BusinessApplication","operatingSystem":"All","inLanguage":"ko","description":"가입 없이 학교·기관명과 안내 내용만 입력하면 가정통신문이 바로 완성됩니다. 회신란·절취선 포함 표준 양식, 직인 첨부, PDF·PNG 다운로드까지 무료. 폼다 가정통신문 만들기.","offers":{"@type":"Offer","price":"0","priceCurrency":"KRW"},"publisher":{"@type":"Organization","name":"폼다","url":"https://formda.kr/"}}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"HowTo","name":"가정통신문 만드는 방법","inLanguage":"ko","step":[{"@type":"HowToStep","position":1,"name":"정보 입력","text":"회사 정보와 품목·금액을 입력합니다."},{"@type":"HowToStep","position":2,"name":"실시간 미리보기","text":"입력하는 즉시 A4 문서에 그대로 반영됩니다."},{"@type":"HowToStep","position":3,"name":"PDF·PNG 저장","text":"완성된 문서를 PDF·PNG로 저장하거나 인쇄합니다."}]}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"홈","item":"https://formda.kr/"},{"@type":"ListItem","position":2,"name":"생활/행정","item":"https://formda.kr/category/life.html"},{"@type":"ListItem","position":3,"name":"가정통신문"}]}</script>

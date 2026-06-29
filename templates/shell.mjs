@@ -23,6 +23,13 @@ ${robots ? `<meta name="robots" content="${robots}" />\n` : ''}${keywords ? `<me
 <meta property="og:description" content="${escAttr(description || site.description)}" />
 <meta property="og:url" content="${site.domain}${canonical}" />
 <meta property="og:site_name" content="${site.name}" />
+<meta property="og:image" content="${site.domain}/assets/og.png" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="${escAttr(title)}" />
+<meta name="twitter:description" content="${escAttr(description || site.description)}" />
+<meta name="twitter:image" content="${site.domain}/assets/og.png" />
 <link rel="icon" href="/assets/favicon.png" type="image/png" />
 <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png" />
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" />
@@ -39,6 +46,11 @@ export function header(activeCat) {
   <div class="header-in">
     <a class="logo" href="/"><img class="logo-img" src="/assets/logo.png" alt="폼다" onerror="this.replaceWith(Object.assign(document.createElement('span'),{className:'logo-text',textContent:'폼다'}))"></a>
     <nav class="nav">${nav}</nav>
+    <div class="hdr-search">
+      <svg class="hdr-search-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.2-3.2"></path></svg>
+      <input id="site-search" type="search" placeholder="문서 검색" autocomplete="off" aria-label="문서 검색">
+      <div id="search-results" class="search-results" role="listbox"></div>
+    </div>
   </div>
 </header>`;
 }
@@ -54,6 +66,8 @@ export function footer() {
     <div class="footer-copy">© ${site.name} · ${site.tagline}</div>
   </div>
 </footer>
+<script src="/search-index.js" defer></script>
+<script src="/engine/search.js" defer></script>
 </body>
 </html>`;
 }

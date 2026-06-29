@@ -4,8 +4,9 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import vm from 'node:vm';
 
-import { site, categories, tools } from '../data/registry.js';
+import { site, categories, tools, categoryBySlug } from '../data/registry.js';
 import { guides } from '../data/guides.js';
+import { svg } from '../templates/icons.mjs';
 import { toolPage, stubToolPage } from '../templates/tool-page.mjs';
 import { textToolPage, textThumb } from '../templates/text-tool-page.mjs';
 import { guidePage, guidesIndexPage } from '../templates/guide-page.mjs';
@@ -85,6 +86,20 @@ out('guides/index.html', guidesIndexPage(guides));
 for (const g of guides) {
   out(`guides/${g.slug}.html`, guidePage(g));
 }
+
+console.log('[검색] 인덱스');
+// 헤더 검색용 인덱스 (모든 페이지에서 로드). 도구명·키워드·예시·카테고리를 한 문자열로 합쳐 부분일치 검색.
+const searchIndex = tools.filter((t) => !t.stub).map((t) => ({
+  slug: t.slug,
+  t: t.navTitle,
+  c: (categoryBySlug[t.category] || {}).label || '',
+  d: t.use || t.summary || '',
+  ac: t.accent || '#4f46e5',
+  svg: svg(t.icon),
+  k: [t.navTitle, t.title, (t.keywords || []).join(' '), t.example || '', t.summary || '', (categoryBySlug[t.category] || {}).label || '']
+    .join(' ').toLowerCase(),
+}));
+out('search-index.js', 'window.Formda=window.Formda||{};window.Formda.searchIndex=' + JSON.stringify(searchIndex) + ';');
 
 console.log('[6/6] sitemap + robots');
 const urls = [

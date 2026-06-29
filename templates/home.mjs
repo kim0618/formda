@@ -42,9 +42,20 @@ ${header('')}
 </section>
 
 <main class="wrap">
-  <!-- 자주 쓰는 문서: 사용 가능한 도구 균일 그리드 (히어로가 대표 견적서를 이미 강조) -->
-  <div class="section-h reveal" id="tools">자주 쓰는 문서</div>
-  <div class="grid reveal">${live.map((t) => liveCard(t, thumbs)).join('')}</div>
+  <!-- 자주 쓰는 문서: 카테고리 고르게 인기 6종만 큐레이션 (전체 목록은 아래 카테고리 섹션) -->
+  <div class="home-sec-head reveal" id="tools">
+    <h2 class="section-h">자주 쓰는 문서</h2>
+    <a class="sec-more" href="#cats">전체 보기 →</a>
+  </div>
+  <div class="grid reveal">${popularTools(live).map((t) => liveCard(t, thumbs)).join('')}</div>
+
+  <!-- 카테고리: 인기 바로 아래에서 전체 탐색 이어가기 -->
+  <section class="home-sec reveal" id="cats">
+    <div class="home-sec-head">
+      <h2 class="home-sec-h">어떤 문서가 필요하세요?</h2>
+    </div>
+    <div class="cat-list">${categories.map(catRow).join('')}</div>
+  </section>
 
   <!-- 3단계 -->
   <section class="home-sec reveal">
@@ -67,15 +78,6 @@ ${header('')}
       <div class="why-item"><b>입력 정보 서버 저장 없음</b><p>작성 내용은 서버로 전송되지 않고 브라우저에서만 처리됩니다.</p></div>
       <div class="why-item"><b>모바일에서도 사용</b><p>PC뿐 아니라 모바일에서도 문서를 만들고 저장할 수 있습니다.</p></div>
     </div>
-  </section>
-
-  <!-- 카테고리 (텍스트형, 준비중은 작게) -->
-  <section class="home-sec reveal">
-    <div class="home-sec-head">
-      <h2 class="home-sec-h">어떤 문서가 필요하세요?</h2>
-      <div class="cat-legend"><span class="lg lg-live">바로 사용 가능</span><span class="lg lg-soon">곧 준비 중</span></div>
-    </div>
-    <div class="cat-list">${categories.map(catRow).join('')}</div>
   </section>
 
   <!-- 가이드 -->
@@ -124,6 +126,22 @@ export function featureCard(t, doc) {
       <span class="btn-cta primary">바로 만들기 →</span>
     </div>
   </a>`;
+}
+
+// 홈 상단 "자주 쓰는 문서" 큐레이션 - 4개 카테고리를 고르게 대표하는 인기 6종.
+// (전체 목록은 아래 "어떤 문서가 필요하세요?" 카테고리 섹션이 담당)
+const POPULAR_SLUGS = ['estimate', 'receipt', 'resume', 'char-count', 'business-card'];
+function popularTools(live) {
+  const bySlug = Object.fromEntries(live.map((t) => [t.slug, t]));
+  const picked = POPULAR_SLUGS.map((s) => bySlug[s]).filter(Boolean);
+  // 큐레이션 슬러그가 비거나 빠져도 최소 5종은 채워서 빈 그리드 방지
+  if (picked.length < 5) {
+    for (const t of live) {
+      if (picked.length >= 5) break;
+      if (!picked.includes(t)) picked.push(t);
+    }
+  }
+  return picked.slice(0, 5);
 }
 
 // 추가 라이브 도구 카드 (대표 카드 아래 그리드; 견적서 외 도구가 생기면 자동 노출)

@@ -220,6 +220,59 @@
       render();
     },
 
+    // QR코드 생성 (qrcodejs 라이브러리 사용, QR 페이지에서만 로드)
+    qr: function (host, sample) {
+      host.innerHTML =
+        '<div class="tt-wrap stack">' +
+          '<div class="tt-main">' +
+            '<div class="tt-bar"><span class="tt-bar-label">URL 또는 텍스트</span>' +
+              '<div class="tt-actions"><button class="mini-btn" data-act="sample">샘플</button><button class="mini-btn danger" data-act="clear">비우기</button></div></div>' +
+            '<textarea id="ttIn" class="tt-input short" placeholder="https://... 또는 담을 텍스트를 입력하세요."></textarea>' +
+            '<div class="tt-opt-row" style="margin-top:12px">' +
+              '<label class="tt-chip"><input type="radio" name="qrsize" value="200">작게</label>' +
+              '<label class="tt-chip"><input type="radio" name="qrsize" value="280" checked>보통</label>' +
+              '<label class="tt-chip"><input type="radio" name="qrsize" value="400">크게</label>' +
+            '</div>' +
+            '<p class="tt-hint">생성된 QR은 정적 코드라 만료되지 않습니다. PNG로 저장해 인쇄물·화면 어디에나 쓸 수 있습니다.</p>' +
+          '</div>' +
+          '<div class="tt-side">' +
+            '<div class="qr-out" id="qrOut"></div>' +
+            '<button class="mini-btn qr-dl" id="qrDl" data-act="download" style="display:none">PNG 저장</button>' +
+          '</div>' +
+        '</div>';
+      var ta = host.querySelector('#ttIn'), out = host.querySelector('#qrOut'), dl = host.querySelector('#qrDl');
+      function render() {
+        out.innerHTML = '';
+        var v = ta.value.trim();
+        if (!v) { dl.style.display = 'none'; out.innerHTML = '<div class="tt-empty">URL이나 텍스트를 입력하면 QR코드가 생성됩니다.</div>'; return; }
+        if (typeof QRCode === 'undefined') { out.innerHTML = '<div class="tt-empty">QR 생성기를 불러오는 중입니다. 잠시 후 다시 시도하세요.</div>'; return; }
+        var size = +(((host.querySelector('input[name=qrsize]:checked')) || {}).value) || 280;
+        // UTF-8 바이트 길이 (한글 3바이트). 보정레벨 M 기준 약 2,300바이트가 한계 → 넘으면 라이브러리가 에러
+        var bytes = (typeof Blob !== 'undefined') ? new Blob([v]).size : v.length;
+        try {
+          new QRCode(out, { text: v, width: size, height: size, colorDark: '#111111', colorLight: '#ffffff', correctLevel: QRCode.CorrectLevel.M });
+          dl.style.display = '';
+        } catch (e) {
+          out.innerHTML = '<div class="tt-empty">내용이 너무 깁니다 (' + bytes.toLocaleString('ko-KR') + '바이트). QR코드 용량을 넘었으니 글자 수를 줄여 주세요. 긴 내용은 링크로 만들어 그 주소를 넣는 것이 좋습니다.</div>';
+          dl.style.display = 'none';
+        }
+      }
+      ta.addEventListener('input', render);
+      Array.prototype.forEach.call(host.querySelectorAll('input[name=qrsize]'), function (el) { el.addEventListener('change', render); });
+      host.querySelector('[data-act=sample]').addEventListener('click', function () { ta.value = sample.text || 'https://formda.kr'; render(); });
+      host.querySelector('[data-act=clear]').addEventListener('click', function () { ta.value = ''; render(); ta.focus(); });
+      dl.addEventListener('click', function () {
+        var c = out.querySelector('canvas');
+        var url = c ? c.toDataURL('image/png') : (out.querySelector('img') || {}).src;
+        if (!url) return;
+        var a = document.createElement('a'); a.href = url; a.download = 'qrcode.png';
+        document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      });
+      // 라이브러리가 늦게 로드될 수 있어 한 번 더 시도
+      if (typeof QRCode === 'undefined') window.addEventListener('load', render);
+      render();
+    },
+
     // 텍스트 정렬·정리
     align: function (host, sample) {
       host.innerHTML =
@@ -256,7 +309,7 @@
         var lines = ta.value.split(/\r\n|\r|\n/);
         if (op('trim')) lines = lines.map(function (l) { return l.trim(); });
         if (op('blank')) lines = lines.filter(function (l) { return l.trim() !== ''; });
-        if (op('dedup')) { var seen = {}; lines = lines.filter(function (l) { if (seen[l]) return false; seen[l] = 1; return true; }); }
+        if (op('dedup')) { var seen = Object.create(null); lines = lines.filter(function (l) { if (seen[l]) return false; seen[l] = 1; return true; }); }
         var sort = (host.querySelector('input[name=ttsort]:checked') || {}).value;
         if (sort === 'asc') lines.sort(function (a, b) { return a.localeCompare(b, 'ko'); });
         else if (sort === 'desc') lines.sort(function (a, b) { return b.localeCompare(a, 'ko'); });

@@ -13,6 +13,13 @@
 <meta property="og:description" content="한글 이름을 국립국어원 로마자 표기법으로 변환하고 여권에서 많이 쓰는 성씨 표기까지 보여 줍니다. 가입 없이 무료. 폼다 영문이름 변환기." />
 <meta property="og:url" content="https://formda.kr/tools/name-roman.html" />
 <meta property="og:site_name" content="폼다" />
+<meta property="og:image" content="https://formda.kr/assets/og.png" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="영문이름 변환 - 한글 이름 여권 로마자 표기 변환 | 폼다" />
+<meta name="twitter:description" content="한글 이름을 국립국어원 로마자 표기법으로 변환하고 여권에서 많이 쓰는 성씨 표기까지 보여 줍니다. 가입 없이 무료. 폼다 영문이름 변환기." />
+<meta name="twitter:image" content="https://formda.kr/assets/og.png" />
 <link rel="icon" href="/assets/favicon.png" type="image/png" />
 <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png" />
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" />
@@ -23,6 +30,11 @@
   <div class="header-in">
     <a class="logo" href="/"><img class="logo-img" src="/assets/logo.png" alt="폼다" onerror="this.replaceWith(Object.assign(document.createElement('span'),{className:'logo-text',textContent:'폼다'}))"></a>
     <nav class="nav"><a href="/category/business.html">비즈니스</a><a href="/category/job.html">취업</a><a href="/category/life.html">생활</a><a href="/category/text.html" class="on">텍스트</a><a href="/guides/">가이드</a></nav>
+    <div class="hdr-search">
+      <svg class="hdr-search-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.2-3.2"></path></svg>
+      <input id="site-search" type="search" placeholder="문서 검색" autocomplete="off" aria-label="문서 검색">
+      <div id="search-results" class="search-results" role="listbox"></div>
+    </div>
   </div>
 </header>
 
@@ -64,8 +76,11 @@
     <div class="footer-copy">© 폼다 · 입력하면 바로 완성되는 무료 문서 도구</div>
   </div>
 </footer>
+<script src="/search-index.js" defer></script>
+<script src="/engine/search.js" defer></script>
 </body>
 </html>
+
 
 <script>window.FORMDA_TEXT_TOOL = {"slug":"name-roman","kind":"roman-name","sample":{"surname":"홍","given":"길동"}};</script>
 <script src="/engine/text-engine.js"></script>

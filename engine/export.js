@@ -36,13 +36,16 @@
     });
   }
 
-  async function downloadPDF(fileName, btn) {
+  async function downloadPDF(fileName, btn, pageSize) {
     var label = btn ? btn.textContent : '';
     if (btn) { btn.textContent = 'PDF 생성 중...'; btn.disabled = true; }
     try {
       await withFullScale(async function () {
         var jsPDF = window.jspdf.jsPDF;
-        var pdf = new jsPDF('p', 'mm', 'a4');
+        // pageSize [w,h](mm) 지정 시 그 크기로(명함 등), 없으면 A4
+        var pdf = pageSize
+          ? new jsPDF({ orientation: pageSize[0] >= pageSize[1] ? 'l' : 'p', unit: 'mm', format: pageSize })
+          : new jsPDF('p', 'mm', 'a4');
         var pw = pdf.internal.pageSize.getWidth();
         var ph = pdf.internal.pageSize.getHeight();
         var els = pageEls();
