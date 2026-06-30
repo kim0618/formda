@@ -152,18 +152,19 @@ function guideHTML(tool) {
 }
 
 function relatedHTML(tool) {
-  const pills = (tool.related || [])
+  const cat = categoryBySlug[tool.category];
+  const toolPills = (tool.related || [])
     .map((slug) => toolsBySlug[slug])
     .filter(Boolean) // 아직 없는 도구는 죽은 링크 방지 위해 제외
     .map((t) => `<a class="sibling-link" href="/tools/${t.slug}.html">${t.navTitle}</a>`);
-  const cat = categoryBySlug[tool.category];
-  pills.push(`<a class="sibling-link" href="/category/${cat.slug}.html">${cat.label} 전체 ›</a>`);
+  toolPills.push(`<a class="sibling-link" href="/category/${cat.slug}.html">${cat.label} 전체 ›</a>`);
   // 도구 → 관련 가이드 내부링크
   const guidePills = (guidesByTool[tool.slug] || [])
-    .map((g) => `<a class="sibling-link guide" href="/guides/${g.slug}.html">${g.navTitle || g.title}</a>`);
-  const guideBlock = guidePills.length
-    ? `<div class="sibling-title mt">관련 가이드</div><div class="sibling-list">${guidePills.join('')}</div>` : '';
-  return `<div class="sibling-section"><div class="sibling-title">관련 문서 도구</div><div class="sibling-list">${pills.join('')}</div>${guideBlock}</div>`;
+    .map((g) => `<a class="sibling-link" href="/guides/${g.slug}.html">${g.navTitle || g.title}</a>`);
+  const group = (title, items) => items.length
+    ? `<div class="sibling-group"><div class="sibling-title">${title}</div><div class="sibling-list">${items.join('')}</div></div>`
+    : '';
+  return `<div class="sibling-section">${group('관련 문서 도구', toolPills)}${group('관련 가이드', guidePills)}</div>`;
 }
 
 // 구조화 데이터 (SEO 리치결과 + GEO/AI 인용): FAQ · WebApplication(무료) · HowTo · Breadcrumb

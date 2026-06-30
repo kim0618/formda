@@ -90,7 +90,7 @@ ${header('')}
   </section>
 </main>
 
-<script src="/engine/thumb.js"></script>
+<script src="/engine/thumb.js?v=2"></script>
 <script src="/engine/reveal.js"></script>
 <script type="application/ld+json">${JSON.stringify({ '@context': 'https://schema.org', '@type': 'WebSite', name: site.name, url: site.domain + '/', inLanguage: 'ko', description: site.description })}</script>
 <script type="application/ld+json">${JSON.stringify({ '@context': 'https://schema.org', '@type': 'Organization', name: site.name, url: site.domain + '/', logo: site.domain + '/assets/logo.png' })}</script>

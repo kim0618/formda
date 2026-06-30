@@ -185,7 +185,7 @@
   }
 
   // .doc-fit = 자동 맞춤 대상(내용이 A4 높이 넘으면 app.fitDoc이 축소)
-  function pageEl(inner, cls) { return '<div class="doc-page' + (cls ? ' ' + cls : '') + '"><div class="doc-fit">' + inner + '</div></div>'; }
+  function pageEl(inner, cls) { return '<div class="doc-page' + (cls ? ' ' + cls : '') + '"><div class="doc-fit">' + inner + '</div><div class="doc-wm" aria-hidden="true"></div><div class="doc-url" aria-hidden="true">formda.kr · 무료 문서 작성</div></div>'; }
 
   function wrap(inner, opts, cls) {
     return opts.single ? pageEl(inner, cls) : '<div class="doc-pages">' + pageEl(inner, cls) + '</div>';

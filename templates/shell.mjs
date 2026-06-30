@@ -14,7 +14,7 @@ export function head({ title, description, canonical, keywords, robots }) {
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<script>document.documentElement.classList.add('js')</script>
+<script>document.documentElement.classList.add('js');if('scrollRestoration'in history)history.scrollRestoration='manual'</script>
 <title>${title}</title>
 <meta name="description" content="${escAttr(description || site.description)}" />
 ${robots ? `<meta name="robots" content="${robots}" />\n` : ''}${keywords ? `<meta name="keywords" content="${escAttr(keywords)}" />\n` : ''}<link rel="canonical" href="${site.domain}${canonical}" />

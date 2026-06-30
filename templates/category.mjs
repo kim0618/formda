@@ -3,6 +3,7 @@
 import { head, header, footer } from './shell.mjs';
 import { svg } from './icons.mjs';
 import { site, tools } from '../data/registry.js';
+import { guides } from '../data/guides.js';
 
 // 받침 유무로 조사 선택 (을/를, 은/는)
 function josa(word, withBatchim, withoutBatchim) {
@@ -32,7 +33,7 @@ export function categoryPage(cat, thumbs = {}) {
   const suffix = cat.slug === 'text' ? '' : ' 작성기';
 
   const badges = [
-    live.length ? `${live[0].navTitle} 사용 가능` : '곧 출시',
+    live.length ? `${live.length}종 바로 사용` : '곧 출시',
     '무료',
     'PDF·PNG 저장',
     '서버 저장 없음',
@@ -46,7 +47,7 @@ export function categoryPage(cat, thumbs = {}) {
   // 사용 가능 = 균일한 그리드 카드 (도구가 늘어도 깔끔하게 확장)
   const liveSection = live.length
     ? `<section class="home-sec" style="margin-top:40px">
-        <h2 class="home-sec-h">지금 사용 가능한 도구</h2>
+        <h2 class="home-sec-h">${planned.length ? '지금 사용 가능한 도구' : (cat.slug === 'text' ? '텍스트 도구' : '문서 작성기')}</h2>
         <div class="grid cat-grid">${live.map((t) => `
           <a class="tool-card" href="/tools/${t.slug}.html" style="--accent:${t.accent || '#4f46e5'}">
             <div class="thumb"><div class="thumb-doc">${thumbs[t.slug] || ''}</div></div>
@@ -70,8 +71,16 @@ export function categoryPage(cat, thumbs = {}) {
       </section>`
     : '';
 
-  const guide = inCat.map((t) =>
-    `<div class="dg-item"><b>${t.navTitle}</b><p>${t.use || ''}</p>${t.example ? `<span class="dg-ex">예: ${t.example}</span>` : ''}</div>`).join('');
+  // 카드(위)는 '만들기'(작성기)로, 이 선택 섹션은 '작성법 가이드'로 (역할 분리). 콤팩트 카드 그리드.
+  const guide = inCat.map((t) => {
+    const g = guides.find((x) => x.tool === t.slug && x.slug.startsWith('how-to')) || guides.find((x) => x.tool === t.slug);
+    const href = g ? `/guides/${g.slug}.html` : `/tools/${t.slug}.html`;
+    const pick = g ? `${t.navTitle} 가이드` : `${t.navTitle}${suffix}`;
+    return `<a class="dg-item" href="${href}" style="--accent:${t.accent || '#4f46e5'}">
+      <span class="dg-when">${t.example || t.use || ''}</span>
+      <span class="dg-pick"><span class="dg-pick-ic">${svg(t.icon)}</span>${pick} →</span>
+    </a>`;
+  }).join('');
 
   const cf = cat.faq || FAQ;
   const catSections = (cat.sections || []).map((s) =>
@@ -112,14 +121,14 @@ ${header(cat.slug)}
   ${soonSection}
 
   <section class="home-sec">
-    <h2 class="home-sec-h">어떤 문서를 써야 할까요?</h2>
+    <h2 class="home-sec-h">이럴 때 어떤 문서를 쓰나요?</h2>
     <div class="doc-guide">${guide}</div>
   </section>
 
   ${catGuide}
 </main>
 
-<script src="/engine/thumb.js"></script>
+<script src="/engine/thumb.js?v=2"></script>
 <script type="application/ld+json">${JSON.stringify(faqLd)}</script>
 <script type="application/ld+json">${JSON.stringify({ '@context': 'https://schema.org', '@type': 'BreadcrumbList', itemListElement: [{ '@type': 'ListItem', position: 1, name: '홈', item: site.domain + '/' }, { '@type': 'ListItem', position: 2, name: cat.label }] })}</script>
 ${footer()}

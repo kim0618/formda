@@ -2,6 +2,7 @@
 import { head, header, footer, trustBadge } from './shell.mjs';
 import { svg } from './icons.mjs';
 import { site, categoryBySlug, toolsBySlug } from '../data/registry.js';
+import { guidesByTool } from '../data/guides.js';
 
 export function textToolPage(tool) {
   const cat = categoryBySlug[tool.category];
@@ -38,7 +39,7 @@ export function textThumb(tool) {
   const a = tool.accent || '#4f46e5';
   const body = {
     'char-count':
-      '<div class="ttt-lines"><i></i><i></i><i style="width:78%"></i><i></i><i style="width:54%"></i></div>' +
+      '<div class="ttt-lines"><i></i><i style="width:78%"></i><i style="width:54%"></i></div>' +
       '<div class="ttt-big"><span class="n">1,248</span><span class="u">글자</span></div>',
     'name-roman':
       '<div class="ttt-io"><div class="ttt-ko">홍길동</div><div class="ttt-arrow">↓</div><div class="ttt-en">Hong Gildong</div></div>',
@@ -93,11 +94,16 @@ function guideHTML(tool) {
 }
 
 function relatedHTML(tool) {
-  const pills = (tool.related || []).map((slug) => toolsBySlug[slug]).filter(Boolean)
-    .map((t) => `<a class="sibling-link" href="/tools/${t.slug}.html">${t.navTitle}</a>`);
   const cat = categoryBySlug[tool.category];
-  pills.push(`<a class="sibling-link" href="/category/${cat.slug}.html">${cat.label} 전체 ›</a>`);
-  return `<div class="sibling-section"><div class="sibling-title">관련 도구</div><div class="sibling-list">${pills.join('')}</div></div>`;
+  const toolPills = (tool.related || []).map((slug) => toolsBySlug[slug]).filter(Boolean)
+    .map((t) => `<a class="sibling-link" href="/tools/${t.slug}.html">${t.navTitle}</a>`);
+  toolPills.push(`<a class="sibling-link" href="/category/${cat.slug}.html">${cat.label} 전체 ›</a>`);
+  const guidePills = (guidesByTool[tool.slug] || [])
+    .map((g) => `<a class="sibling-link" href="/guides/${g.slug}.html">${g.navTitle || g.title}</a>`);
+  const group = (title, items) => items.length
+    ? `<div class="sibling-group"><div class="sibling-title">${title}</div><div class="sibling-list">${items.join('')}</div></div>`
+    : '';
+  return `<div class="sibling-section">${group('관련 도구', toolPills)}${group('관련 가이드', guidePills)}</div>`;
 }
 
 function jsonLd(tool) {

@@ -18,8 +18,10 @@
     var pages = document.querySelector('#doc .doc-pages');
     var prev = pages ? pages.style.transform : '';
     if (pages) pages.style.transform = 'none';
+    var doc = document.getElementById('doc');
+    if (doc) doc.classList.add('exporting'); // 도장 미등록 시 '(인)' 플레이스홀더를 캡처에서 제외
     try { return await fn(); }
-    finally { if (pages) pages.style.transform = prev; }
+    finally { if (pages) pages.style.transform = prev; if (doc) doc.classList.remove('exporting'); }
   }
 
   // 캡처 배율 = 선명도. A4 794px 기준 3배 ≈ 약 216DPI (화면 DPR이 더 높으면 그만큼).

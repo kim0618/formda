@@ -89,8 +89,11 @@ for (const g of guides) {
 
 console.log('[검색] 인덱스');
 // 헤더 검색용 인덱스 (모든 페이지에서 로드). 도구명·키워드·예시·카테고리를 한 문자열로 합쳐 부분일치 검색.
-const searchIndex = tools.filter((t) => !t.stub).map((t) => ({
+const guideSvg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4.5A1.5 1.5 0 0 1 5.5 3H18v16H5.5A1.5 1.5 0 0 0 4 20.5z"/><path d="M4 20.5A1.5 1.5 0 0 1 5.5 19H18"/><path d="M8 7.5h6M8 11h5"/></svg>';
+const toolEntries = tools.filter((t) => !t.stub).map((t) => ({
   slug: t.slug,
+  u: '/tools/' + t.slug + '.html',
+  g: 0,
   t: t.navTitle,
   c: (categoryBySlug[t.category] || {}).label || '',
   d: t.use || t.summary || '',
@@ -99,6 +102,19 @@ const searchIndex = tools.filter((t) => !t.stub).map((t) => ({
   k: [t.navTitle, t.title, (t.keywords || []).join(' '), t.example || '', t.summary || '', (categoryBySlug[t.category] || {}).label || '']
     .join(' ').toLowerCase(),
 }));
+const guideEntries = guides.map((g) => ({
+  slug: g.slug,
+  u: '/guides/' + g.slug + '.html',
+  g: 1,
+  t: g.navTitle || g.title,
+  c: '가이드',
+  d: g.seoDescription || g.lead || '',
+  ac: '#0d9488',
+  svg: guideSvg,
+  k: [g.navTitle || '', g.title || '', (g.keywords || []).join(' '), g.seoDescription || '', '가이드']
+    .join(' ').toLowerCase(),
+}));
+const searchIndex = toolEntries.concat(guideEntries);
 out('search-index.js', 'window.Formda=window.Formda||{};window.Formda.searchIndex=' + JSON.stringify(searchIndex) + ';');
 
 console.log('[6/6] sitemap + robots');

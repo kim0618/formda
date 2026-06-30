@@ -1,7 +1,7 @@
 // 가이드 아티클 페이지 (/guides/{slug}.html) - 롱폼 SEO 콘텐츠 + 도구 CTA + 내부링크
 import { head, header, footer } from './shell.mjs';
 import { svg } from './icons.mjs';
-import { site, categoryBySlug, toolsBySlug } from '../data/registry.js';
+import { site, categories, categoryBySlug, toolsBySlug } from '../data/registry.js';
 import { guidesByCategory } from '../data/guides.js';
 
 function fmtDate(d) {
@@ -71,36 +71,46 @@ ${jsonLd(guide)}
 
 // 가이드 허브 (/guides/index.html)
 export function guidesIndexPage(guides) {
-  const cards = guides.map((g) => {
-    const cat = categoryBySlug[g.category];
+  const card = (g) => {
     const tool = toolsBySlug[g.tool];
     return `<a class="guide-card" href="/guides/${g.slug}.html" style="--accent:${(tool && tool.accent) || '#4f46e5'}">
-      <span class="guide-card-tag">${cat.label}</span>
       <h3>${g.title}</h3>
       <p>${g.seoDescription}</p>
       <span class="guide-card-go">읽어보기 →</span>
     </a>`;
-  }).join('\n');
+  };
+
+  const sections = categories.map((c) => {
+    const list = guidesByCategory[c.slug] || [];
+    if (!list.length) return '';
+    return `<section class="guide-cat">
+      <h2 class="guide-cat-h">${c.label}<span class="guide-cat-n">${list.length}</span></h2>
+      <div class="guide-grid">${list.map(card).join('\n')}</div>
+    </section>`;
+  }).filter(Boolean).join('\n');
 
   return `${head({ title: `문서 작성 가이드 | ${site.name}`, description: '견적서, 거래명세서 등 실무 문서를 제대로 쓰는 방법을 정리한 폼다 가이드 모음입니다.', canonical: '/guides/' })}
 ${header('guides')}
 <main class="wrap">
   <div class="crumb"><a href="/">홈</a> › 가이드</div>
   <div class="cat-hero"><h1>문서 작성 가이드</h1><p>실무 문서를 제대로 쓰는 방법을 쉽게 정리했습니다. 읽고 바로 폼다로 만들어 보세요.</p></div>
-  <div class="guide-grid">${cards || '<p class="muted">가이드를 준비하고 있습니다.</p>'}</div>
+  ${sections || '<p class="muted">가이드를 준비하고 있습니다.</p>'}
 </main>
 ${footer()}
 `;
 }
 
 function relatedHTML(guide) {
-  const pills = (guide.relatedTools || []).map((slug) => toolsBySlug[slug]).filter(Boolean)
+  // 도구(만들기)와 가이드를 그룹으로 분리. 가이드는 긴 title 대신 짧은 navTitle로 통일.
+  const toolPills = (guide.relatedTools || []).map((slug) => toolsBySlug[slug]).filter(Boolean)
     .map((t) => `<a class="sibling-link" href="/tools/${t.slug}.html">${t.navTitle} 만들기</a>`);
-  // 같은 카테고리의 다른 가이드
-  (guidesByCategory[guide.category] || []).filter((g) => g.slug !== guide.slug)
-    .forEach((g) => pills.push(`<a class="sibling-link" href="/guides/${g.slug}.html">${g.title}</a>`));
-  pills.push('<a class="sibling-link" href="/guides/">가이드 전체 ›</a>');
-  return `<div class="sibling-section"><div class="sibling-title">관련 도구·가이드</div><div class="sibling-list">${pills.join('')}</div></div>`;
+  const guidePills = (guidesByCategory[guide.category] || []).filter((g) => g.slug !== guide.slug)
+    .map((g) => `<a class="sibling-link" href="/guides/${g.slug}.html">${g.navTitle || g.title}</a>`);
+  guidePills.push('<a class="sibling-link" href="/guides/">가이드 전체 ›</a>');
+  const group = (title, items) => items.length
+    ? `<div class="sibling-group"><div class="sibling-title">${title}</div><div class="sibling-list">${items.join('')}</div></div>`
+    : '';
+  return `<div class="sibling-section">${group('관련 도구', toolPills)}${group('관련 가이드', guidePills)}</div>`;
 }
 
 function jsonLd(guide) {

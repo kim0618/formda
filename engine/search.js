@@ -32,16 +32,20 @@
         var score = title === q ? 0 : title.indexOf(q) === 0 ? 1 : title.indexOf(q) >= 0 ? 2 : 3;
         res.push({ it: it, score: score });
       }
-      res.sort(function (a, b) { return a.score - b.score; });
+      // 점수 우선, 같으면 도구(g=0)를 가이드(g=1)보다 먼저
+      res.sort(function (a, b) { return (a.score - b.score) || ((a.it.g || 0) - (b.it.g || 0)); });
       return res.slice(0, 8).map(function (r) { return r.it; });
     }
 
     function render(hasQuery) {
       if (items.length) {
         box.innerHTML = items.map(function (it, i) {
-          return '<a class="sr-item' + (i === active ? ' on' : '') + '" href="/tools/' + it.slug + '.html">' +
+          var badge = it.g ? '<span class="sr-bd sr-bd-g">가이드</span>' : '<span class="sr-bd sr-bd-t">도구</span>';
+          var meta = it.g ? esc(it.d) : (esc(it.c) + ' · ' + esc(it.d));
+          return '<a class="sr-item' + (i === active ? ' on' : '') + '" href="' + (it.u || ('/tools/' + it.slug + '.html')) + '">' +
             '<span class="sr-ic" style="color:' + esc(it.ac) + '">' + it.svg + '</span>' +
-            '<span class="sr-tx"><b>' + esc(it.t) + '</b><small>' + esc(it.c) + ' · ' + esc(it.d) + '</small></span></a>';
+            '<span class="sr-tx"><b>' + esc(it.t) + '</b><small>' + meta + '</small></span>' +
+            badge + '</a>';
         }).join('');
         box.classList.add('open');
       } else if (hasQuery) {
@@ -60,7 +64,7 @@
       render(q.trim().length > 0);
     }
 
-    function go(it) { if (it) location.href = '/tools/' + it.slug + '.html'; }
+    function go(it) { if (it) location.href = it.u || ('/tools/' + it.slug + '.html'); }
 
     input.addEventListener('input', update);
     input.addEventListener('focus', update);
