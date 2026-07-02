@@ -34,7 +34,7 @@ ok('공급자 상호', docHTML.includes('폼다상사'));
 ok('공급자 라벨 박스', docHTML.includes('공급자') && docHTML.includes('qt-supplier'));
 ok('표준 항목(대표자·업태/종목)', docHTML.includes('대표자') && docHTML.includes('업태/종목') && docHTML.includes('김폼다'));
 ok('품목표 규격 열', docHTML.includes('<th>규격</th>') && docHTML.includes('반응형'));
-ok('수신처 + 귀하', docHTML.includes('○○ 주식회사') && docHTML.includes('귀하'));
+ok('수신처 + 귀하', docHTML.includes('폼다테크 주식회사') && docHTML.includes('귀하'));
 ok('합계 자동계산 (3,630,000)', docHTML.includes('3,630,000'));
 ok('한글금액(一金 ...원整)', docHTML.includes('一金 삼백육십삼만원整'));
 ok('도장칸 (인)', docHTML.includes('(인)'));

@@ -193,7 +193,7 @@
 
   // 기본 레이아웃 (견적서 / 거래명세서)
   function renderDefault(state, cfg, opts) {
-    var t = calc.totals(state.items, state.vat);
+    var t = calc.totals(state.items, state.vat, !!cfg.taxColumns);
     var minRows = opts.single ? THUMB_MIN : (cfg.maxItems || PAGE_ROWS);
     var n = Math.max(state.items.length, minRows);
     var mmdd = '';
@@ -203,7 +203,7 @@
 
   // 영수증 레이아웃: 금액이 주인공인 슬립형 (제목 → 받는분 → 큰 금액 → 영수확인 → 내역 → 공급자)
   function renderReceipt(state, cfg, opts) {
-    var t = calc.totals(state.items, state.vat);
+    var t = calc.totals(state.items, state.vat, !!cfg.taxColumns);
     var minRows = opts.single ? 5 : (cfg.maxItems || 8);
     var n = Math.max(state.items.length, minRows);
     var rows = '';
@@ -263,7 +263,7 @@
       '<div class="ct-top">' +
         (s.docNo ? '<div class="ct-docno">제 ' + esc(s.docNo) + ' 호</div>' : '') +
         '<div class="ct-title">' + esc(cfg.docTitle) + '</div>' + info +
-        '<div class="ct-body">' + (esc(s.body) || '위 사람은 당사에 위와 같이 재직하고 있음을 증명합니다.') + '</div>' +
+        '<div class="ct-body">' + (esc(s.body) || cfg.bodyDefault || '위 사람은 당사에 위와 같이 재직하고 있음을 증명합니다.') + '</div>' +
         (s.purpose ? '<div class="ct-purpose">용　도 : ' + esc(s.purpose) + '</div>' : '') +
       '</div>' +
       '<div class="ct-bottom">' +
@@ -532,9 +532,284 @@
       '<div class="lg-signline">위임인　<span class="lg-sign">' + vOr(s.prName) + sealHTML(s, cfg) + '</span></div>' +
     '</div>';
   }
+  // 지불각서(지불확약서) - 채무자가 채권자에게 일정 기일·방법으로 지불을 확약
+  function renderPledge(state, cfg) {
+    var s = state;
+    var amount = Number(s.amount) || 0;
+    var creditor = lgParty('채권자 (받는 사람)', [
+      ['성　명', vOr(s.crName)], ['주민등록번호', vOr(s.crId)],
+      ['주　소', vOr(s.crAddr)], ['연　락　처', vOr(s.crTel)],
+    ]);
+    var debtor = lgParty('채무자 (지불인)', [
+      ['성　명', vOr(s.dbName)], ['주민등록번호', vOr(s.dbId)],
+      ['주　소', vOr(s.dbAddr)], ['연　락　처', vOr(s.dbTel)],
+    ]);
+    var terms = [];
+    if (s.debtReason) terms.push(['채무 발생 원인', vOr(s.debtReason)]);
+    terms.push(['지 불 기 일', lgDate(s.dueDate)], ['지 불 방 법', vOr(s.repayMethod)]);
+    if (s.delayRate) terms.push(['지연손해금', '연 ' + esc(s.delayRate) + ' %']);
+    var reason = s.debtReason ? esc(s.debtReason) + '에 관하여 ' : '';
+    var defBody = '위 채무자는 ' + reason + '위 금액을 채권자에게 아래에 정한 기일과 방법에 따라 틀림없이 지불할 것을 확약합니다. 만약 이를 이행하지 아니할 경우 지연손해금을 가산하여 지불하며, 채권자의 강제집행에 대하여 이의를 제기하지 아니할 것을 확약합니다.';
+    return '<div class="lg-page">' +
+      '<div class="lg-title">' + esc(cfg.docTitle) + '</div>' +
+      '<div class="lg-parties">' + creditor + debtor + '</div>' +
+      '<div class="lg-amount"><div class="lg-amount-kr">일금 ' + (amount > 0 ? calc.korAmount(amount) + '원정' : '&nbsp;') + '</div>' +
+        '<div class="lg-amount-num">₩ ' + comma(amount) + '</div></div>' +
+      '<div class="lg-body">' + (esc(s.body) || defBody) + '</div>' +
+      '<table class="lg-terms"><tbody>' + lgRows(terms) + '</tbody></table>' +
+      (s.special ? '<div class="lg-sec">특약사항</div><div class="lg-special">' + esc(s.special) + '</div>' : '') +
+      '<div class="lg-date">' + korDate(s.date) + '</div>' +
+      '<div class="lg-signline">채무자(지불인)　<span class="lg-sign">' + vOr(s.dbName) + sealHTML(s, cfg) + '</span></div>' +
+    '</div>';
+  }
+  // 합의서·각서 - 당사자(갑·을)가 합의 내용을 정하고 이행을 확약
+  function renderAgreement(state, cfg) {
+    var s = state;
+    var pA = lgParty('갑 (당사자 1)', [
+      ['성　명', vOr(s.prName)], ['주민등록번호', vOr(s.prId)],
+      ['주　소', vOr(s.prAddr)], ['연　락　처', vOr(s.prTel)],
+    ]);
+    var pB = lgParty('을 (당사자 2)', [
+      ['성　명', vOr(s.agName)], ['주민등록번호', vOr(s.agId)],
+      ['주　소', vOr(s.agAddr)], ['연　락　처', vOr(s.agTel)],
+    ]);
+    return '<div class="lg-page">' +
+      '<div class="lg-title">' + esc(cfg.docTitle) + '</div>' +
+      '<div class="lg-parties lg-parties-col">' + pA + pB + '</div>' +
+      '<div class="lg-sec">합의 내용</div>' +
+      '<div class="lg-content">' + (esc(s.content) || '&nbsp;') + '</div>' +
+      (s.special ? '<div class="lg-sec">특약사항</div><div class="lg-special">' + esc(s.special) + '</div>' : '') +
+      '<div class="lg-decl">' + (esc(s.lead) || '위 당사자는 위 내용에 합의하며, 이를 성실히 이행할 것을 확약한다. 본 합의서는 2부를 작성하여 각 1부씩 보관한다.') + '</div>' +
+      '<div class="lg-date">' + korDate(s.date) + '</div>' +
+      '<div class="lg-signrow">' +
+        // 갑 정보가 없으면(각서: 한쪽만 작성) 갑 서명셀을 생략해 자연스럽게 처리
+        (s.prName ? '<span class="lg-signcell">갑　<span class="lg-sign">' + esc(s.prName) + '<span class="qt-seal">(인)</span></span></span>' : '') +
+        '<span class="lg-signcell">을　<span class="lg-sign">' + vOr(s.agName) + sealHTML(s, cfg) + '</span></span>' +
+      '</div>' +
+    '</div>';
+  }
   function legal(state, cfg, opts) {
     opts = opts || {};
-    var inner = cfg.variant === 'mandate' ? renderMandate(state, cfg) : renderLoan(state, cfg);
+    var inner;
+    if (cfg.variant === 'mandate') inner = renderMandate(state, cfg);
+    else if (cfg.variant === 'pledge') inner = renderPledge(state, cfg);
+    else if (cfg.variant === 'agreement') inner = renderAgreement(state, cfg);
+    else inner = renderLoan(state, cfg);
+    return wrap(inner, opts);
+  }
+
+  // ===== 급여명세서 (payslip) =====
+  // 근로기준법 시행령 제27조의2 필수 항목: 성명·생년월일(또는 사번)·임금총액·항목별 지급액·항목별 공제액·계산방법
+  function psSum(list) {
+    return (list || []).reduce(function (a, it) { return a + (Number(it && it.amount) || 0); }, 0);
+  }
+  function psRows(list, minRows) {
+    var n = Math.max((list || []).length, minRows);
+    var h = '';
+    for (var i = 0; i < n; i++) {
+      var it = (list || [])[i];
+      var nm = it ? esc(it.name) : '';
+      var amt = (it && it.amount) ? comma(it.amount) : '';
+      h += '<tr><td class="l">' + (nm || '&nbsp;') + '</td><td class="r">' + amt + '</td></tr>';
+    }
+    return h;
+  }
+  function renderPayslip(state, cfg, opts) {
+    opts = opts || {};
+    var s = state;
+    var earnSum = psSum(s.earnings), dedSum = psSum(s.deductions);
+    var net = earnSum - dedSum;
+    var minRows = opts.single ? 5 : (cfg.maxRows || 8);
+    var idLabel = s.empNo ? '사원번호' : '생년월일';
+    var idValue = s.empNo || s.empBirth;
+    var info = '<table class="ps-info"><tbody>' +
+      '<tr><td class="k">회 사 명</td><td class="v">' + vOr(s.company) + '</td><td class="k">성　　명</td><td class="v">' + vOr(s.empName) + '</td></tr>' +
+      '<tr><td class="k">사업자번호</td><td class="v">' + vOr(s.bizNo) + '</td><td class="k">부　　서</td><td class="v">' + vOr(s.empDept) + '</td></tr>' +
+      '<tr><td class="k">대 표 자</td><td class="v">' + vOr(s.ceo) + '</td><td class="k">직　　급</td><td class="v">' + vOr(s.empRank) + '</td></tr>' +
+      '<tr><td class="k">입 사 일</td><td class="v">' + vOr(s.empHireDate) + '</td><td class="k">' + idLabel + '</td><td class="v">' + vOr(idValue) + '</td></tr>' +
+      '</tbody></table>';
+    var earnTable = '<table class="ps-tbl"><colgroup><col><col class="c-amt"></colgroup>' +
+      '<thead><tr><th>지급 항목</th><th>금액 (원)</th></tr></thead>' +
+      '<tbody>' + psRows(s.earnings, minRows) + '</tbody>' +
+      '<tfoot><tr class="sum"><td>지급 합계</td><td class="r">' + comma(earnSum) + '</td></tr></tfoot></table>';
+    var dedTable = '<table class="ps-tbl"><colgroup><col><col class="c-amt"></colgroup>' +
+      '<thead><tr><th>공제 항목</th><th>금액 (원)</th></tr></thead>' +
+      '<tbody>' + psRows(s.deductions, minRows) + '</tbody>' +
+      '<tfoot><tr class="sum"><td>공제 합계</td><td class="r">' + comma(dedSum) + '</td></tr></tfoot></table>';
+    var inner =
+      '<div class="ps-page">' +
+        '<div class="ps-title">' + esc(cfg.docTitle || '급 여 명 세 서') + '</div>' +
+        '<div class="qt-meta"><span>' + (s.payMonth ? '귀속 : ' + esc(s.payMonth) : '') + '</span>' +
+          '<span>' + (s.payDate ? '지급일 : ' + esc(s.payDate) : '') + '</span></div>' +
+        info +
+        (function () {
+          var h = [];
+          if (s.workDaysN) h.push('근로일수 ' + esc(s.workDaysN) + '일');
+          if (s.workHoursTotal) h.push('총 근로시간 ' + esc(s.workHoursTotal) + '시간');
+          if (s.hoursOT) h.push('연장 ' + esc(s.hoursOT) + '시간');
+          if (s.hoursNight) h.push('야간 ' + esc(s.hoursNight) + '시간');
+          if (s.hoursHoliday) h.push('휴일 ' + esc(s.hoursHoliday) + '시간');
+          return h.length ? '<div class="ps-hours">' + h.join('　·　') + '</div>' : '';
+        })() +
+        '<div class="ps-cols">' + earnTable + dedTable + '</div>' +
+        '<div class="ps-net">' +
+          '<span class="ps-net-l">실 지급액</span>' +
+          '<span class="ps-net-kr">일금 ' + (net > 0 ? calc.korAmount(net) + '원정' : '') + '</span>' +
+          '<span class="ps-net-v">₩ ' + comma(net) + '</span>' +
+        '</div>' +
+        (s.note ? '<div class="ps-sec">계산 방법 · 비고</div><div class="ps-note">' + esc(s.note) + '</div>' : '') +
+        '<div class="ps-foot">' +
+          '<div class="ps-decl">위와 같이 급여를 지급합니다.</div>' +
+          '<div class="ps-date">' + korDate(s.payDate) + '</div>' +
+          '<div class="ps-issuer">' + vOr(s.company) + sealHTML(s, cfg) + '</div>' +
+        '</div>' +
+      '</div>';
+    return wrap(inner, opts);
+  }
+
+  // ===== 근로계약서 (contract) - 고용노동부 표준근로계약서 기반 =====
+  function renderContract(state, cfg, opts) {
+    opts = opts || {};
+    var s = state;
+    var ins = [
+      (s.insEmploy ? '☑' : '□') + ' 고용보험',
+      (s.insInjury ? '☑' : '□') + ' 산재보험',
+      (s.insPension ? '☑' : '□') + ' 국민연금',
+      (s.insHealth ? '☑' : '□') + ' 건강보험',
+    ].join('　');
+    var term = s.endDate
+      ? esc(s.startDate) + ' 부터 ' + esc(s.endDate) + ' 까지'
+      : (s.startDate ? esc(s.startDate) + ' 부터 (기간의 정함이 없음)' : '(기간의 정함이 없음)');
+    var payType = esc(s.payType) || '월급';
+    var wage = (Number(s.payAmount) || 0) > 0 ? comma(s.payAmount) + ' 원' : '&nbsp;';
+    function cl(no, label, body) {
+      return '<li><span class="ec-no">' + no + '. ' + label + '</span><span class="ec-val">' + body + '</span></li>';
+    }
+    var inner =
+      '<div class="ec-page">' +
+        '<div class="ec-title">' + (esc(cfg.docTitle) || '표준 근로계약서') + '</div>' +
+        '<div class="ec-intro"><b>' + vOr(s.bizName) + '</b> (이하 "사업주")과(와) <b>' + vOr(s.wName) + '</b> (이하 "근로자")은(는) 다음과 같이 근로계약을 체결한다.</div>' +
+        '<ol class="ec-clauses">' +
+          cl(1, '근로개시일', term) +
+          cl(2, '근 무 장 소', vOr(s.workplace)) +
+          cl(3, '업무의 내용', vOr(s.jobDesc)) +
+          cl(4, '소정근로시간', (esc(s.workTime) || '&nbsp;') + (s.breakTime ? '　(휴게시간 ' + esc(s.breakTime) + ')' : '')) +
+          cl(5, '근무일 / 휴일', (esc(s.workDays) || '&nbsp;') + ' 근무' + (s.holiday ? '，주휴일 ' + esc(s.holiday) : '')) +
+          '<li><span class="ec-no">6. 임　　금</span><span class="ec-val">' +
+            '<div class="ec-pay">' +
+              '<div>· ' + payType + ' : ' + wage + '</div>' +
+              '<div>· 상여금 : ' + (s.bonus ? '있음 (' + esc(s.bonus) + ')' : '없음') + '</div>' +
+              '<div>· 기타 제수당 : ' + (s.allowance ? '있음 (' + esc(s.allowance) + ')' : '없음') + '</div>' +
+              '<div>· 임금지급일 : ' + (esc(s.wageDate) || '&nbsp;') + '</div>' +
+              '<div>· 지급방법 : ' + (esc(s.payMethod) || '근로자 명의 예금통장에 입금') + '</div>' +
+            '</div></span></li>' +
+          cl(7, '연차유급휴가', '근로기준법에서 정하는 바에 따라 부여한다.') +
+          cl(8, '사회보험 적용여부', ins) +
+          cl(9, '근로계약서 교부', '사업주는 근로계약을 체결함과 동시에 본 계약서를 사본하여 근로자에게 교부한다.') +
+          cl(10, '성실 이행의무', '사업주와 근로자는 각자가 근로계약, 취업규칙, 단체협약을 지키고 성실하게 이행하여야 한다.') +
+          cl(11, '기　　타', '이 계약에 정함이 없는 사항은 근로기준법령에 의한다.') +
+        '</ol>' +
+        (s.note ? '<div class="ec-sec">특약사항</div><div class="ec-note">' + esc(s.note) + '</div>' : '') +
+        '<div class="ec-date">' + korDate(s.date) + '</div>' +
+        '<div class="ec-sign">' +
+          '<div class="ec-party"><span class="ec-plabel">(사업주)</span>' +
+            '<div class="ec-plines">' +
+              '<div>사업체명 : ' + vOr(s.bizName) + (s.bizRegNo ? '　　사업자등록번호 : ' + esc(s.bizRegNo) : '') + '</div>' +
+              '<div>주　　소 : ' + vOr(s.bizAddr) + '</div>' +
+              '<div>연 락 처 : ' + vOr(s.bizTel) + '　　대표자 : ' + vOr(s.bizCeo) + sealHTML(s, cfg) + '</div>' +
+            '</div>' +
+          '</div>' +
+          '<div class="ec-party"><span class="ec-plabel">(근로자)</span>' +
+            '<div class="ec-plines">' +
+              '<div>주　　소 : ' + vOr(s.wAddr) + '</div>' +
+              '<div>생년월일 : ' + vOr(s.wBirth) + '　　연락처 : ' + vOr(s.wTel) + '</div>' +
+              '<div>성　　명 : ' + vOr(s.wName) + '<span class="ec-signhint">(서명)</span></div>' +
+            '</div>' +
+          '</div>' +
+        '</div>' +
+      '</div>';
+    return wrap(inner, opts);
+  }
+
+  // ===== 지출결의서 (expense) - 품목·합계 machinery 재사용 + 결재란 =====
+  function renderExpense(state, cfg, opts) {
+    opts = opts || {};
+    var s = state;
+    var t = calc.totals(state.items, '0', false); // 부가세 분리 없음: 합계 = 금액 총합
+    var minRows = opts.single ? 6 : (cfg.maxItems || 12);
+    var n = Math.max(state.items.length, minRows);
+    var rows = '';
+    for (var k = 0; k < n; k++) {
+      var it = state.items[k];
+      if (!it) { rows += '<tr class="qt-er"><td></td><td></td><td></td><td></td></tr>'; continue; }
+      var line = (it.qty || 0) * (it.price || 0);
+      rows += '<tr><td class="c">' + (k + 1) + '</td><td class="l">' + (esc(it.name) || '') + '</td>' +
+        '<td class="l">' + (esc(it.spec) || '') + '</td><td class="r">' + (line ? comma(line) : '') + '</td></tr>';
+    }
+    var approvers = String(s.approvers || '담당,팀장,대표').split(',').map(function (x) { return x.trim(); }).filter(Boolean);
+    var appHead = approvers.map(function (a) { return '<th>' + esc(a) + '</th>'; }).join('');
+    var appBody = approvers.map(function () { return '<td></td>'; }).join('');
+    var approval = '<table class="ex-approval"><tbody>' +
+      '<tr><th class="ex-ap-side" rowspan="2">결<br>재</th>' + appHead + '</tr>' +
+      '<tr>' + appBody + '</tr></tbody></table>';
+    var inner =
+      '<div class="ex-page">' +
+        '<div class="ex-head"><div class="ex-title">' + (esc(cfg.docTitle) || '지 출 결 의 서') + '</div>' + approval + '</div>' +
+        '<div class="qt-meta"><span>' + (s.date ? '작성일자 : ' + esc(s.date) : '') + '</span>' +
+          '<span>' + (s.no ? '문서번호 : ' + esc(s.no) : '') + '</span></div>' +
+        '<table class="ex-info"><tbody><tr>' +
+          '<td class="k">부　서</td><td class="v">' + vOr(s.dept) + '</td>' +
+          '<td class="k">작성자</td><td class="v"><span>' + vOr(s.writer) + '</span>' + sealHTML(s, cfg) + '</td>' +
+        '</tr></tbody></table>' +
+        '<table class="qt-items"><colgroup><col style="width:8%"><col style="width:34%"><col style="width:38%"><col style="width:20%"></colgroup>' +
+          '<thead><tr><th>No</th><th>계정과목</th><th>적요</th><th>금액</th></tr></thead>' +
+          '<tbody>' + rows + '</tbody></table>' +
+        '<table class="qt-tot"><tbody><tr class="sum"><td class="k">합　계</td><td class="v">' + comma(t.total) + ' 원</td></tr></tbody></table>' +
+        '<div class="ex-amount-kr">' + (t.total > 0 ? '一金 ' + calc.korAmount(t.total) + '원整' : '') + '</div>' +
+        (s.note ? '<div class="qt-note">' + esc(s.note) + '</div>' : '') +
+      '</div>';
+    return wrap(inner, opts);
+  }
+
+  // ===== 업무 인수인계서 (handover) - 항목 machinery 재사용 =====
+  function renderHandover(state, cfg, opts) {
+    opts = opts || {};
+    var s = state;
+    var minRows = opts.single ? 6 : (cfg.maxItems || 12);
+    var n = Math.max(state.items.length, minRows);
+    var rows = '';
+    for (var k = 0; k < n; k++) {
+      var it = state.items[k];
+      if (!it) { rows += '<tr class="qt-er"><td></td><td></td><td></td></tr>'; continue; }
+      rows += '<tr><td class="c">' + (k + 1) + '</td><td class="l">' + (esc(it.name) || '') + '</td>' +
+        '<td class="l">' + (esc(it.spec) || '') + '</td></tr>';
+    }
+    var info = '<table class="ho-info"><tbody>' +
+      '<tr><td class="k">인계자</td><td class="v">' + vOr(s.hoFrom) + '</td><td class="k">인수자</td><td class="v">' + vOr(s.hoTo) + '</td></tr>' +
+      '<tr><td class="k">부　서</td><td class="v">' + vOr(s.hoFromDept) + '</td><td class="k">부　서</td><td class="v">' + vOr(s.hoToDept) + '</td></tr>' +
+      '<tr><td class="k">직　위</td><td class="v">' + vOr(s.hoFromPos) + '</td><td class="k">직　위</td><td class="v">' + vOr(s.hoToPos) + '</td></tr>' +
+      '</tbody></table>';
+    var inner =
+      '<div class="ho-page">' +
+        '<div class="ho-title">' + (esc(cfg.docTitle) || '업무 인수인계서') + '</div>' +
+        '<div class="qt-meta"><span>' + (s.hoDate ? '인수인계일 : ' + esc(s.hoDate) : '') +
+          (s.hoPeriod ? '　·　기간 : ' + esc(s.hoPeriod) : '') + '</span>' +
+          '<span>' + (s.no ? '문서번호 : ' + esc(s.no) : '') + '</span></div>' +
+        info +
+        '<table class="qt-items"><colgroup><col style="width:8%"><col style="width:32%"><col style="width:60%"></colgroup>' +
+          '<thead><tr><th>No</th><th>업무 / 구분</th><th>인계 내용 · 진행 현황</th></tr></thead>' +
+          '<tbody>' + rows + '</tbody></table>' +
+        (s.note ? '<div class="ho-sec">특이사항 · 비고</div><div class="ho-note">' + esc(s.note) + '</div>' : '') +
+        '<div class="ho-foot">' +
+          '<div class="ho-decl">위와 같이 담당 업무를 빠짐없이 인수인계하였음을 확인합니다.</div>' +
+          '<div class="ho-date">' + korDate(s.hoDate) + '</div>' +
+          '<div class="ho-signrow">' +
+            '<span class="ho-signcell">인계자　<b>' + vOr(s.hoFrom) + '</b>' + sealHTML(s, cfg) + '</span>' +
+            '<span class="ho-signcell">인수자　<b>' + vOr(s.hoTo) + '</b><span class="qt-seal">(인)</span></span>' +
+            (s.hoConfirm ? '<span class="ho-signcell">확인　<b>' + esc(s.hoConfirm) + '</b><span class="qt-seal">(인)</span></span>' : '') +
+          '</div>' +
+        '</div>' +
+      '</div>';
     return wrap(inner, opts);
   }
 
@@ -554,5 +829,9 @@
     'cover-letter': renderCoverLetter,
     'career': renderCareer,
     'legal': legal,
+    'payslip': renderPayslip,
+    'contract': renderContract,
+    'expense': renderExpense,
+    'handover': renderHandover,
   };
 })(typeof window !== 'undefined' ? window : this);

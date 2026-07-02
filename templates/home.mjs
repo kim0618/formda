@@ -86,14 +86,14 @@ ${header('')}
       <h2 class="home-sec-h">문서 작성 가이드</h2>
       <a class="sec-more" href="/guides/">전체 보기 →</a>
     </div>
-    <div class="guide-grid">${guides.slice(0, 6).map(guideCardHome).join('')}</div>
+    <div class="guide-grid">${guides.slice(0, 8).map(guideCardHome).join('')}</div>
   </section>
 </main>
 
 <script src="/engine/thumb.js?v=2"></script>
 <script src="/engine/reveal.js"></script>
-<script type="application/ld+json">${JSON.stringify({ '@context': 'https://schema.org', '@type': 'WebSite', name: site.name, url: site.domain + '/', inLanguage: 'ko', description: site.description })}</script>
-<script type="application/ld+json">${JSON.stringify({ '@context': 'https://schema.org', '@type': 'Organization', name: site.name, url: site.domain + '/', logo: site.domain + '/assets/logo.png' })}</script>
+<script type="application/ld+json">${JSON.stringify({ '@context': 'https://schema.org', '@type': 'WebSite', '@id': site.domain + '/#website', name: site.name, url: site.domain + '/', inLanguage: 'ko', description: site.description, publisher: { '@id': site.domain + '/#org' }, potentialAction: { '@type': 'SearchAction', target: { '@type': 'EntryPoint', urlTemplate: site.domain + '/?q={search_term_string}' }, 'query-input': 'required name=search_term_string' } })}</script>
+<script type="application/ld+json">${JSON.stringify({ '@context': 'https://schema.org', '@type': 'Organization', '@id': site.domain + '/#org', name: site.name, alternateName: 'formda', url: site.domain + '/', logo: { '@type': 'ImageObject', url: site.domain + '/assets/logo.png', width: 380, height: 200 }, description: site.description, foundingDate: '2026', contactPoint: { '@type': 'ContactPoint', email: 'jptcalc@naver.com', contactType: 'customer support', availableLanguage: 'Korean' } })}</script>
 ${footer()}
 `;
 }

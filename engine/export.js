@@ -10,6 +10,33 @@
     return list.length ? list : [host];
   }
 
+  // PDF/PNG 라이브러리는 무겁다(~200KB+). 페이지 로드 시가 아니라
+  // 첫 내보내기 클릭 때 한 번만 지연 로드한다.
+  var LIBS = [
+    'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js',
+    'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js',
+  ];
+  var libsPromise = null;
+  function loadScript(src) {
+    return new Promise(function (resolve, reject) {
+      var s = document.createElement('script');
+      s.src = src; s.async = true;
+      s.onload = resolve;
+      s.onerror = function () { reject(new Error('스크립트 로드 실패: ' + src)); };
+      document.head.appendChild(s);
+    });
+  }
+  function ensureLibs() {
+    if (window.html2canvas && window.jspdf) return Promise.resolve();
+    if (!libsPromise) {
+      libsPromise = Promise.all(LIBS.map(loadScript)).catch(function (e) {
+        libsPromise = null; // 실패 시 다음 클릭에서 재시도 가능
+        throw e;
+      });
+    }
+    return libsPromise;
+  }
+
   // 캡처 동안 미리보기 축소(transform)를 잠시 해제 -> 원본 794px 해상도로 캡처
   async function withFullScale(fn) {
     if (document.fonts && document.fonts.ready) {
@@ -42,6 +69,7 @@
     var label = btn ? btn.textContent : '';
     if (btn) { btn.textContent = 'PDF 생성 중...'; btn.disabled = true; }
     try {
+      await ensureLibs();
       await withFullScale(async function () {
         var jsPDF = window.jspdf.jsPDF;
         // pageSize [w,h](mm) 지정 시 그 크기로(명함 등), 없으면 A4
@@ -53,9 +81,13 @@
         var els = pageEls();
         for (var i = 0; i < els.length; i++) {
           var canvas = await shoot(els[i]);
-          var imgH = (canvas.height * pw) / canvas.width;
+          // 비율 유지: 폭은 페이지에 맞추되, 세로가 A4를 넘으면 세로 기준으로 축소해
+          // 가로 중앙 배치(세로 눌림 왜곡 방지).
+          var imgW = pw, imgH = (canvas.height * pw) / canvas.width;
+          if (imgH > ph) { imgW = pw * (ph / imgH); imgH = ph; }
+          var x = (pw - imgW) / 2;
           if (i > 0) pdf.addPage();
-          pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, 0, pw, Math.min(imgH, ph), undefined, 'FAST');
+          pdf.addImage(canvas.toDataURL('image/png'), 'PNG', x, 0, imgW, imgH, undefined, 'FAST');
         }
         pdf.save(fileName + '.pdf');
       });
@@ -70,6 +102,7 @@
     var label = btn ? btn.textContent : '';
     if (btn) { btn.textContent = 'PNG 생성 중...'; btn.disabled = true; }
     try {
+      await ensureLibs();
       await withFullScale(async function () {
         var els = pageEls();
         if (els.length === 1) {

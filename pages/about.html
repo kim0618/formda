@@ -21,13 +21,16 @@
 <meta name="twitter:image" content="https://formda.kr/assets/og.png" />
 <link rel="icon" href="/assets/favicon.png" type="image/png" />
 <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png" />
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" />
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+<link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard-dynamic-subset.css" />
 <link rel="stylesheet" href="/styles/tokens.css" />
+<script>window.FORMDA_CFG={"GA_ID":"","WEB3FORMS_KEY":"","PRICE_SINGLE":1000,"PRICE_SUB":4900,"PRICE_SUB_YEAR":53900};</script>
 </head>
 <body>
 <header class="header">
   <div class="header-in">
-    <a class="logo" href="/"><img class="logo-img" src="/assets/logo.png" alt="폼다" onerror="this.replaceWith(Object.assign(document.createElement('span'),{className:'logo-text',textContent:'폼다'}))"></a>
+    <a class="logo" href="/"><img class="logo-img" src="/assets/logo.png" alt="폼다" width="53" height="28" onerror="this.replaceWith(Object.assign(document.createElement('span'),{className:'logo-text',textContent:'폼다'}))"></a>
     <nav class="nav"><a href="/category/business.html">비즈니스</a><a href="/category/job.html">취업</a><a href="/category/life.html">생활</a><a href="/category/text.html">텍스트</a><a href="/guides/">가이드</a></nav>
     <div class="hdr-search">
       <svg class="hdr-search-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.2-3.2"></path></svg>
@@ -41,25 +44,55 @@
   <article class="legal-page">
     <h1>폼다 소개</h1>
     
-    <p>폼다(formda)는 "폼 다 됐다"는 뜻으로, 가입이나 결제 없이 웹에서 입력만 하면 견적서·이력서·차용증 같은 실무 문서가 바로 완성 PDF로 나오는 한국형 문서 자동작성 도구입니다.</p>
+    <p>폼다(formda)는 "폼 다 됐다"는 뜻으로, 가입이나 결제 없이 웹에서 입력만 하면 견적서·이력서·차용증 같은 실무 문서가 바로 완성 PDF로 나오는 한국형 문서 자동작성 도구입니다. 사무실 컴퓨터든 카페의 노트북이든 지하철에서 꺼낸 휴대폰이든, 브라우저만 있으면 몇 분 안에 인쇄해도 손색없는 문서 한 장을 손에 쥘 수 있도록 만들었습니다.</p>
+
     <h2>왜 만들었나요</h2>
-    <p>문서 하나를 만들려고 양식을 검색하고, 한글·엑셀 파일을 내려받아 칸을 맞추고, 금액을 직접 계산하고, 다시 PDF로 변환하는 과정은 번거롭습니다. 폼다는 이 과정을 "입력하면 끝"으로 줄이기 위해 만들었습니다. 필요한 정보만 넣으면 금액 계산과 양식 정리, PDF·이미지 변환까지 자동으로 처리합니다.</p>
+    <p>문서 하나를 만들려고 양식을 검색하고, 한글·엑셀 파일을 내려받아 칸을 맞추고, 금액을 직접 계산하고, 다시 PDF로 변환하는 과정은 번거롭습니다. 어렵게 찾은 양식이 내 화면에서 글꼴이 깨지거나, 표 칸이 밀리거나, 합계와 부가세를 잘못 더해 다시 손보는 일도 흔합니다. 폼다는 이 모든 과정을 "입력하면 끝"으로 줄이기 위해 만들었습니다. 필요한 정보만 넣으면 금액 계산과 양식 정리, 한글 금액 표기, PDF·이미지 변환까지 폼다가 자동으로 처리합니다.</p>
+    <p>특히 견적서·영수증·차용증처럼 <b>숫자가 중요한 문서</b>는 사람이 계산하면 실수가 생기기 쉽습니다. 폼다는 수량과 단가만 넣으면 공급가액·부가세·합계를 자동으로 맞추고, 금액을 "일금 삼백육십삼만원정" 같은 한글 정자로 바꿔 위·변조를 막아 줍니다. 양식을 어떻게 채워야 할지 고민하는 대신, 내용에만 집중할 수 있게 하는 것이 폼다의 목표입니다.</p>
+
     <h2>폼다가 다른 점</h2>
     <ul>
-      <li><b>빈 양식이 아니라 완성본</b> - 양식 파일을 받아 직접 채우는 게 아니라, 입력하는 즉시 A4 문서로 완성되어 실시간 미리보기로 확인합니다.</li>
-      <li><b>가입·설치 없음</b> - 도구를 클릭하면 바로 입력 화면이 뜨고, PC와 모바일 어디서나 동작합니다.</li>
-      <li><b>브라우저에서만 처리</b> - 입력 정보를 서버로 보내거나 저장하지 않아, 상호·금액·주민등록번호 같은 민감한 정보가 외부로 나가지 않습니다.</li>
-      <li><b>무료</b> - 문서 작성과 PDF·PNG 저장, 인쇄까지 모두 무료입니다.</li>
+      <li><b>빈 양식이 아니라 완성본</b> - 양식 파일을 받아 직접 채우는 게 아니라, 입력하는 즉시 A4 문서로 완성되어 실시간 미리보기로 확인합니다. 화면에 보이는 그대로 인쇄되고 저장됩니다.</li>
+      <li><b>가입·설치 없음</b> - 회원가입도, 프로그램 설치도 필요 없습니다. 도구를 클릭하면 바로 입력 화면이 뜨고, PC와 모바일 어디서나 같은 방식으로 동작합니다.</li>
+      <li><b>브라우저에서만 처리</b> - 입력한 내용을 서버로 보내거나 저장하지 않습니다. 상호·금액·주민등록번호 같은 민감한 정보가 내 브라우저 밖으로 나가지 않으므로 안심하고 쓸 수 있습니다.</li>
+      <li><b>한국 실무에 맞춘 양식</b> - 국내에서 실제로 통용되는 문서 형식을 기준으로 만들었습니다. 공급자·공급받는자 구분, 도장(인) 자리, 한글 금액 표기, 대체공휴일 등 한국 서류의 관행을 반영했습니다.</li>
+      <li><b>무료</b> - 문서 작성과 PDF·PNG 저장, 인쇄까지 가입·설치 없이 무료로 쓸 수 있습니다. 완성 문서에는 폼다 표기가 들어가며, 표기 없이 저장하고 싶을 때만 유료 옵션을 선택할 수 있습니다.</li>
     </ul>
+
+    <h2>어떻게 사용하나요</h2>
+    <p>폼다의 모든 도구는 세 단계로 끝납니다.</p>
+    <ol>
+      <li><b>도구 고르기</b> - 홈이나 상단 메뉴에서 만들 문서를 고릅니다. 어떤 도구가 있는지 감이 안 잡히면 상단 검색창에 "견적서", "이력서"처럼 문서 이름을 입력하면 됩니다.</li>
+      <li><b>내용 입력</b> - 왼쪽 입력창에 필요한 정보를 채웁니다. 처음이라면 "샘플 불러오기"를 눌러 예시가 채워진 상태를 먼저 확인하고, 내 정보로 바꿔 넣는 방법을 추천합니다. 입력하는 즉시 오른쪽 미리보기에 결과가 반영됩니다.</li>
+      <li><b>저장·인쇄</b> - 완성되면 PDF 다운로드, PNG 저장, 인쇄 중 원하는 방식을 고릅니다. 자주 쓰는 회사 정보와 도장은 "내 회사 정보 저장"으로 이 브라우저에만 기억시켜 다음 방문 때 자동으로 채울 수 있습니다.</li>
+    </ol>
+
+    <h2>이런 분들이 씁니다</h2>
+    <ul>
+      <li><b>프리랜서·1인 사업자</b> - 거래처에 보낼 견적서·청구서·영수증을 회계 프로그램 없이 바로 발행합니다.</li>
+      <li><b>소상공인·소규모 팀</b> - 발주서, 거래명세서, 재직증명서 등 자주 쓰는 서식을 그때그때 만들어 씁니다.</li>
+      <li><b>구직자</b> - 이력서·자기소개서·경력기술서를 깔끔한 양식으로 정리해 PDF로 제출합니다.</li>
+      <li><b>학교·기관·모임</b> - 상장·표창장, 가정통신문처럼 격식 있는 문서를 손쉽게 만듭니다.</li>
+      <li><b>개인</b> - 지인 간 차용증이나 위임장처럼 가끔 필요하지만 양식을 찾기 번거로운 문서를 즉석에서 작성합니다.</li>
+    </ul>
+
     <h2>제공하는 문서</h2>
     <p>폼다는 자주 쓰는 문서를 네 갈래로 제공합니다.</p>
     <ul>
-      <li><b>비즈니스</b> - 견적서, 거래명세서, 영수증, 발주서, 청구서</li>
-      <li><b>취업·자기PR</b> - 이력서, 자기소개서, 경력기술서, 재직증명서, 사직서</li>
-      <li><b>생활·행정</b> - 상장·표창장, 가정통신문, 명함, 차용증, 위임장</li>
-      <li><b>텍스트 도구</b> - 글자수 세기, 영문이름·주소 변환, 텍스트 정렬, QR코드</li>
+      <li><b>비즈니스</b> - 견적서, 거래명세서, 영수증, 발주서, 청구서. 수량·단가만 넣으면 금액과 부가세를 자동 계산합니다.</li>
+      <li><b>취업·자기PR</b> - 이력서, 자기소개서, 경력기술서, 재직증명서, 사직서. 채용 서류에 바로 쓰는 형식으로 정리됩니다.</li>
+      <li><b>생활·행정</b> - 상장·표창장, 가정통신문, 명함, 차용증, 위임장. 격식과 법적 요건을 반영한 양식으로 완성됩니다.</li>
+      <li><b>텍스트 도구</b> - 글자수 세기, 영문이름·주소 변환, 텍스트 정렬, QR코드. 문서 작업에 곁들여 쓰는 보조 도구입니다.</li>
     </ul>
-    <p>자주 쓰이지만 만들기 번거로운 문서를 계속 더해 가고 있습니다. 필요한 문서가 있다면 <a href="/pages/contact.html">문의</a>로 알려 주세요.</p>
+
+    <h2>개인정보는 안전한가요</h2>
+    <p>폼다에서 가장 중요하게 지키는 원칙입니다. 문서 작성에 입력한 내용은 <b>이용자의 브라우저 안에서만</b> 처리되며 폼다 서버로 전송되거나 저장되지 않습니다. 이용자가 직접 내려받은 PDF·이미지 파일만 이용자의 기기에 남습니다. 자세한 내용은 <a href="/pages/privacy.html">개인정보처리방침</a>에서 확인할 수 있습니다.</p>
+
+    <h2>참고해 주세요</h2>
+    <p>폼다는 문서를 편리하게 만드는 <b>도구</b>이며, 세무·법률·회계 자문을 제공하지 않습니다. 각 문서 페이지에 딸린 안내와 가이드는 일반적인 참고 정보이니, 계약이나 신고처럼 중요한 결정에는 반드시 최신 법령과 전문가의 확인을 거치시길 권합니다. 작성한 문서의 내용 확인과 사용 책임은 이용자에게 있습니다.</p>
+
+    <h2>앞으로</h2>
+    <p>자주 쓰이지만 만들기 번거로운 문서를 계속 더해 가고, 이미 있는 도구도 실제 사용 후기를 반영해 다듬어 갑니다. 폼다에 있었으면 하는 문서나 불편한 점이 있다면 <a href="/pages/contact.html">문의</a>로 알려 주세요. 주신 의견은 도구 개선과 새 문서 추가에 적극 반영합니다.</p>
   </article>
 </main>
 <footer class="footer">
@@ -69,7 +102,7 @@
     <div class="footer-copy">© 폼다 · 입력하면 바로 완성되는 무료 문서 도구</div>
   </div>
 </footer>
-<script src="/search-index.js" defer></script>
+<script src="/engine/track.js" defer></script>
 <script src="/engine/search.js" defer></script>
 </body>
 </html>

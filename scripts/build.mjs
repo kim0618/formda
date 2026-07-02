@@ -62,16 +62,16 @@ for (const dir of ['tools', 'category', 'pages', 'guides']) {
   if (existsSync(p)) rmSync(p, { recursive: true, force: true });
 }
 
-console.log('[1/5] 도구 페이지');
+console.log('[1/6] 도구 페이지');
 for (const tool of tools) {
   const html = tool.stub ? stubToolPage(tool) : (tool.toolType === 'text' ? textToolPage(tool) : toolPage(tool));
   out(`tools/${tool.slug}.html`, html);
 }
 
-console.log('[2/5] 홈');
+console.log('[2/6] 홈');
 out('index.html', homePage(THUMBS));
 
-console.log('[3/5] 카테고리 허브');
+console.log('[3/6] 카테고리 허브');
 for (const cat of categories) {
   out(`category/${cat.slug}.html`, categoryPage(cat, THUMBS));
 }
@@ -118,23 +118,30 @@ const searchIndex = toolEntries.concat(guideEntries);
 out('search-index.js', 'window.Formda=window.Formda||{};window.Formda.searchIndex=' + JSON.stringify(searchIndex) + ';');
 
 console.log('[6/6] sitemap + robots');
+// 도구·홈·카테고리처럼 개별 날짜가 없는 URL의 lastmod (사이트 최종 수정일).
+// 콘텐츠 리프레시 때 이 값을 올리면 전 URL의 재크롤 신호가 갱신된다.
+const SITE_MODIFIED = '2026-07-01';
+// 가이드 허브는 최신 가이드 날짜를 lastmod로.
+const guidesLatest = guides.map((g) => g.date).sort().slice(-1)[0] || SITE_MODIFIED;
 const urls = [
-  { loc: '/', priority: '1.0' },
-  ...categories.map((c) => ({ loc: `/category/${c.slug}.html`, priority: '0.7' })),
-  ...tools.filter((t) => !t.stub).map((t) => ({ loc: `/tools/${t.slug}.html`, priority: '0.9' })),
-  { loc: '/guides/', priority: '0.6' },
-  ...guides.map((g) => ({ loc: `/guides/${g.slug}.html`, priority: '0.6' })),
-  ...['about', 'terms', 'privacy', 'contact'].map((s) => ({ loc: `/pages/${s}.html`, priority: '0.3' })),
+  { loc: '/', priority: '1.0', lastmod: SITE_MODIFIED },
+  ...categories.map((c) => ({ loc: `/category/${c.slug}.html`, priority: '0.7', lastmod: SITE_MODIFIED })),
+  ...tools.filter((t) => !t.stub).map((t) => ({ loc: `/tools/${t.slug}.html`, priority: '0.9', lastmod: SITE_MODIFIED })),
+  { loc: '/guides/', priority: '0.7', lastmod: guidesLatest },
+  ...guides.map((g) => ({ loc: `/guides/${g.slug}.html`, priority: '0.6', lastmod: g.updated || g.date })),
+  ...['about', 'terms', 'privacy', 'contact'].map((s) => ({ loc: `/pages/${s}.html`, priority: '0.3', lastmod: SITE_MODIFIED })),
 ];
 const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-${urls.map((u) => `  <url><loc>${site.domain}${u.loc}</loc><priority>${u.priority}</priority></url>`).join('\n')}
+${urls.map((u) => `  <url><loc>${site.domain}${u.loc}</loc>${u.lastmod ? `<lastmod>${u.lastmod}</lastmod>` : ''}<priority>${u.priority}</priority></url>`).join('\n')}
 </urlset>
 `;
 out('sitemap.xml', sitemap);
 
+// QA·검수 산출물(proof.html)은 색인 제외
 out('robots.txt', `User-agent: *
 Allow: /
+Disallow: /proof.html
 Sitemap: ${site.domain}/sitemap.xml
 `);
 

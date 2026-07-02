@@ -1,5 +1,5 @@
 // 도구 페이지 템플릿 (좌 입력 / 우 A4 미리보기 + 프리렌더 본문)
-import { head, header, footer, trustBadge, steps } from './shell.mjs';
+import { head, header, footer, trustBadge, steps, orgNode } from './shell.mjs';
 import { site, categoryBySlug, toolsBySlug } from '../data/registry.js';
 import { guidesByTool } from '../data/guides.js';
 
@@ -27,6 +27,21 @@ ${header(tool.category)}
 </main>
 ${footer()}
 `;
+}
+
+// 결제 painted-door 블록 (수요검증). 단건=전 문서 도구, 구독=비즈니스 문서만(WTP 높음).
+function pricingBlock(tool) {
+  return `<div class="fd-pricing no-print" data-doc="${tool.slug}">
+    <span class="fd-price-lead">더 깔끔하게, 반복 작업은 더 빠르게</span>
+    <div class="fd-price-btns">
+      <button type="button" class="fd-price-btn single" onclick="Formda.pay.open('single')">
+        <span class="fp-t">워터마크 없이 저장</span><span class="fp-p">건당 1,000원</span>
+      </button>
+      <button type="button" class="fd-price-btn sub" onclick="Formda.pay.open('subscribe')">
+        <span class="fp-t">무제한 저장</span><span class="fp-p">월 4,900원</span>
+      </button>
+    </div>
+  </div>`;
 }
 
 export function toolPage(tool) {
@@ -77,19 +92,20 @@ ${header(tool.category)}
     <section class="pane-preview">
       <div class="pane-head">
         <span class="pv-label">미리보기</span>
-        <div class="zoom no-print">
-          <button type="button" onclick="Formda.app.zoomOut()" aria-label="축소">−</button>
-          <button type="button" class="zoom-pct" onclick="Formda.app.zoomReset()" aria-label="맞춤"><span id="zoomLabel">100%</span></button>
-          <button type="button" onclick="Formda.app.zoomIn()" aria-label="확대">+</button>
+        <div class="head-actions no-print">
+          <button class="mini-btn pv-exp" type="button" onclick="Formda.app.print()">인쇄</button>
+          <button class="mini-btn pv-exp" type="button" onclick="Formda.app.downloadPNG(this)">PNG 저장</button>
+          <button class="mini-btn primary pv-exp" type="button" onclick="Formda.app.downloadPDF(this)">PDF 다운로드</button>
+          <div class="zoom">
+            <button type="button" onclick="Formda.app.zoomOut()" aria-label="축소">−</button>
+            <button type="button" class="zoom-pct" onclick="Formda.app.zoomReset()" aria-label="맞춤"><span id="zoomLabel">100%</span></button>
+            <button type="button" onclick="Formda.app.zoomIn()" aria-label="확대">+</button>
+          </div>
         </div>
       </div>
       <div class="preview-wrap">
         <div class="doc-viewport" id="doc"><!-- 미리보기: 엔진이 A4 페이지로 렌더 --></div>
-        <div class="actions no-print">
-          <button class="btn btn-ghost" onclick="Formda.app.print()">인쇄</button>
-          <button class="btn btn-ghost" onclick="Formda.app.downloadPNG(this)">PNG 저장</button>
-          <button class="btn btn-primary btn-pdf" onclick="Formda.app.downloadPDF(this)">PDF 다운로드</button>
-        </div>
+        ${pricingBlock(tool)}
       </div>
     </section>
   </div>
@@ -102,18 +118,18 @@ ${header(tool.category)}
 <div class="mobile-bar no-print">
   <button class="btn btn-ghost" onclick="Formda.app.downloadPNG(this)">PNG</button>
   <button class="btn btn-primary btn-pdf" onclick="Formda.app.downloadPDF(this)">PDF 다운로드</button>
+  <button class="btn btn-buy" onclick="Formda.pay.open('single')" aria-label="워터마크 제거">✦ 제거</button>
 </div>
 
 ${footer()}
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script>window.FORMDA_TOOL = ${JSON.stringify(toolConfig)};</script>
 <script src="/engine/calc.js"></script>
 <script src="/engine/doc-render.js"></script>
 <script src="/engine/form-engine.js"></script>
 <script src="/engine/export.js"></script>
 <script src="/engine/app.js"></script>
+<script src="/engine/pay.js" defer></script>
 ${jsonLd(tool)}
 `;
 }
@@ -167,6 +183,33 @@ function relatedHTML(tool) {
   return `<div class="sibling-section">${group('관련 문서 도구', toolPills)}${group('관련 가이드', guidePills)}</div>`;
 }
 
+// HowTo 1단계(입력) 안내를 문서 유형/도구별로 정확히. 하드코딩 "품목·금액"이
+// 차용증·위임장처럼 품목이 없는 문서에까지 붙던 오류를 방지.
+const HOWTO_INPUT_SLUG = {
+  employment: '회사·근로자 정보와 재직 사항을 입력합니다.',
+  resignation: '소속·직위와 퇴직 사유·퇴직 예정일을 입력합니다.',
+  award: '수여 기관과 수상자 이름·상장 문구를 입력합니다.',
+  loan: '채권자·채무자 정보와 차용 금액·이자율·변제기일을 입력합니다.',
+  mandate: '위임인·수임인 정보와 위임할 내용을 입력합니다.',
+};
+const HOWTO_INPUT_TYPE = {
+  'business-invoice': '공급자·공급받는자 정보와 품목·수량·단가를 입력합니다.',
+  'resume': '인적사항·학력·경력 등 이력서 항목을 입력합니다.',
+  'cover-letter': '지원 회사·직무와 자기소개 문항 내용을 입력합니다.',
+  'career': '경력사항과 담당 업무·성과를 입력합니다.',
+  'certificate': '문서에 들어갈 인적사항과 내용을 입력합니다.',
+  'notice': '기관 정보와 안내할 내용을 입력합니다.',
+  'card': '이름·직함·연락처 등 명함 정보를 입력합니다.',
+  'legal': '당사자 정보와 문서 내용을 입력합니다.',
+  'payslip': '회사·근로자 정보와 지급·공제 항목을 입력합니다.',
+  'contract': '사업주·근로자 정보와 근로시간·임금 등 근로조건을 입력합니다.',
+  'expense': '부서·작성자·결재선과 지출 내역을 입력합니다.',
+  'handover': '인계자·인수자와 인수인계할 업무 항목을 입력합니다.',
+};
+function howtoInputText(tool) {
+  return HOWTO_INPUT_SLUG[tool.slug] || HOWTO_INPUT_TYPE[tool.docType] || '필요한 정보를 입력합니다.';
+}
+
 // 구조화 데이터 (SEO 리치결과 + GEO/AI 인용): FAQ · WebApplication(무료) · HowTo · Breadcrumb
 function jsonLd(tool) {
   const cat = categoryBySlug[tool.category];
@@ -186,14 +229,15 @@ function jsonLd(tool) {
     inLanguage: 'ko', description: tool.seoDescription,
     // 프리미엄 출시 시 무료+유료 티어로 갱신
     offers: { '@type': 'Offer', price: '0', priceCurrency: 'KRW' },
-    publisher: { '@type': 'Organization', name: site.name, url: base + '/' },
+    publisher: orgNode(),
   };
   const howto = {
     '@context': 'https://schema.org', '@type': 'HowTo',
     name: `${tool.navTitle} 만드는 방법`, inLanguage: 'ko',
+    totalTime: 'PT2M', image: base + '/assets/og.png',
     step: [
-      { '@type': 'HowToStep', position: 1, name: '정보 입력', text: '회사 정보와 품목·금액을 입력합니다.' },
-      { '@type': 'HowToStep', position: 2, name: '실시간 미리보기', text: '입력하는 즉시 A4 문서에 그대로 반영됩니다.' },
+      { '@type': 'HowToStep', position: 1, name: '정보 입력', text: howtoInputText(tool) },
+      { '@type': 'HowToStep', position: 2, name: '실시간 미리보기', text: `입력하는 즉시 A4 ${tool.navTitle} 문서에 그대로 반영됩니다.` },
       { '@type': 'HowToStep', position: 3, name: 'PDF·PNG 저장', text: '완성된 문서를 PDF·PNG로 저장하거나 인쇄합니다.' },
     ],
   };

@@ -22,13 +22,16 @@
 <meta name="twitter:image" content="https://formda.kr/assets/og.png" />
 <link rel="icon" href="/assets/favicon.png" type="image/png" />
 <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png" />
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" />
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+<link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard-dynamic-subset.css" />
 <link rel="stylesheet" href="/styles/tokens.css" />
+<script>window.FORMDA_CFG={"GA_ID":"","WEB3FORMS_KEY":"","PRICE_SINGLE":1000,"PRICE_SUB":4900,"PRICE_SUB_YEAR":53900};</script>
 </head>
 <body>
 <header class="header">
   <div class="header-in">
-    <a class="logo" href="/"><img class="logo-img" src="/assets/logo.png" alt="폼다" onerror="this.replaceWith(Object.assign(document.createElement('span'),{className:'logo-text',textContent:'폼다'}))"></a>
+    <a class="logo" href="/"><img class="logo-img" src="/assets/logo.png" alt="폼다" width="53" height="28" onerror="this.replaceWith(Object.assign(document.createElement('span'),{className:'logo-text',textContent:'폼다'}))"></a>
     <nav class="nav"><a href="/category/business.html">비즈니스</a><a href="/category/job.html" class="on">취업</a><a href="/category/life.html">생활</a><a href="/category/text.html">텍스트</a><a href="/guides/">가이드</a></nav>
     <div class="hdr-search">
       <svg class="hdr-search-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.2-3.2"></path></svg>
@@ -70,19 +73,30 @@
     <section class="pane-preview">
       <div class="pane-head">
         <span class="pv-label">미리보기</span>
-        <div class="zoom no-print">
-          <button type="button" onclick="Formda.app.zoomOut()" aria-label="축소">−</button>
-          <button type="button" class="zoom-pct" onclick="Formda.app.zoomReset()" aria-label="맞춤"><span id="zoomLabel">100%</span></button>
-          <button type="button" onclick="Formda.app.zoomIn()" aria-label="확대">+</button>
+        <div class="head-actions no-print">
+          <button class="mini-btn pv-exp" type="button" onclick="Formda.app.print()">인쇄</button>
+          <button class="mini-btn pv-exp" type="button" onclick="Formda.app.downloadPNG(this)">PNG 저장</button>
+          <button class="mini-btn primary pv-exp" type="button" onclick="Formda.app.downloadPDF(this)">PDF 다운로드</button>
+          <div class="zoom">
+            <button type="button" onclick="Formda.app.zoomOut()" aria-label="축소">−</button>
+            <button type="button" class="zoom-pct" onclick="Formda.app.zoomReset()" aria-label="맞춤"><span id="zoomLabel">100%</span></button>
+            <button type="button" onclick="Formda.app.zoomIn()" aria-label="확대">+</button>
+          </div>
         </div>
       </div>
       <div class="preview-wrap">
         <div class="doc-viewport" id="doc"><!-- 미리보기: 엔진이 A4 페이지로 렌더 --></div>
-        <div class="actions no-print">
-          <button class="btn btn-ghost" onclick="Formda.app.print()">인쇄</button>
-          <button class="btn btn-ghost" onclick="Formda.app.downloadPNG(this)">PNG 저장</button>
-          <button class="btn btn-primary btn-pdf" onclick="Formda.app.downloadPDF(this)">PDF 다운로드</button>
-        </div>
+        <div class="fd-pricing no-print" data-doc="employment">
+    <span class="fd-price-lead">더 깔끔하게, 반복 작업은 더 빠르게</span>
+    <div class="fd-price-btns">
+      <button type="button" class="fd-price-btn single" onclick="Formda.pay.open('single')">
+        <span class="fp-t">워터마크 없이 저장</span><span class="fp-p">건당 1,000원</span>
+      </button>
+      <button type="button" class="fd-price-btn sub" onclick="Formda.pay.open('subscribe')">
+        <span class="fp-t">무제한 저장</span><span class="fp-p">월 4,900원</span>
+      </button>
+    </div>
+  </div>
       </div>
     </section>
   </div>
@@ -115,6 +129,7 @@
 <div class="mobile-bar no-print">
   <button class="btn btn-ghost" onclick="Formda.app.downloadPNG(this)">PNG</button>
   <button class="btn btn-primary btn-pdf" onclick="Formda.app.downloadPDF(this)">PDF 다운로드</button>
+  <button class="btn btn-buy" onclick="Formda.pay.open('single')" aria-label="워터마크 제거">✦ 제거</button>
 </div>
 
 <footer class="footer">
@@ -124,20 +139,19 @@
     <div class="footer-copy">© 폼다 · 입력하면 바로 완성되는 무료 문서 도구</div>
   </div>
 </footer>
-<script src="/search-index.js" defer></script>
+<script src="/engine/track.js" defer></script>
 <script src="/engine/search.js" defer></script>
 </body>
 </html>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script>window.FORMDA_TOOL = {"slug":"employment","docType":"certificate","doc":{"docTitle":"재 직 증 명 서","variant":"employment","fileName":"재직증명서","showSeal":true},"sample":{"date":"today","docNo":"2026-001","name":"홍길동","birth":"1990-05-20","addr":"서울특별시 마포구 월드컵로 100","dept":"경영지원팀","position":"과장","period":"2018년 3월 1일 ~ 현재","body":"위 사람은 당사에 위와 같이 재직하고 있음을 증명합니다.","purpose":"관공서 제출용","orgName":"폼다 주식회사","orgCeo":"김폼다","orgReg":"123-45-67890","orgTel":"02-1234-5678","orgAddr":"서울특별시 강남구 테헤란로 1"}};</script>
 <script src="/engine/calc.js"></script>
 <script src="/engine/doc-render.js"></script>
 <script src="/engine/form-engine.js"></script>
 <script src="/engine/export.js"></script>
 <script src="/engine/app.js"></script>
+<script src="/engine/pay.js" defer></script>
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"회사가 재직증명서 발급을 거부할 수 있나요?","acceptedAnswer":{"@type":"Answer","text":"근로기준법 제39조는 사용증명서(재직증명서)에 대해, 근로자가 청구하면 사용자가 근무 기간·업무 종류·지위·임금 등 근로자가 요구한 사항을 사실대로 적어 발급하도록 정하고 있습니다. 따라서 정당한 사유 없이 발급을 거부하기 어렵습니다. 다만 근로자가 요구하지 않은 항목까지 회사가 임의로 넣을 수는 없습니다. 회사가 직접 발급할 때 폼다로 표준 양식을 빠르게 만들 수 있습니다."}},{"@type":"Question","name":"재직증명서는 누가 발급하나요?","acceptedAnswer":{"@type":"Answer","text":"재직증명서는 본인이 임의로 만드는 것이 아니라 재직 중인 회사가 발급하는 문서입니다. 보통 인사팀이나 총무팀에 요청하면 회사 직인을 찍어 발급해 줍니다. 소규모 사업장이라면 대표자가 직접 작성하고 도장을 찍어 발급하기도 합니다. 폼다는 이렇게 회사가 직접 발급할 때 표준 양식을 빠르게 만들 수 있도록 돕는 도구입니다."}},{"@type":"Question","name":"재직증명서에 직인이 꼭 필요한가요?","acceptedAnswer":{"@type":"Answer","text":"대부분의 제출처는 회사 직인이나 대표 도장이 찍힌 재직증명서를 요구합니다. 직인이 없으면 공식 문서로 인정받지 못할 수 있습니다. 폼다에서는 직인 이미지를 올리면 발급기관 대표자 이름 옆에 바로 반영되므로, 인쇄해서 찍지 않아도 날인된 재직증명서를 만들 수 있습니다."}},{"@type":"Question","name":"퇴사한 회사의 재직증명서를 받을 수 있나요?","acceptedAnswer":{"@type":"Answer","text":"재직증명서는 현재 재직 중인 사람에게만 발급됩니다. 이미 퇴사했다면 재직증명서가 아니라 경력증명서를 요청해야 합니다. 경력증명서는 과거 근무 사실과 기간을 증명하는 문서로, 마찬가지로 그 회사가 발급합니다. 제출처에서 무엇을 요구하는지 먼저 확인하세요."}},{"@type":"Question","name":"재직증명서에 연봉이나 급여도 적나요?","acceptedAnswer":{"@type":"Answer","text":"재직 사실만 증명하는 기본 재직증명서에는 보통 급여를 적지 않습니다. 소득까지 증빙해야 한다면 재직증명서와 별도로 원천징수영수증이나 급여명세서를 함께 제출하는 경우가 많습니다. 제출처가 소득 명시를 요구하면 회사와 협의해 별도 항목으로 기재할 수 있습니다."}},{"@type":"Question","name":"작성한 재직증명서는 저장되나요?","acceptedAnswer":{"@type":"Answer","text":"폼다는 입력 내용을 서버로 전송하거나 저장하지 않습니다. 모든 처리는 사용자 브라우저 안에서만 이루어지며, PDF·PNG로 내려받은 파일만 기기에 남습니다. 직원의 인적사항 같은 민감 정보가 외부로 나가지 않으므로 안심하고 발급할 수 있습니다."}}]}</script>
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"폼다 재직증명서 작성기","url":"https://formda.kr/tools/employment.html","applicationCategory":"BusinessApplication","operatingSystem":"All","inLanguage":"ko","description":"가입 없이 대상자 정보와 재직기간만 입력하면 재직증명서가 바로 완성됩니다. 표준 양식, 직인 첨부, PDF·PNG 다운로드까지 무료. 폼다 재직증명서 만들기.","offers":{"@type":"Offer","price":"0","priceCurrency":"KRW"},"publisher":{"@type":"Organization","name":"폼다","url":"https://formda.kr/"}}</script>
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"HowTo","name":"재직증명서 만드는 방법","inLanguage":"ko","step":[{"@type":"HowToStep","position":1,"name":"정보 입력","text":"회사 정보와 품목·금액을 입력합니다."},{"@type":"HowToStep","position":2,"name":"실시간 미리보기","text":"입력하는 즉시 A4 문서에 그대로 반영됩니다."},{"@type":"HowToStep","position":3,"name":"PDF·PNG 저장","text":"완성된 문서를 PDF·PNG로 저장하거나 인쇄합니다."}]}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"폼다 재직증명서 작성기","url":"https://formda.kr/tools/employment.html","applicationCategory":"BusinessApplication","operatingSystem":"All","inLanguage":"ko","description":"가입 없이 대상자 정보와 재직기간만 입력하면 재직증명서가 바로 완성됩니다. 표준 양식, 직인 첨부, PDF·PNG 다운로드까지 무료. 폼다 재직증명서 만들기.","offers":{"@type":"Offer","price":"0","priceCurrency":"KRW"},"publisher":{"@type":"Organization","@id":"https://formda.kr/#org","name":"폼다","url":"https://formda.kr/","logo":{"@type":"ImageObject","url":"https://formda.kr/assets/logo.png","width":380,"height":200}}}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"HowTo","name":"재직증명서 만드는 방법","inLanguage":"ko","totalTime":"PT2M","image":"https://formda.kr/assets/og.png","step":[{"@type":"HowToStep","position":1,"name":"정보 입력","text":"회사·근로자 정보와 재직 사항을 입력합니다."},{"@type":"HowToStep","position":2,"name":"실시간 미리보기","text":"입력하는 즉시 A4 재직증명서 문서에 그대로 반영됩니다."},{"@type":"HowToStep","position":3,"name":"PDF·PNG 저장","text":"완성된 문서를 PDF·PNG로 저장하거나 인쇄합니다."}]}</script>
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"홈","item":"https://formda.kr/"},{"@type":"ListItem","position":2,"name":"취업/자기PR","item":"https://formda.kr/category/job.html"},{"@type":"ListItem","position":3,"name":"재직증명서"}]}</script>

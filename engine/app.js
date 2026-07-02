@@ -15,8 +15,8 @@
       this.slug = tool.slug || tool.docType;
       this.cfg = tool.doc;
       // 데스크톱 A4 기본 130%. 모바일·가로형(명함)은 폭에 맞게 100%(아니면 폭을 넘어 잘림)
-      var narrowFit = (typeof window !== 'undefined' && window.innerWidth <= 980) || tool.docType === 'card';
-      this.userZoom = narrowFit ? 1 : 1.3;
+      // 기본 배율 100% = 미리보기 폭을 꽉 채움(회색 여백 최소화). 세로가 길면 스크롤.
+      this.userZoom = 1;
       this.MAX_ITEMS = (tool.doc && tool.doc.maxItems) || 14;   // 무료: 문서별 한 페이지 분량
       this.sampleState = this.resolveSample(tool.sample); // 원본 샘플 보관 (샘플 불러오기용)
 
@@ -48,6 +48,11 @@
         if (!s.items || !s.items.length) s.items = [{ heading: '', body: '' }];
       } else if (this.docType === 'career') {
         if (!s.items || !s.items.length) s.items = [{ company: '', period: '', role: '', body: '' }];
+      } else if (this.docType === 'payslip') {
+        if (!s.earnings || !s.earnings.length) s.earnings = this.psEarnDefault();
+        if (!s.deductions || !s.deductions.length) s.deductions = this.psDeductDefault();
+      } else if (this.docType === 'contract') {
+        // 반복 행 없음 - 기본값은 sample / clearAll에서 처리
       } else if (!s.items || !s.items.length) {
         s.items = [{ name: '', spec: '', qty: 1, price: 0 }];
       }
@@ -137,12 +142,41 @@
       this.setVal('dueDate', s.dueDate);
       this.setVal('repayMethod', s.repayMethod);
       this.setVal('delayRate', s.delayRate);
+      this.setVal('debtReason', s.debtReason);
       this.setVal('special', s.special);
       this.setVal('crName', s.crName); this.setVal('crId', s.crId); this.setVal('crAddr', s.crAddr); this.setVal('crTel', s.crTel);
       this.setVal('dbName', s.dbName); this.setVal('dbId', s.dbId); this.setVal('dbAddr', s.dbAddr); this.setVal('dbTel', s.dbTel);
       this.setVal('agName', s.agName); this.setVal('agId', s.agId); this.setVal('agAddr', s.agAddr); this.setVal('agTel', s.agTel);
       this.setVal('relation', s.relation); this.setVal('content', s.content); this.setVal('attach', s.attach); this.setVal('lead', s.lead);
       this.setVal('prName', s.prName); this.setVal('prId', s.prId); this.setVal('prAddr', s.prAddr); this.setVal('prTel', s.prTel);
+      // 급여명세서 (payslip) 가족 필드 (해당 입력칸 없으면 setVal 자동 무시)
+      this.setVal('bizNo', s.bizNo); this.setVal('ceo', s.ceo);
+      this.setVal('empName', s.empName); this.setVal('empDept', s.empDept); this.setVal('empRank', s.empRank);
+      this.setVal('empHireDate', s.empHireDate); this.setVal('empNo', s.empNo); this.setVal('empBirth', s.empBirth);
+      this.setVal('payMonth', s.payMonth); this.setVal('payDate', s.payDate);
+      this.setVal('workDaysN', s.workDaysN); this.setVal('workHoursTotal', s.workHoursTotal);
+      this.setVal('hoursOT', s.hoursOT); this.setVal('hoursNight', s.hoursNight); this.setVal('hoursHoliday', s.hoursHoliday);
+      // 근로계약서 (contract) 가족 필드
+      this.setVal('bizName', s.bizName); this.setVal('bizCeo', s.bizCeo); this.setVal('bizAddr', s.bizAddr); this.setVal('bizTel', s.bizTel);
+      this.setVal('bizRegNo', s.bizRegNo);
+      this.setVal('wName', s.wName); this.setVal('wBirth', s.wBirth); this.setVal('wAddr', s.wAddr); this.setVal('wTel', s.wTel);
+      this.setVal('startDate', s.startDate); this.setVal('endDate', s.endDate);
+      this.setVal('workplace', s.workplace); this.setVal('jobDesc', s.jobDesc);
+      this.setVal('workTime', s.workTime); this.setVal('breakTime', s.breakTime);
+      this.setVal('workDays', s.workDays); this.setVal('holiday', s.holiday);
+      this.setVal('payType', s.payType); this.setMoney('payAmount', s.payAmount);
+      this.setVal('bonus', s.bonus); this.setVal('allowance', s.allowance);
+      this.setVal('wageDate', s.wageDate); this.setVal('payMethod', s.payMethod);
+      this.setCheck('insEmploy', s.insEmploy); this.setCheck('insInjury', s.insInjury);
+      this.setCheck('insPension', s.insPension); this.setCheck('insHealth', s.insHealth);
+      // 지출결의서 (expense) 가족 필드 (dept·no·date·note는 위에서 처리)
+      this.setVal('writer', s.writer); this.setVal('approvers', s.approvers);
+      // 인수인계서 (handover) 가족 필드
+      this.setVal('hoFrom', s.hoFrom); this.setVal('hoFromDept', s.hoFromDept); this.setVal('hoFromPos', s.hoFromPos);
+      this.setVal('hoTo', s.hoTo); this.setVal('hoToDept', s.hoToDept); this.setVal('hoToPos', s.hoToPos);
+      this.setVal('hoDate', s.hoDate); this.setVal('hoPeriod', s.hoPeriod); this.setVal('hoConfirm', s.hoConfirm);
+      this.drawEarn();
+      this.drawDeduct();
       this.drawQ();
       this.drawExp();
       var pn = document.getElementById('photoName');
@@ -188,6 +222,40 @@
         });
         return;
       }
+      if (this.docType === 'payslip') {
+        this.applyState({
+          company: '', bizNo: '', ceo: '', empName: '', empDept: '', empRank: '',
+          empHireDate: '', empNo: '', empBirth: '', payMonth: '', payDate: this.today(),
+          workDaysN: '', workHoursTotal: '', hoursOT: '', hoursNight: '', hoursHoliday: '',
+          earnings: this.psEarnDefault(), deductions: this.psDeductDefault(), note: '', sealImg: null,
+        });
+        return;
+      }
+      if (this.docType === 'expense') {
+        this.applyState({
+          date: this.today(), no: '', dept: '', writer: '', approvers: '담당,팀장,대표',
+          items: [{ name: '', spec: '', qty: 1, price: 0 }], note: '', sealImg: null,
+        });
+        return;
+      }
+      if (this.docType === 'handover') {
+        this.applyState({
+          hoFrom: '', hoFromDept: '', hoFromPos: '', hoTo: '', hoToDept: '', hoToPos: '',
+          hoDate: this.today(), hoPeriod: '', no: '', hoConfirm: '',
+          items: [{ name: '', spec: '', qty: 1, price: 0 }], note: '', sealImg: null,
+        });
+        return;
+      }
+      if (this.docType === 'contract') {
+        this.applyState({
+          bizName: '', bizRegNo: '', bizCeo: '', bizAddr: '', bizTel: '', wName: '', wBirth: '', wAddr: '', wTel: '',
+          startDate: '', endDate: '', workplace: '', jobDesc: '', workTime: '', breakTime: '', workDays: '', holiday: '',
+          payType: '월급', payAmount: 0, bonus: '', allowance: '', wageDate: '', payMethod: '근로자 명의 예금통장에 입금',
+          insEmploy: true, insInjury: true, insPension: true, insHealth: true,
+          date: this.today(), note: '', sealImg: null,
+        });
+        return;
+      }
       if (this.docType === 'resume') {
         this.applyState({
           name: '', birth: '', tel: '', email: '', addr: '', photo: null,
@@ -202,6 +270,16 @@
           this.applyState({
             agName: '', agId: '', agAddr: '', agTel: '', relation: '', content: '',
             period: '', attach: '', date: this.today(), prName: '', prId: '', prAddr: '', prTel: '', sealImg: null,
+          });
+        } else if (this.cfg.variant === 'pledge') {
+          this.applyState({
+            amount: 0, debtReason: '', dueDate: '', repayMethod: '', delayRate: '', body: '', special: '', date: this.today(),
+            crName: '', crId: '', crAddr: '', crTel: '', dbName: '', dbId: '', dbAddr: '', dbTel: '', sealImg: null,
+          });
+        } else if (this.cfg.variant === 'agreement') {
+          this.applyState({
+            content: '', lead: '', special: '', date: this.today(),
+            prName: '', prId: '', prAddr: '', prTel: '', agName: '', agId: '', agAddr: '', agTel: '', sealImg: null,
           });
         } else {
           this.applyState({
@@ -222,30 +300,40 @@
 
     // ----- 반복 사용: 내 회사 정보 + 문서번호 (localStorage, 이 브라우저에만 저장) -----
     PROFILE_KEY: 'formda_profile_v1',
+    SEAL_KEY: 'formda_seal_v1',
     PROFILE_FIELDS: ['from', 'fromReg', 'fromCeo', 'fromBiz', 'fromTel', 'fromAddr'],
     store: function (k, v) { try { localStorage.setItem(k, v); return true; } catch (e) { return false; } },
+    remove: function (k) { try { localStorage.removeItem(k); } catch (e) {} },
     fetch: function (k) { try { return localStorage.getItem(k); } catch (e) { return null; } },
     loadProfileRaw: function () { try { return JSON.parse(this.fetch(this.PROFILE_KEY) || 'null'); } catch (e) { return null; } },
 
     saveProfile: function () {
       var s = this.state, p = {};
       this.PROFILE_FIELDS.forEach(function (k) { p[k] = s[k] || ''; });
-      p.sealImg = s.sealImg || null;
-      if (this.store(this.PROFILE_KEY, JSON.stringify(p))) this.flashProfile('내 회사 정보를 저장했어요');
+      var textOk = this.store(this.PROFILE_KEY, JSON.stringify(p));
+      // 도장 이미지는 용량이 커 쿼터를 초과할 수 있으므로 별도 키에 저장한다.
+      // 이미지 저장이 실패해도 텍스트 회사정보 저장은 유지되도록 분리.
+      var sealOk = true;
+      if (s.sealImg) sealOk = this.store(this.SEAL_KEY, s.sealImg);
+      else this.remove(this.SEAL_KEY);
+      if (textOk && sealOk) this.flashProfile('내 회사 정보를 저장했어요');
+      else if (textOk) this.flashProfile('회사 정보는 저장했어요 (도장 이미지는 용량이 커 저장하지 못했어요)');
       else this.flashProfile('저장에 실패했어요');
       this.updateProfileBar();
     },
     applyProfile: function (p) {
       var self = this;
       this.PROFILE_FIELDS.forEach(function (k) { if (p[k] != null) { self.state[k] = p[k]; self.setVal(k, p[k]); } });
-      if (p.sealImg) {
-        this.state.sealImg = p.sealImg;
+      // 도장은 별도 키에서(구버전 프로필의 p.sealImg도 하위호환으로 수용)
+      var seal = this.fetch(this.SEAL_KEY) || p.sealImg;
+      if (seal) {
+        this.state.sealImg = seal;
         var nm = document.getElementById('sealName'); if (nm) nm.textContent = '저장된 도장 적용됨';
       }
       this.renderDoc();
     },
     loadProfile: function () { var p = this.loadProfileRaw(); if (p) { this.applyProfile(p); this.flashProfile('저장된 정보를 불러왔어요'); } },
-    clearProfile: function () { try { localStorage.removeItem(this.PROFILE_KEY); } catch (e) {} this.flashProfile('저장된 정보를 지웠어요'); this.updateProfileBar(); },
+    clearProfile: function () { this.remove(this.PROFILE_KEY); this.remove(this.SEAL_KEY); this.flashProfile('저장된 정보를 지웠어요'); this.updateProfileBar(); },
     flashProfile: function (msg) {
       var el = document.getElementById('profileStatus'); if (!el) return;
       el.textContent = msg; clearTimeout(this._pf);
@@ -275,6 +363,12 @@
       if (el) el.value = v ? Number(v).toLocaleString('ko-KR') : '';
     },
 
+    setCheck: function (id, v) {
+      var el = document.getElementById('f-' + id);
+      if (el) el.checked = !!v;
+    },
+    onCheck: function (key, checked) { this.state[key] = !!checked; this.renderDoc(); },
+
     onField: function (id, v) {
       var prev = this.state[id];
       this.state[id] = v;
@@ -288,7 +382,7 @@
     },
     // 캡 걸린 자유 텍스트 영역이 max-height를 넘쳤는지
     overflowing: function () {
-      var els = document.querySelectorAll('#doc .nt-body, #doc .aw-body, #doc .ct-letter, #doc .ct-handover, #doc .ct-body, #doc .rs-etc, #doc .qt-note, #doc .lg-content, #doc .lg-special');
+      var els = document.querySelectorAll('#doc .nt-body, #doc .aw-body, #doc .ct-letter, #doc .ct-handover, #doc .ct-body, #doc .rs-etc, #doc .qt-note, #doc .lg-content, #doc .lg-special, #doc .ps-note, #doc .ec-note, #doc .ho-note');
       for (var i = 0; i < els.length; i++) {
         if (els[i].scrollHeight > els[i].clientHeight + 2) return true;
       }
@@ -304,7 +398,13 @@
 
     drawRows: function () {
       var host = document.getElementById('rows');
-      if (host) host.innerHTML = F.formEngine.itemRows(this.state.items);
+      if (host) {
+        host.innerHTML = (this.docType === 'expense')
+          ? F.formEngine.expenseRows(this.state.items)   // 지출결의서: 계정과목·적요·금액
+          : (this.docType === 'handover')
+            ? F.formEngine.handoverRows(this.state.items) // 인수인계서: 업무·인계내용
+            : F.formEngine.itemRows(this.state.items);
+      }
       this.updateAddBtn();
     },
 
@@ -449,6 +549,88 @@
       if (field === 'body') { var c = document.getElementById('qc-' + i); if (c) c.textContent = F.formEngine.qcLabel(v); }
       this.renderDoc();
     },
+    // ----- 급여명세서 지급·공제 항목 -----
+    psEarnDefault: function () { return [{ name: '기본급', amount: 0, taxfree: false }]; },
+    psDeductDefault: function () {
+      return ['국민연금', '건강보험', '장기요양보험', '고용보험', '소득세', '지방소득세']
+        .map(function (n) { return { name: n, amount: 0 }; });
+    },
+    drawEarn: function () {
+      var h = document.getElementById('earnRows');
+      if (!h) return;
+      h.innerHTML = F.formEngine.payslipEarnRows(this.state.earnings || []);
+      var b = document.getElementById('addEarnBtn');
+      if (b) b.disabled = (this.state.earnings || []).length >= (this.cfg.maxRows || 8);
+    },
+    drawDeduct: function () {
+      var h = document.getElementById('deductRows');
+      if (!h) return;
+      h.innerHTML = F.formEngine.payslipDeductRows(this.state.deductions || []);
+      var b = document.getElementById('addDeductBtn');
+      if (b) b.disabled = (this.state.deductions || []).length >= (this.cfg.maxRows || 8);
+    },
+    addEarn: function () {
+      if ((this.state.earnings || []).length >= (this.cfg.maxRows || 8)) return;
+      this.state.earnings.push({ name: '', amount: 0, taxfree: false });
+      this.drawEarn(); this.renderDoc();
+    },
+    delEarn: function (i) {
+      this.state.earnings.splice(i, 1);
+      if (!this.state.earnings.length) this.state.earnings.push({ name: '', amount: 0, taxfree: false });
+      this.drawEarn(); this.renderDoc();
+    },
+    onEarn: function (i, v) { this.state.earnings[i].name = v; this.renderDoc(); },
+    onEarnAmt: function (i, el) {
+      var c = F.calc.cleanInt(el.value, F.calc.MAX_PRICE_DIGITS);
+      this.state.earnings[i].amount = c.value;
+      el.value = c.digits ? c.value.toLocaleString('ko-KR') : '';
+      this.renderDoc();
+    },
+    onEarnTax: function (i, checked) { this.state.earnings[i].taxfree = !!checked; this.renderDoc(); },
+    addDeduct: function () {
+      if ((this.state.deductions || []).length >= (this.cfg.maxRows || 8)) return;
+      this.state.deductions.push({ name: '', amount: 0 });
+      this.drawDeduct(); this.renderDoc();
+    },
+    delDeduct: function (i) {
+      this.state.deductions.splice(i, 1);
+      if (!this.state.deductions.length) this.state.deductions.push({ name: '', amount: 0 });
+      this.drawDeduct(); this.renderDoc();
+    },
+    onDeduct: function (i, v) { this.state.deductions[i].name = v; this.renderDoc(); },
+    onDeductAmt: function (i, el) {
+      var c = F.calc.cleanInt(el.value, F.calc.MAX_PRICE_DIGITS);
+      this.state.deductions[i].amount = c.value;
+      el.value = c.digits ? c.value.toLocaleString('ko-KR') : '';
+      this.renderDoc();
+    },
+    // 4대보험 자동 계산 - 2026년 근로자 부담 요율(국민연금 4.75% · 건강 3.595% · 장기요양=건강보험료×13.14% · 고용 0.9%)
+    // 과세 지급액(비과세 제외)을 공통 기준으로 한 참고값. 실제와 다를 수 있어 수정 가능하게 채운다.
+    autoInsurance: function () {
+      var base = (this.state.earnings || []).reduce(function (a, it) {
+        return a + (it.taxfree ? 0 : (Number(it.amount) || 0));
+      }, 0);
+      if (base <= 0) { alert('먼저 지급 항목(과세 급여)을 입력한 뒤 눌러 주세요.'); return; }
+      // 원단위 절사(10원 미만 버림). Math.round로 부동소수점 오차 보정(예: 3,180,000×0.009=28619.9999… → 28,620).
+      var f10 = function (x) { return Math.floor(Math.round(x) / 10) * 10; };
+      // 국민연금은 기준소득월액 상·하한 적용(2026.7~2027.6: 상한 659만·하한 41만). 건강·고용은 미적용.
+      var npBase = Math.min(Math.max(base, 410000), 6590000);
+      var hi = f10(base * 0.03595);
+      var ins = [
+        { name: '국민연금', amount: f10(npBase * 0.0475) },
+        { name: '건강보험', amount: hi },
+        { name: '장기요양보험', amount: f10(hi * 0.1314) },
+        { name: '고용보험', amount: f10(base * 0.009) },
+      ];
+      // 기존 4대보험 행은 교체하고, 소득세·지방소득세·기타 공제는 뒤에 보존
+      var others = (this.state.deductions || []).filter(function (it) {
+        var nm = (it.name || '').replace(/\s/g, '');
+        return !/(국민연금|건강보험|장기요양|고용보험)/.test(nm) && (it.name || it.amount);
+      });
+      this.state.deductions = ins.concat(others);
+      this.drawDeduct(); this.renderDoc();
+    },
+
     // 본문(.cl-flow 블록)을 A4 페이지 높이(1011px)로 패킹해 여러 .doc-page로 분할
     paginateFlow: function () {
       var doc = document.getElementById('doc');
@@ -456,14 +638,15 @@
       if (!flow) return;
       var kids = Array.prototype.slice.call(flow.children);
       if (!kids.length) return;
-      var CONTENT_H = 1011, MAX_PAGES = 8;
+      var CONTENT_H = 1011, MAX_PAGES = 20;
       var pages = [[]], curH = 0;
       for (var i = 0; i < kids.length; i++) {
         var st = window.getComputedStyle(kids[i]);
         var h = kids[i].offsetHeight + (parseFloat(st.marginTop) || 0) + (parseFloat(st.marginBottom) || 0);
         if (curH + h > CONTENT_H && pages[pages.length - 1].length) {
-          if (pages.length >= MAX_PAGES) break;
-          pages.push([]); curH = 0;
+          // 상한 미만이면 새 페이지로 분할. 상한 도달 시엔 내용을 버리지 않고
+          // 마지막 페이지에 계속 쌓아 소실을 방지한다(비정상적으로 긴 문서 방어).
+          if (pages.length < MAX_PAGES) { pages.push([]); curH = 0; }
         }
         pages[pages.length - 1].push(kids[i].outerHTML);
         curH += h;
@@ -553,7 +736,11 @@
         var availH = host.clientHeight - 36;
         host.style.overflow = prevOv;
         if (availW <= 0) return;
-        var base = mobile ? (availW / pw) : Math.min(availW / pw, availH / ph);
+        // 세로 문서(A4)는 폭에 맞춰 채워 좌우 회색 여백을 없애고(넘치는 세로는 스크롤),
+        // 가로 문서(명함)는 통째로 보이되 패널을 꽉 채워 과하게 커지지 않게 상한을 둔다.
+        var base = (ph > pw)
+          ? (availW / pw)
+          : Math.min(availW / pw, availH / ph, 1.15);
         if (!(base > 0)) base = availW / pw;
         this._base = base;
       }
@@ -571,8 +758,9 @@
     zoomReset: function () { this.userZoom = 1; this.fitPreview(); },
 
     // ----- 내보내기 -----
-    downloadPDF: function (btn) { this.recordDocNo(); F.exporter.downloadPDF(this.cfg.fileName + (this.state.no ? '_' + this.state.no : ''), btn, this.cfg.pageSize); },
-    downloadPNG: function (btn) { this.recordDocNo(); F.exporter.downloadPNG(this.cfg.fileName + (this.state.no ? '_' + this.state.no : ''), btn); },
+    downloadPDF: function (btn) { this.recordDocNo(); this.trackCreate(); F.exporter.downloadPDF(this.cfg.fileName + (this.state.no ? '_' + this.state.no : ''), btn, this.cfg.pageSize); },
+    downloadPNG: function (btn) { this.recordDocNo(); this.trackCreate(); F.exporter.downloadPNG(this.cfg.fileName + (this.state.no ? '_' + this.state.no : ''), btn); },
+    trackCreate: function () { if (F.trackCreate) F.trackCreate(this.slug || this.docType); },
     print: function () { F.exporter.printDoc(); },
 
     // ----- 모바일 탭 -----

@@ -1,5 +1,6 @@
 // 공통 셸 (head / header+nav / footer) - 모든 페이지 공통
 import { site, categories } from '../data/registry.js';
+import { config, publicConfig } from '../data/config.js';
 
 const TRUST_PAGES = [
   { href: '/pages/about.html', label: '소개' },
@@ -8,18 +9,22 @@ const TRUST_PAGES = [
   { href: '/pages/contact.html', label: '문의' },
 ];
 
-export function head({ title, description, canonical, keywords, robots }) {
+export function head({ title, description, canonical, keywords, robots, ogType, publishedTime, modifiedTime }) {
+  const type = ogType || 'website';
+  const articleMeta = type === 'article'
+    ? `${publishedTime ? `<meta property="article:published_time" content="${publishedTime}" />\n` : ''}${modifiedTime ? `<meta property="article:modified_time" content="${modifiedTime}" />\n` : ''}`
+    : '';
   return `<!DOCTYPE html>
 <html lang="ko">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <script>document.documentElement.classList.add('js');if('scrollRestoration'in history)history.scrollRestoration='manual'</script>
-<title>${title}</title>
+<title>${escAttr(title)}</title>
 <meta name="description" content="${escAttr(description || site.description)}" />
 ${robots ? `<meta name="robots" content="${robots}" />\n` : ''}${keywords ? `<meta name="keywords" content="${escAttr(keywords)}" />\n` : ''}<link rel="canonical" href="${site.domain}${canonical}" />
-<meta property="og:type" content="website" />
-<meta property="og:title" content="${escAttr(title)}" />
+<meta property="og:type" content="${type}" />
+${articleMeta}<meta property="og:title" content="${escAttr(title)}" />
 <meta property="og:description" content="${escAttr(description || site.description)}" />
 <meta property="og:url" content="${site.domain}${canonical}" />
 <meta property="og:site_name" content="${site.name}" />
@@ -32,8 +37,11 @@ ${robots ? `<meta name="robots" content="${robots}" />\n` : ''}${keywords ? `<me
 <meta name="twitter:image" content="${site.domain}/assets/og.png" />
 <link rel="icon" href="/assets/favicon.png" type="image/png" />
 <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png" />
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" />
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+<link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard-dynamic-subset.css" />
 <link rel="stylesheet" href="/styles/tokens.css" />
+${analytics()}<script>window.FORMDA_CFG=${JSON.stringify(publicConfig())};</script>
 </head>
 <body>`;
 }
@@ -44,7 +52,7 @@ export function header(activeCat) {
     .join('') + `<a href="/guides/"${activeCat === 'guides' ? ' class="on"' : ''}>가이드</a>`;
   return `<header class="header">
   <div class="header-in">
-    <a class="logo" href="/"><img class="logo-img" src="/assets/logo.png" alt="폼다" onerror="this.replaceWith(Object.assign(document.createElement('span'),{className:'logo-text',textContent:'폼다'}))"></a>
+    <a class="logo" href="/"><img class="logo-img" src="/assets/logo.png" alt="폼다" width="53" height="28" onerror="this.replaceWith(Object.assign(document.createElement('span'),{className:'logo-text',textContent:'폼다'}))"></a>
     <nav class="nav">${nav}</nav>
     <div class="hdr-search">
       <svg class="hdr-search-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.2-3.2"></path></svg>
@@ -66,7 +74,7 @@ export function footer() {
     <div class="footer-copy">© ${site.name} · ${site.tagline}</div>
   </div>
 </footer>
-<script src="/search-index.js" defer></script>
+<script src="/engine/track.js" defer></script>
 <script src="/engine/search.js" defer></script>
 </body>
 </html>`;
@@ -84,6 +92,28 @@ export function steps() {
   </div>`;
 }
 
+// GA4 gtag 스니펫 - config.GA_ID가 채워졌을 때만 로드(미설정 시 측정 비활성).
+export function analytics() {
+  if (!config.GA_ID) return '';
+  const id = config.GA_ID;
+  return `<link rel="preconnect" href="https://www.googletagmanager.com" />
+<script async src="https://www.googletagmanager.com/gtag/js?id=${id}"></script>
+<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag('js',new Date());gtag('config','${id}');</script>
+`;
+}
+
 export function escAttr(s) {
   return String(s == null ? '' : s).replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+// 사이트 공통 Organization 노드 (@id로 다른 스키마의 author/publisher가 참조).
+// 각 페이지에 자기완결적으로 인라인해 크롤러가 페이지 단독으로 발행처를 해석할 수 있게 함.
+export function orgNode() {
+  return {
+    '@type': 'Organization',
+    '@id': site.domain + '/#org',
+    name: site.name,
+    url: site.domain + '/',
+    logo: { '@type': 'ImageObject', url: site.domain + '/assets/logo.png', width: 380, height: 200 },
+  };
 }

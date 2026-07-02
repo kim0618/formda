@@ -38,12 +38,32 @@ function stressResume(d) {
   };
 }
 
+function stressPayslip(cap) {
+  const mk = (n) => Array.from({ length: cap }, (_, i) => ({ name: '아주 긴 항목명 예시 ' + n + (i + 1), amount: 12345678 }));
+  return { earnings: mk('지급'), deductions: mk('공제'), note: '계산 방법 예시: 연장근로수당 = 통상시급 × 1.5 × 연장근로시간. '.repeat(4) };
+}
 const live = tools.filter((t) => !t.stub && t.toolType !== 'text'); // 텍스트 유틸은 A4 문서 아님
 const blocks = live.flatMap((t) => {
   if (t.docType === 'resume') {
     return [
       sheet(`${t.navTitle} — 기본 샘플`, render(t)),
       sheet(`${t.navTitle} — 학력 ${t.doc.maxEdu}·경력 ${t.doc.maxCareer} 최대 + 긴 텍스트 (최악 케이스)`, render(t, stressResume(t.doc))),
+    ];
+  }
+  if (t.docType === 'payslip') {
+    return [
+      sheet(`${t.navTitle} — 기본 샘플`, render(t)),
+      sheet(`${t.navTitle} — 지급·공제 각 ${t.doc.maxRows}행 + 긴 텍스트 (최악 케이스)`, render(t, stressPayslip(t.doc.maxRows || 8))),
+    ];
+  }
+  if (t.docType === 'contract') {
+    return [
+      sheet(`${t.navTitle} — 기본 샘플`, render(t)),
+      sheet(`${t.navTitle} — 긴 값 + 특약 (최악 케이스)`, render(t, {
+        endDate: '2027-06-30', jobDesc: '아주 긴 업무 내용 설명 예시 케이스 '.repeat(4),
+        workplace: '아주 긴 근무장소 주소 예시 '.repeat(3), allowance: '식대 20만원, 교통비 10만원, 직책수당 15만원',
+        note: '수습기간 3개월, 비밀유지 의무, 경업금지 등 특약사항 예시 문장. '.repeat(5),
+      })),
     ];
   }
   const cap = (t.doc && t.doc.maxItems) || 10;

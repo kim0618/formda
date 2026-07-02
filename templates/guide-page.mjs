@@ -1,8 +1,9 @@
 // 가이드 아티클 페이지 (/guides/{slug}.html) - 롱폼 SEO 콘텐츠 + 도구 CTA + 내부링크
-import { head, header, footer } from './shell.mjs';
+import { head, header, footer, orgNode } from './shell.mjs';
 import { svg } from './icons.mjs';
 import { site, categories, categoryBySlug, toolsBySlug } from '../data/registry.js';
 import { guidesByCategory } from '../data/guides.js';
+import { guideExtras } from '../data/guide-extras.js';
 
 function fmtDate(d) {
   const [y, m, day] = d.split('-');
@@ -24,6 +25,20 @@ export function guidePage(guide) {
   const faq = (guide.faq || [])
     .map((f) => `<div class="g-faq-item"><p class="faq-q">Q. ${f.q}</p><p>${f.a}</p></div>`).join('\n');
 
+  // GEO: 상단 "빠른 답변" 박스 (AI 답변 엔진이 그대로 인용할 수 있는 자기완결 요약)
+  const ex = guideExtras[guide.slug] || {};
+  const answerBox = ex.answer
+    ? `<div class="answer-box"><div class="answer-box-h">핵심 요약</div><p class="answer-box-a">${ex.answer}</p>${
+        (ex.facts && ex.facts.length) ? `<ul class="answer-box-facts">${ex.facts.map((f) => `<li>${f}</li>`).join('')}</ul>` : ''
+      }</div>`
+    : '';
+  // E-E-A-T: 법률·세무 가이드의 출처/참고 자료 + 기준연도
+  const sources = (ex.sources && ex.sources.length)
+    ? `<div class="article-sources"><div class="article-sources-h">참고 자료${ex.basisYear ? ` · ${ex.basisYear}년 시행 기준` : ''}</div><ul>${
+        ex.sources.map((s) => `<li><a href="${s.url}" target="_blank" rel="noopener nofollow">${s.label}</a></li>`).join('')
+      }</ul></div>`
+    : '';
+
   // 도구 CTA (주 연결 도구)
   const cta = tool ? `<aside class="article-cta" style="--accent:${tool.accent || '#4f46e5'}">
       <div class="article-cta-ic">${svg(tool.icon)}</div>
@@ -34,7 +49,7 @@ export function guidePage(guide) {
       <a class="btn-cta primary" href="/tools/${tool.slug}.html">${tool.navTitle} 만들기 →</a>
     </aside>` : '';
 
-  return `${head({ title: guide.seoTitle, description: guide.seoDescription, canonical, keywords: (guide.keywords || []).join(', ') })}
+  return `${head({ title: guide.seoTitle, description: guide.seoDescription, canonical, keywords: (guide.keywords || []).join(', '), ogType: 'article', publishedTime: guide.date, modifiedTime: guide.updated || guide.date })}
 ${header(guide.category)}
 
 <main class="wrap article-wrap">
@@ -48,6 +63,7 @@ ${header(guide.category)}
       <p class="article-lead">${guide.lead}</p>
     </header>
 
+    ${answerBox}
     ${toc}
     ${cta}
 
@@ -58,6 +74,7 @@ ${header(guide.category)}
       <div class="g-faq-block">${faq}</div>
 
       ${guide.closing ? `<h2>${guide.closing.h}</h2>\n${guide.closing.html}` : ''}
+      ${sources}
     </div>
 
     ${relatedHTML(guide)}
@@ -119,11 +136,16 @@ function jsonLd(guide) {
   const cat = categoryBySlug[guide.category];
   const article = {
     '@context': 'https://schema.org', '@type': 'Article',
-    headline: guide.title, inLanguage: 'ko', datePublished: guide.date, dateModified: guide.date,
+    headline: guide.title, inLanguage: 'ko',
+    datePublished: guide.date, dateModified: guide.updated || guide.date,
+    image: base + '/assets/og.png',
     description: guide.seoDescription, mainEntityOfPage: url,
-    author: { '@type': 'Organization', name: site.name },
-    publisher: { '@type': 'Organization', name: site.name, url: base + '/' },
+    author: orgNode(),
+    publisher: orgNode(),
   };
+  if ((guideExtras[guide.slug] || {}).answer) {
+    article.speakable = { '@type': 'SpeakableSpecification', cssSelector: ['.answer-box'] };
+  }
   const faq = {
     '@context': 'https://schema.org', '@type': 'FAQPage',
     mainEntity: (guide.faq || []).map((f) => ({ '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: f.a } })),

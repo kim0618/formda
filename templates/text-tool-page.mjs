@@ -49,6 +49,24 @@ export function textThumb(tool) {
     'text-align':
       '<div class="ttt-cols"><ul class="ttt-list before"><li>다람쥐</li><li>가오리</li><li>나비</li><li>다람쥐</li></ul>' +
       '<span class="ttt-arrow">→</span><ul class="ttt-list after"><li>가오리</li><li>나비</li><li>다람쥐</li></ul></div>',
+    'image-to-pdf':
+      '<div class="ttt-i2p"><div class="ttt-i2p-imgs">' +
+        '<span class="ttt-ph p3"></span><span class="ttt-ph p2"></span>' +
+        '<span class="ttt-ph p1"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="8.5" cy="9.5" r="1.6"/><path d="m4 17 4.5-4.5L13 17l3-3 4 4"/></svg></span>' +
+      '</div><span class="ttt-arrow">→</span><div class="ttt-pdf"><span>PDF</span></div></div>',
+    'pdf-merge':
+      '<div class="ttt-i2p"><div class="ttt-i2p-imgs">' +
+        '<span class="ttt-ph p3" style="background:#d6dae2"></span><span class="ttt-ph p2" style="background:#c3c8d2"></span>' +
+        '<span class="ttt-ph p1"><span style="font-size:42px;font-weight:800;color:#fff">PDF</span></span>' +
+      '</div><span class="ttt-arrow">→</span><div class="ttt-pdf"><span>1</span></div></div>',
+    'pdf-split':
+      '<div class="ttt-i2p"><div class="ttt-pdf"><span>PDF</span></div><span class="ttt-arrow">→</span>' +
+      '<div class="ttt-i2p-imgs">' +
+        '<span class="ttt-ph p3" style="background:#d6dae2"></span><span class="ttt-ph p2" style="background:#c3c8d2"></span>' +
+        '<span class="ttt-ph p1" style="background:var(--accent)"></span>' +
+      '</div></div>',
+    'idphoto':
+      '<div class="ttt-idp"><div class="ttt-idp-frame"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="9.5" r="3.4"/><path d="M6 18.5c1.1-3 3.2-4.5 6-4.5s4.9 1.5 6 4.5"/></svg></div><div class="ttt-idp-tag">3×4</div></div>',
     'qr':
       '<div class="ttt-qr"><svg viewBox="0 0 84 84" width="230" height="230" xmlns="http://www.w3.org/2000/svg"><g fill="#1a1a1a">' +
         '<path fill-rule="evenodd" d="M2 2h22v22H2zM7 7v12h12V7z"/><rect x="10" y="10" width="6" height="6"/>' +

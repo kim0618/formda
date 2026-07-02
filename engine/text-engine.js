@@ -324,6 +324,649 @@
       host.querySelector('[data-act=copy]').addEventListener('click', function (e) { copy(out.value, e.currentTarget); });
       render();
     },
+
+    // 이미지 → PDF (여러 장을 한 PDF로. 전부 브라우저에서 처리, 서버 전송 없음)
+    'img2pdf': function (host) {
+      host.innerHTML =
+        '<div class="tt-wrap stack i2p">' +
+          '<div class="tt-main">' +
+            '<div class="tt-bar"><span class="tt-bar-label">이미지 추가 <span id="i2pCnt" class="tt-cnt"></span></span>' +
+              '<div class="tt-actions"><button class="mini-btn danger" data-act="clear">모두 지우기</button></div></div>' +
+            '<div class="i2p-drop" id="i2pDrop" tabindex="0" role="button" aria-label="이미지 선택">' +
+              '<input type="file" id="i2pFile" accept="image/*" multiple hidden>' +
+              '<svg class="i2p-drop-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V4"/><path d="m8 8 4-4 4 4"/><path d="M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"/></svg>' +
+              '<p class="i2p-drop-t">이미지를 끌어다 놓거나 <b>클릭해서 선택</b></p>' +
+              '<p class="i2p-drop-s">JPG · PNG · WEBP · GIF · 여러 장 한 번에 · 순서 변경 가능</p>' +
+            '</div>' +
+            '<div class="i2p-grid" id="i2pGrid"></div>' +
+          '</div>' +
+          '<div class="tt-side">' +
+            '<div class="i2p-opts">' +
+              '<div class="i2p-opt"><div class="i2p-opt-h">페이지 크기</div><div class="tt-opt-row">' +
+                '<label class="tt-chip"><input type="radio" name="i2psize" value="a4" checked>A4</label>' +
+                '<label class="tt-chip"><input type="radio" name="i2psize" value="letter">Letter</label>' +
+                '<label class="tt-chip"><input type="radio" name="i2psize" value="fit">이미지 원본</label>' +
+              '</div></div>' +
+              '<div class="i2p-opt" id="i2pOriWrap"><div class="i2p-opt-h">방향</div><div class="tt-opt-row">' +
+                '<label class="tt-chip"><input type="radio" name="i2pori" value="auto" checked>자동</label>' +
+                '<label class="tt-chip"><input type="radio" name="i2pori" value="p">세로</label>' +
+                '<label class="tt-chip"><input type="radio" name="i2pori" value="l">가로</label>' +
+              '</div></div>' +
+              '<div class="i2p-opt" id="i2pMarWrap"><div class="i2p-opt-h">여백</div><div class="tt-opt-row">' +
+                '<label class="tt-chip"><input type="radio" name="i2pmar" value="0">없음</label>' +
+                '<label class="tt-chip"><input type="radio" name="i2pmar" value="10" checked>좁게</label>' +
+                '<label class="tt-chip"><input type="radio" name="i2pmar" value="20">넓게</label>' +
+              '</div></div>' +
+            '</div>' +
+            '<button class="mini-btn i2p-make" id="i2pMake" disabled>PDF 만들기</button>' +
+            '<p class="tt-hint">여러 장을 추가한 순서대로 한 개의 PDF로 합쳐집니다. 변환은 모두 사용자 브라우저에서 이루어지며, 이미지를 서버로 전송하거나 저장하지 않습니다.</p>' +
+          '</div>' +
+        '</div>';
+
+      var entries = [];   // { file, name, url, w, h }
+      var grid = host.querySelector('#i2pGrid');
+      var drop = host.querySelector('#i2pDrop');
+      var fileInput = host.querySelector('#i2pFile');
+      var makeBtn = host.querySelector('#i2pMake');
+      var cntEl = host.querySelector('#i2pCnt');
+      var oriWrap = host.querySelector('#i2pOriWrap');
+      var marWrap = host.querySelector('#i2pMarWrap');
+      var busy = false;
+
+      function opt(name) { return (host.querySelector('input[name=' + name + ']:checked') || {}).value; }
+
+      function fileToEntry(file) {
+        return new Promise(function (resolve) {
+          var url = URL.createObjectURL(file);
+          var img = new Image();
+          img.onload = function () { resolve({ file: file, name: file.name, url: url, w: img.naturalWidth, h: img.naturalHeight }); };
+          img.onerror = function () { URL.revokeObjectURL(url); resolve(null); };
+          img.src = url;
+        });
+      }
+
+      function addFiles(list) {
+        var arr = Array.prototype.slice.call(list).filter(function (f) {
+          return /^image\//.test(f.type) || /\.(jpe?g|png|webp|gif|bmp)$/i.test(f.name);
+        });
+        if (!arr.length) return;
+        Promise.all(arr.map(fileToEntry)).then(function (res) {
+          var skipped = 0;
+          res.forEach(function (e) { if (e) entries.push(e); else skipped++; });
+          render();
+          if (skipped) alert(skipped + '개의 파일은 이미지로 읽을 수 없어 제외했습니다. (지원 형식: JPG, PNG, WEBP, GIF)');
+        });
+      }
+
+      function render() {
+        if (!entries.length) {
+          grid.innerHTML = '';
+          cntEl.textContent = '';
+          makeBtn.disabled = true;
+          return;
+        }
+        var last = entries.length - 1;
+        grid.innerHTML = entries.map(function (e, i) {
+          return '<div class="i2p-item" data-i="' + i + '">' +
+            '<div class="i2p-thumb"><img src="' + e.url + '" alt="" loading="lazy"></div>' +
+            '<div class="i2p-item-bar">' +
+              '<button class="i2p-mv" data-mv="-1"' + (i === 0 ? ' disabled' : '') + ' aria-label="앞으로">◀</button>' +
+              '<span class="i2p-idx">' + (i + 1) + '</span>' +
+              '<button class="i2p-mv" data-mv="1"' + (i === last ? ' disabled' : '') + ' aria-label="뒤로">▶</button>' +
+              '<button class="i2p-del" data-del aria-label="삭제">✕</button>' +
+            '</div>' +
+          '</div>';
+        }).join('');
+        cntEl.textContent = '(' + entries.length + '장 · PDF 1개로 합쳐집니다)';
+        makeBtn.disabled = false;
+      }
+
+      grid.addEventListener('click', function (e) {
+        var item = e.target.closest('.i2p-item'); if (!item) return;
+        var i = +item.getAttribute('data-i');
+        if (e.target.closest('[data-del]')) {
+          URL.revokeObjectURL(entries[i].url); entries.splice(i, 1); render();
+        } else {
+          var mv = e.target.closest('[data-mv]'); if (!mv) return;
+          var j = i + (+mv.getAttribute('data-mv'));
+          if (j < 0 || j >= entries.length) return;
+          var t = entries[i]; entries[i] = entries[j]; entries[j] = t; render();
+        }
+      });
+
+      // 페이지 크기 = '이미지 원본'이면 방향·여백은 의미가 없으므로 비활성
+      function syncOpts() {
+        var fit = opt('i2psize') === 'fit';
+        [oriWrap, marWrap].forEach(function (w) { w.classList.toggle('off', fit); w.querySelectorAll('input').forEach(function (el) { el.disabled = fit; }); });
+      }
+      host.querySelectorAll('input[name=i2psize]').forEach(function (el) { el.addEventListener('change', syncOpts); });
+      syncOpts();
+
+      // 드래그 앤 드롭 + 클릭 선택
+      drop.addEventListener('click', function () { fileInput.click(); });
+      drop.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); fileInput.click(); } });
+      fileInput.addEventListener('change', function () { addFiles(fileInput.files); fileInput.value = ''; });
+      ['dragenter', 'dragover'].forEach(function (ev) { drop.addEventListener(ev, function (e) { e.preventDefault(); drop.classList.add('over'); }); });
+      ['dragleave', 'dragend'].forEach(function (ev) { drop.addEventListener(ev, function () { drop.classList.remove('over'); }); });
+      drop.addEventListener('drop', function (e) { e.preventDefault(); drop.classList.remove('over'); if (e.dataTransfer && e.dataTransfer.files) addFiles(e.dataTransfer.files); });
+
+      host.querySelector('[data-act=clear]').addEventListener('click', function () {
+        entries.forEach(function (e) { URL.revokeObjectURL(e.url); }); entries = []; render();
+      });
+
+      // jsPDF는 무겁다(~350KB). 페이지 로드가 아니라 첫 변환 클릭 때 한 번만 지연 로드.
+      var jspdfPromise = null;
+      function ensureJsPDF() {
+        if (window.jspdf && window.jspdf.jsPDF) return Promise.resolve();
+        if (!jspdfPromise) {
+          jspdfPromise = new Promise(function (resolve, reject) {
+            var s = document.createElement('script');
+            s.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
+            s.async = true;
+            s.onload = resolve;
+            s.onerror = function () { jspdfPromise = null; reject(new Error('PDF 라이브러리를 불러오지 못했습니다.')); };
+            document.head.appendChild(s);
+          });
+        }
+        return jspdfPromise;
+      }
+
+      // 각 이미지를 캔버스로 JPEG 변환(투명 배경은 흰색으로). 형식 호환·용량을 안정화.
+      var MAX_SIDE = 2400;
+      function toJpeg(entry) {
+        return new Promise(function (resolve, reject) {
+          var img = new Image();
+          img.onload = function () {
+            var scale = Math.min(1, MAX_SIDE / Math.max(img.naturalWidth, img.naturalHeight));
+            var cw = Math.max(1, Math.round(img.naturalWidth * scale));
+            var ch = Math.max(1, Math.round(img.naturalHeight * scale));
+            var c = document.createElement('canvas'); c.width = cw; c.height = ch;
+            var ctx = c.getContext('2d');
+            ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, cw, ch);
+            ctx.drawImage(img, 0, 0, cw, ch);
+            resolve({ data: c.toDataURL('image/jpeg', 0.92), w: cw, h: ch });
+          };
+          img.onerror = function () { reject(new Error(entry.name + ' 변환 실패')); };
+          img.src = entry.url;
+        });
+      }
+
+      async function build() {
+        if (busy || !entries.length) return;
+        busy = true;
+        var label = makeBtn.textContent;
+        makeBtn.textContent = 'PDF 만드는 중...'; makeBtn.disabled = true;
+        try {
+          await ensureJsPDF();
+          var jsPDF = window.jspdf.jsPDF;
+          var size = opt('i2psize');
+          var ori = opt('i2pori') || 'auto';
+          var margin = +(opt('i2pmar') || 0);
+          var pdf = null;
+          for (var i = 0; i < entries.length; i++) {
+            var jp = await toJpeg(entries[i]);
+            if (size === 'fit') {
+              var o = jp.w >= jp.h ? 'l' : 'p';
+              var fmt = [jp.w, jp.h];
+              if (!pdf) pdf = new jsPDF({ orientation: o, unit: 'px', format: fmt });
+              else pdf.addPage(fmt, o);
+              pdf.addImage(jp.data, 'JPEG', 0, 0, jp.w, jp.h, undefined, 'FAST');
+            } else {
+              var fmtName = size === 'letter' ? 'letter' : 'a4';
+              var dim = size === 'letter' ? [215.9, 279.4] : [210, 297]; // mm, 세로 기준
+              var po = ori === 'auto' ? (jp.w >= jp.h ? 'l' : 'p') : ori;
+              var pw = po === 'l' ? dim[1] : dim[0];
+              var ph = po === 'l' ? dim[0] : dim[1];
+              if (!pdf) pdf = new jsPDF({ orientation: po, unit: 'mm', format: fmtName });
+              else pdf.addPage(fmtName, po);
+              var cw2 = Math.max(1, pw - margin * 2), ch2 = Math.max(1, ph - margin * 2);
+              var r = Math.min(cw2 / jp.w, ch2 / jp.h); // mm per px (여백 안에 비율 유지 맞춤)
+              var iw = jp.w * r, ih = jp.h * r;
+              pdf.addImage(jp.data, 'JPEG', (pw - iw) / 2, (ph - ih) / 2, iw, ih, undefined, 'FAST');
+            }
+          }
+          pdf.save('formda-images.pdf');
+        } catch (e) {
+          alert('PDF 생성 중 오류가 발생했습니다: ' + (e && e.message ? e.message : e));
+        } finally {
+          makeBtn.textContent = label; makeBtn.disabled = false; busy = false;
+        }
+      }
+      makeBtn.addEventListener('click', build);
+      render();
+    },
+
+    // PDF 합치기 (여러 PDF를 순서대로 하나로. pdf-lib, 전부 브라우저 처리)
+    'pdfmerge': function (host) {
+      host.innerHTML =
+        '<div class="tt-wrap stack i2p">' +
+          '<div class="tt-main">' +
+            '<div class="tt-bar"><span class="tt-bar-label">PDF 추가 <span id="pmCnt" class="tt-cnt"></span></span>' +
+              '<div class="tt-actions"><button class="mini-btn danger" data-act="clear">모두 지우기</button></div></div>' +
+            '<div class="i2p-drop" id="pmDrop" tabindex="0" role="button" aria-label="PDF 선택">' +
+              '<input type="file" id="pmFile" accept="application/pdf,.pdf" multiple hidden>' +
+              '<svg class="i2p-drop-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V4"/><path d="m8 8 4-4 4 4"/><path d="M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"/></svg>' +
+              '<p class="i2p-drop-t">PDF를 끌어다 놓거나 <b>클릭해서 선택</b></p>' +
+              '<p class="i2p-drop-s">여러 개 한 번에 · 순서 변경 가능 · 추가한 순서대로 합쳐집니다</p>' +
+            '</div>' +
+            '<div class="pdf-list" id="pmList"></div>' +
+          '</div>' +
+          '<div class="tt-side">' +
+            '<button class="mini-btn i2p-make" id="pmMake" disabled>PDF 합치기</button>' +
+            '<p class="tt-hint">추가한 순서대로 하나의 PDF로 합쳐집니다. 처리는 모두 사용자 브라우저에서 이루어지며, 파일이 서버로 전송되지 않습니다.</p>' +
+          '</div>' +
+        '</div>';
+
+      var entries = [];   // { file, name, size, pages }
+      var list = host.querySelector('#pmList');
+      var drop = host.querySelector('#pmDrop');
+      var fileInput = host.querySelector('#pmFile');
+      var makeBtn = host.querySelector('#pmMake');
+      var cntEl = host.querySelector('#pmCnt');
+      var busy = false;
+
+      var pdflibPromise = null;
+      function ensurePdfLib() {
+        if (window.PDFLib) return Promise.resolve();
+        if (!pdflibPromise) {
+          pdflibPromise = new Promise(function (resolve, reject) {
+            var s = document.createElement('script');
+            s.src = 'https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js';
+            s.async = true;
+            s.onload = resolve;
+            s.onerror = function () { pdflibPromise = null; reject(new Error('PDF 라이브러리를 불러오지 못했습니다.')); };
+            document.head.appendChild(s);
+          });
+        }
+        return pdflibPromise;
+      }
+      function sizeStr(b) { return b < 1024 * 1024 ? Math.max(1, Math.round(b / 1024)) + ' KB' : (b / 1024 / 1024).toFixed(1) + ' MB'; }
+
+      async function addFiles(fileList) {
+        var arr = Array.prototype.slice.call(fileList).filter(function (f) {
+          return f.type === 'application/pdf' || /\.pdf$/i.test(f.name);
+        });
+        if (!arr.length) return;
+        try { await ensurePdfLib(); } catch (e) { alert(e.message); return; }
+        var skipped = 0;
+        for (var i = 0; i < arr.length; i++) {
+          try {
+            var bytes = await arr[i].arrayBuffer();
+            var doc = await window.PDFLib.PDFDocument.load(bytes, { ignoreEncryption: true });
+            entries.push({ file: arr[i], name: arr[i].name, size: arr[i].size, pages: doc.getPageCount() });
+          } catch (e) { skipped++; }
+        }
+        render();
+        if (skipped) alert(skipped + '개 파일은 열 수 없어 제외했습니다. (손상되었거나 암호가 걸린 PDF일 수 있습니다)');
+      }
+
+      function render() {
+        if (!entries.length) { list.innerHTML = ''; cntEl.textContent = ''; makeBtn.disabled = true; return; }
+        var last = entries.length - 1, totalPages = 0;
+        list.innerHTML = entries.map(function (e, i) {
+          totalPages += e.pages;
+          return '<div class="pdf-item" data-i="' + i + '">' +
+            '<span class="pdf-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h9l3 3v15H6z"/><path d="M14 3v4h4"/></svg></span>' +
+            '<span class="pdf-meta"><span class="pdf-name">' + esc(e.name) + '</span><span class="pdf-sub">' + e.pages + '쪽 · ' + sizeStr(e.size) + '</span></span>' +
+            '<span class="pdf-ord"><button class="i2p-mv" data-mv="-1"' + (i === 0 ? ' disabled' : '') + ' aria-label="위로">▲</button>' +
+              '<button class="i2p-mv" data-mv="1"' + (i === last ? ' disabled' : '') + ' aria-label="아래로">▼</button>' +
+              '<button class="i2p-del" data-del aria-label="삭제">✕</button></span>' +
+          '</div>';
+        }).join('');
+        cntEl.textContent = '(' + entries.length + '개 · 총 ' + totalPages + '쪽)';
+        makeBtn.disabled = false;
+      }
+
+      list.addEventListener('click', function (e) {
+        var item = e.target.closest('.pdf-item'); if (!item) return;
+        var i = +item.getAttribute('data-i');
+        if (e.target.closest('[data-del]')) { entries.splice(i, 1); render(); return; }
+        var mv = e.target.closest('[data-mv]'); if (!mv) return;
+        var j = i + (+mv.getAttribute('data-mv'));
+        if (j < 0 || j >= entries.length) return;
+        var t = entries[i]; entries[i] = entries[j]; entries[j] = t; render();
+      });
+
+      drop.addEventListener('click', function () { fileInput.click(); });
+      drop.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); fileInput.click(); } });
+      fileInput.addEventListener('change', function () { addFiles(fileInput.files); fileInput.value = ''; });
+      ['dragenter', 'dragover'].forEach(function (ev) { drop.addEventListener(ev, function (e) { e.preventDefault(); drop.classList.add('over'); }); });
+      ['dragleave', 'dragend'].forEach(function (ev) { drop.addEventListener(ev, function () { drop.classList.remove('over'); }); });
+      drop.addEventListener('drop', function (e) { e.preventDefault(); drop.classList.remove('over'); if (e.dataTransfer && e.dataTransfer.files) addFiles(e.dataTransfer.files); });
+      host.querySelector('[data-act=clear]').addEventListener('click', function () { entries = []; render(); });
+
+      async function merge() {
+        if (busy || entries.length < 1) return;
+        busy = true;
+        var label = makeBtn.textContent; makeBtn.textContent = '합치는 중...'; makeBtn.disabled = true;
+        try {
+          await ensurePdfLib();
+          var PDFLib = window.PDFLib;
+          var out = await PDFLib.PDFDocument.create();
+          for (var i = 0; i < entries.length; i++) {
+            var bytes = await entries[i].file.arrayBuffer();
+            var src = await PDFLib.PDFDocument.load(bytes, { ignoreEncryption: true });
+            var copied = await out.copyPages(src, src.getPageIndices());
+            copied.forEach(function (p) { out.addPage(p); });
+          }
+          var merged = await out.save();
+          var blob = new Blob([merged], { type: 'application/pdf' });
+          var url = URL.createObjectURL(blob);
+          var a = document.createElement('a'); a.href = url; a.download = 'formda-merged.pdf';
+          document.body.appendChild(a); a.click(); document.body.removeChild(a);
+          setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+        } catch (e) {
+          alert('PDF 합치기 중 오류가 발생했습니다: ' + (e && e.message ? e.message : e));
+        } finally { makeBtn.textContent = label; makeBtn.disabled = false; busy = false; }
+      }
+      makeBtn.addEventListener('click', merge);
+      render();
+    },
+
+    // PDF 분할 (한 PDF에서 페이지 범위 추출 또는 낱장 분리. pdf-lib + 낱장은 JSZip)
+    'pdfsplit': function (host) {
+      host.innerHTML =
+        '<div class="tt-wrap stack i2p">' +
+          '<div class="tt-main">' +
+            '<div class="tt-bar"><span class="tt-bar-label">PDF 선택 <span id="psCnt" class="tt-cnt"></span></span>' +
+              '<div class="tt-actions"><button class="mini-btn danger" data-act="clear">지우기</button></div></div>' +
+            '<div class="i2p-drop" id="psDrop" tabindex="0" role="button" aria-label="PDF 선택">' +
+              '<input type="file" id="psFile" accept="application/pdf,.pdf" hidden>' +
+              '<svg class="i2p-drop-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V4"/><path d="m8 8 4-4 4 4"/><path d="M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"/></svg>' +
+              '<p class="i2p-drop-t">PDF를 끌어다 놓거나 <b>클릭해서 선택</b></p>' +
+              '<p class="i2p-drop-s">한 개의 PDF · 원하는 페이지만 추출하거나 낱장으로 분리</p>' +
+            '</div>' +
+            '<div class="pdf-list" id="psList"></div>' +
+          '</div>' +
+          '<div class="tt-side">' +
+            '<div class="i2p-opts" id="psOpts" style="display:none">' +
+              '<div class="i2p-opt"><div class="i2p-opt-h">분할 방식</div><div class="tt-opt-row">' +
+                '<label class="tt-chip"><input type="radio" name="psmode" value="range" checked>페이지 추출</label>' +
+                '<label class="tt-chip"><input type="radio" name="psmode" value="each">낱장 분리</label>' +
+              '</div></div>' +
+              '<div class="i2p-opt" id="psRangeWrap"><div class="i2p-opt-h">추출할 페이지</div>' +
+                '<input id="psRange" class="ps-range" placeholder="예: 1-3, 5, 8-10">' +
+                '<p class="tt-hint" style="margin-top:6px">쉼표로 여러 범위를 지정합니다. 위 페이지만 골라 한 개의 PDF로 만듭니다.</p></div>' +
+              '<p class="tt-hint" id="psEachHint" style="display:none">모든 페이지를 1쪽씩 개별 PDF로 나눠 ZIP으로 내려받습니다.</p>' +
+            '</div>' +
+            '<button class="mini-btn i2p-make" id="psMake" disabled>분할하기</button>' +
+            '<p class="tt-hint">처리는 모두 사용자 브라우저에서 이루어지며, 파일이 서버로 전송되지 않습니다.</p>' +
+          '</div>' +
+        '</div>';
+
+      var cur = null;   // { name, size, pages, bytes }
+      var listEl = host.querySelector('#psList');
+      var drop = host.querySelector('#psDrop');
+      var fileInput = host.querySelector('#psFile');
+      var makeBtn = host.querySelector('#psMake');
+      var cntEl = host.querySelector('#psCnt');
+      var opts = host.querySelector('#psOpts');
+      var rangeWrap = host.querySelector('#psRangeWrap');
+      var eachHint = host.querySelector('#psEachHint');
+      var rangeInput = host.querySelector('#psRange');
+      var busy = false;
+
+      function loadLib(src, glob) {
+        if (window[glob]) return Promise.resolve();
+        return new Promise(function (resolve, reject) {
+          var s = document.createElement('script');
+          s.src = src; s.async = true;
+          s.onload = resolve;
+          s.onerror = function () { reject(new Error('라이브러리를 불러오지 못했습니다.')); };
+          document.head.appendChild(s);
+        });
+      }
+      function ensurePdfLib() { return loadLib('https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js', 'PDFLib'); }
+      function ensureJsZip() { return loadLib('https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js', 'JSZip'); }
+      function sizeStr(b) { return b < 1024 * 1024 ? Math.max(1, Math.round(b / 1024)) + ' KB' : (b / 1024 / 1024).toFixed(1) + ' MB'; }
+
+      function opt(name) { return (host.querySelector('input[name=' + name + ']:checked') || {}).value; }
+      function mode() { return opt('psmode') || 'range'; }
+      function syncMode() {
+        var m = mode();
+        rangeWrap.style.display = m === 'range' ? '' : 'none';
+        eachHint.style.display = m === 'each' ? '' : 'none';
+      }
+
+      async function setFile(file) {
+        if (!file || !(file.type === 'application/pdf' || /\.pdf$/i.test(file.name))) return;
+        try { await ensurePdfLib(); } catch (e) { alert(e.message); return; }
+        try {
+          var bytes = await file.arrayBuffer();
+          var doc = await window.PDFLib.PDFDocument.load(bytes, { ignoreEncryption: true });
+          cur = { name: file.name, size: file.size, pages: doc.getPageCount(), bytes: bytes };
+        } catch (e) { alert('PDF를 열 수 없습니다. 손상되었거나 암호가 걸린 파일일 수 있습니다.'); return; }
+        render();
+      }
+      function render() {
+        if (!cur) { listEl.innerHTML = ''; cntEl.textContent = ''; opts.style.display = 'none'; makeBtn.disabled = true; return; }
+        listEl.innerHTML = '<div class="pdf-item">' +
+          '<span class="pdf-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h9l3 3v15H6z"/><path d="M14 3v4h4"/></svg></span>' +
+          '<span class="pdf-meta"><span class="pdf-name">' + esc(cur.name) + '</span><span class="pdf-sub">' + cur.pages + '쪽 · ' + sizeStr(cur.size) + '</span></span></div>';
+        cntEl.textContent = '(' + cur.pages + '쪽)';
+        opts.style.display = '';
+        makeBtn.disabled = false;
+        syncMode();
+      }
+
+      function parseRanges(str, max) {
+        var out = [], seen = {};
+        String(str).split(',').forEach(function (part) {
+          part = part.trim(); if (!part) return;
+          var m = part.match(/^(\d+)\s*-\s*(\d+)$/);
+          if (m) {
+            var a = +m[1], b = +m[2]; if (a > b) { var t = a; a = b; b = t; }
+            for (var p = a; p <= b; p++) { if (p >= 1 && p <= max && !seen[p]) { seen[p] = 1; out.push(p - 1); } }
+          } else if (/^\d+$/.test(part)) {
+            var n = +part; if (n >= 1 && n <= max && !seen[n]) { seen[n] = 1; out.push(n - 1); }
+          }
+        });
+        return out;
+      }
+
+      drop.addEventListener('click', function () { fileInput.click(); });
+      drop.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); fileInput.click(); } });
+      fileInput.addEventListener('change', function () { if (fileInput.files[0]) setFile(fileInput.files[0]); fileInput.value = ''; });
+      ['dragenter', 'dragover'].forEach(function (ev) { drop.addEventListener(ev, function (e) { e.preventDefault(); drop.classList.add('over'); }); });
+      ['dragleave', 'dragend'].forEach(function (ev) { drop.addEventListener(ev, function () { drop.classList.remove('over'); }); });
+      drop.addEventListener('drop', function (e) { e.preventDefault(); drop.classList.remove('over'); if (e.dataTransfer && e.dataTransfer.files[0]) setFile(e.dataTransfer.files[0]); });
+      host.querySelector('[data-act=clear]').addEventListener('click', function () { cur = null; render(); });
+      host.querySelectorAll('input[name=psmode]').forEach(function (el) { el.addEventListener('change', syncMode); });
+
+      function saveBlob(blob, name) {
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement('a'); a.href = url; a.download = name;
+        document.body.appendChild(a); a.click(); document.body.removeChild(a);
+        setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+      }
+      async function split() {
+        if (busy || !cur) return;
+        var m = mode();
+        var indices = null;
+        if (m === 'range') {
+          indices = parseRanges(rangeInput.value, cur.pages);
+          if (!indices.length) { alert('추출할 페이지를 올바르게 입력하세요. (예: 1-3, 5) · 이 PDF는 1~' + cur.pages + '쪽입니다.'); return; }
+        }
+        busy = true;
+        var label = makeBtn.textContent; makeBtn.textContent = '처리 중...'; makeBtn.disabled = true;
+        try {
+          await ensurePdfLib();
+          var PDFLib = window.PDFLib;
+          var src = await PDFLib.PDFDocument.load(cur.bytes, { ignoreEncryption: true });
+          if (m === 'range') {
+            var out = await PDFLib.PDFDocument.create();
+            var copied = await out.copyPages(src, indices);
+            copied.forEach(function (p) { out.addPage(p); });
+            saveBlob(new Blob([await out.save()], { type: 'application/pdf' }), 'formda-extracted.pdf');
+          } else {
+            await ensureJsZip();
+            var zip = new window.JSZip();
+            var pad = String(cur.pages).length;
+            for (var i = 0; i < cur.pages; i++) {
+              var one = await PDFLib.PDFDocument.create();
+              var pg = await one.copyPages(src, [i]);
+              one.addPage(pg[0]);
+              var pn = String(i + 1); while (pn.length < pad) pn = '0' + pn;
+              zip.file('page-' + pn + '.pdf', await one.save());
+            }
+            saveBlob(await zip.generateAsync({ type: 'blob' }), 'formda-split.zip');
+          }
+        } catch (e) {
+          alert('PDF 분할 중 오류가 발생했습니다: ' + (e && e.message ? e.message : e));
+        } finally { makeBtn.textContent = label; makeBtn.disabled = false; busy = false; }
+      }
+      makeBtn.addEventListener('click', split);
+      render();
+    },
+
+    // 증명사진 규격 맞추기 - 사진을 규격 프레임에 이동·확대해 300DPI로 크롭 저장 (배경제거 없음)
+    'idphoto': function (host) {
+      var PRESETS = [
+        { id: 'id34', label: '증명사진 3×4', w: 30, h: 40 },
+        { id: 'passport', label: '여권 3.5×4.5', w: 35, h: 45 },
+        { id: 'visa2', label: '미국비자 2×2in', w: 50.8, h: 50.8 },
+      ];
+      var DPI = 300, CW = 320, CH = 420; // 미리보기 캔버스 논리 크기
+      host.innerHTML =
+        '<div class="tt-wrap stack idp">' +
+          '<div class="tt-main">' +
+            '<div class="tt-bar"><span class="tt-bar-label">증명사진 만들기</span>' +
+              '<div class="tt-actions"><button class="mini-btn" data-act="reopen" style="display:none">다른 사진</button></div></div>' +
+            '<div class="i2p-drop" id="idpDrop" tabindex="0" role="button" aria-label="사진 선택">' +
+              '<input type="file" id="idpFile" accept="image/*" hidden>' +
+              '<svg class="i2p-drop-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="8.5" cy="10.5" r="1.6"/><path d="m4 17 4.5-4.5L13 17l3-3 4 4"/></svg>' +
+              '<p class="i2p-drop-t">사진을 끌어다 놓거나 <b>클릭해서 선택</b></p>' +
+              '<p class="i2p-drop-s">얼굴이 정면으로 나온 사진을 올린 뒤 규격에 맞춰 조정하세요</p>' +
+            '</div>' +
+            '<div class="idp-stage" id="idpStage" style="display:none">' +
+              '<canvas id="idpCanvas" width="' + CW + '" height="' + CH + '"></canvas>' +
+              '<div class="idp-zoom"><span>축소</span><input type="range" id="idpZoom" min="1" max="3" step="0.01" value="1"><span>확대</span></div>' +
+              '<p class="tt-hint">사진을 드래그해 위치를, 슬라이더로 크기를 맞추세요. 파란 테두리 안이 저장 영역입니다.</p>' +
+            '</div>' +
+          '</div>' +
+          '<div class="tt-side">' +
+            '<div class="i2p-opts"><div class="i2p-opt"><div class="i2p-opt-h">규격</div><div class="tt-opt-row" id="idpPresets">' +
+              PRESETS.map(function (p, i) { return '<label class="tt-chip"><input type="radio" name="idpsize" value="' + i + '"' + (i === 0 ? ' checked' : '') + '>' + p.label + '</label>'; }).join('') +
+            '</div></div></div>' +
+            '<button class="mini-btn i2p-make" id="idpSave" disabled>사진 저장 (JPG)</button>' +
+            '<p class="tt-hint">300DPI 규격 크기(예: 3×4cm=354×472px)로 저장됩니다. 배경은 원본 그대로이며, 사진 처리는 모두 브라우저에서 이루어져 서버로 전송되지 않습니다.</p>' +
+          '</div>' +
+        '</div>';
+
+      var drop = host.querySelector('#idpDrop');
+      var stage = host.querySelector('#idpStage');
+      var fileInput = host.querySelector('#idpFile');
+      var canvas = host.querySelector('#idpCanvas');
+      var ctx = canvas.getContext('2d');
+      var zoom = host.querySelector('#idpZoom');
+      var saveBtn = host.querySelector('#idpSave');
+      var reopenBtn = host.querySelector('[data-act=reopen]');
+      var img = null, preset = PRESETS[0];
+      var crop = { x: 0, y: 0, w: 0, h: 0 };
+      var view = { scale: 1, min: 1, x: 0, y: 0 };
+
+      function computeCrop() {
+        var aspect = preset.w / preset.h;                 // 폭/높이
+        var maxW = CW * 0.82, maxH = CH * 0.82;
+        var w = maxW, h = w / aspect;
+        if (h > maxH) { h = maxH; w = h * aspect; }
+        crop.w = w; crop.h = h; crop.x = (CW - w) / 2; crop.y = (CH - h) / 2;
+      }
+      function clamp() {
+        view.min = Math.max(crop.w / img.naturalWidth, crop.h / img.naturalHeight);
+        if (view.scale < view.min) view.scale = view.min;
+        if (view.scale > view.min * 3) view.scale = view.min * 3;
+        var dw = img.naturalWidth * view.scale, dh = img.naturalHeight * view.scale;
+        // 크롭 창이 이미지 밖으로 나가지 않도록 위치 제한
+        view.x = Math.min(crop.x, Math.max(crop.x + crop.w - dw, view.x));
+        view.y = Math.min(crop.y, Math.max(crop.y + crop.h - dh, view.y));
+      }
+      function draw() {
+        ctx.clearRect(0, 0, CW, CH);
+        ctx.fillStyle = '#eef0f4'; ctx.fillRect(0, 0, CW, CH);
+        var dw = img.naturalWidth * view.scale, dh = img.naturalHeight * view.scale;
+        ctx.drawImage(img, view.x, view.y, dw, dh);
+        // 크롭 밖 어둡게
+        ctx.save();
+        ctx.fillStyle = 'rgba(20,24,36,.55)';
+        ctx.beginPath();
+        ctx.rect(0, 0, CW, CH);
+        ctx.rect(crop.x, crop.y, crop.w, crop.h);
+        ctx.fill('evenodd');
+        ctx.restore();
+        // 크롭 테두리
+        ctx.strokeStyle = '#2563eb'; ctx.lineWidth = 2;
+        ctx.strokeRect(crop.x + 1, crop.y + 1, crop.w - 2, crop.h - 2);
+      }
+      function reset() {
+        computeCrop();
+        view.min = Math.max(crop.w / img.naturalWidth, crop.h / img.naturalHeight);
+        view.scale = view.min;
+        view.x = crop.x + (crop.w - img.naturalWidth * view.scale) / 2;
+        view.y = crop.y + (crop.h - img.naturalHeight * view.scale) / 2;
+        zoom.value = 1; clamp(); draw();
+      }
+      function setFile(file) {
+        if (!file || !/^image\//.test(file.type)) return;
+        var url = URL.createObjectURL(file);
+        var im = new Image();
+        im.onload = function () {
+          img = im; drop.style.display = 'none'; stage.style.display = '';
+          reopenBtn.style.display = ''; saveBtn.disabled = false;
+          reset();
+          setTimeout(function () { URL.revokeObjectURL(url); }, 100);
+        };
+        im.onerror = function () { URL.revokeObjectURL(url); alert('이미지를 열 수 없습니다. 다른 사진을 선택하세요.'); };
+        im.src = url;
+      }
+
+      drop.addEventListener('click', function () { fileInput.click(); });
+      drop.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); fileInput.click(); } });
+      reopenBtn.addEventListener('click', function () { fileInput.click(); });
+      fileInput.addEventListener('change', function () { if (fileInput.files[0]) setFile(fileInput.files[0]); fileInput.value = ''; });
+      ['dragenter', 'dragover'].forEach(function (ev) { drop.addEventListener(ev, function (e) { e.preventDefault(); drop.classList.add('over'); }); });
+      ['dragleave', 'dragend'].forEach(function (ev) { drop.addEventListener(ev, function () { drop.classList.remove('over'); }); });
+      drop.addEventListener('drop', function (e) { e.preventDefault(); drop.classList.remove('over'); if (e.dataTransfer && e.dataTransfer.files[0]) setFile(e.dataTransfer.files[0]); });
+
+      // 드래그 이동
+      var dragging = false, lastX = 0, lastY = 0;
+      function pt(e) { var r = canvas.getBoundingClientRect(); var t = e.touches ? e.touches[0] : e; return { x: (t.clientX - r.left) * (CW / r.width), y: (t.clientY - r.top) * (CH / r.height) }; }
+      canvas.addEventListener('pointerdown', function (e) { if (!img) return; dragging = true; var p = pt(e); lastX = p.x; lastY = p.y; canvas.setPointerCapture(e.pointerId); });
+      canvas.addEventListener('pointermove', function (e) { if (!dragging) return; var p = pt(e); view.x += p.x - lastX; view.y += p.y - lastY; lastX = p.x; lastY = p.y; clamp(); draw(); });
+      canvas.addEventListener('pointerup', function () { dragging = false; });
+      canvas.addEventListener('pointercancel', function () { dragging = false; });
+
+      zoom.addEventListener('input', function () {
+        if (!img) return;
+        var cx = crop.x + crop.w / 2, cy = crop.y + crop.h / 2;  // 크롭 중심 기준 확대
+        var old = view.scale;
+        view.scale = view.min * parseFloat(zoom.value);
+        clamp();
+        var f = view.scale / old;
+        view.x = cx - (cx - view.x) * f; view.y = cy - (cy - view.y) * f;
+        clamp(); draw();
+      });
+      host.querySelectorAll('input[name=idpsize]').forEach(function (el) {
+        el.addEventListener('change', function () { preset = PRESETS[+el.value]; if (img) reset(); });
+      });
+
+      saveBtn.addEventListener('click', function () {
+        if (!img) return;
+        var outW = Math.round(preset.w / 25.4 * DPI), outH = Math.round(preset.h / 25.4 * DPI);
+        // 크롭 창(캔버스 좌표) → 원본 이미지 좌표
+        var sx = (crop.x - view.x) / view.scale, sy = (crop.y - view.y) / view.scale;
+        var sw = crop.w / view.scale, sh = crop.h / view.scale;
+        var out = document.createElement('canvas'); out.width = outW; out.height = outH;
+        var octx = out.getContext('2d');
+        octx.fillStyle = '#fff'; octx.fillRect(0, 0, outW, outH);
+        octx.imageSmoothingQuality = 'high';
+        octx.drawImage(img, sx, sy, sw, sh, 0, 0, outW, outH);
+        var a = document.createElement('a');
+        a.href = out.toDataURL('image/jpeg', 0.95);
+        a.download = '증명사진_' + preset.w + 'x' + preset.h + '.jpg';
+        document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      });
+    },
   };
 
   function boot() {
