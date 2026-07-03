@@ -300,7 +300,7 @@
     return '<div class="aw-page">' +
       '<div class="aw-top">' +
         (s.docNo ? '<div class="ct-docno">제 ' + esc(s.docNo) + ' 호</div>' : '') +
-        '<div class="aw-title">' + esc(cfg.docTitle) + '</div>' +
+        '<div class="aw-title">' + (esc(s.docTitle) || esc(cfg.docTitle)) + '</div>' +
         '<div class="aw-flourish"><span>&#9670;</span></div>' +
       '</div>' +
       '<div class="aw-mid">' +
@@ -588,12 +588,75 @@
       '</div>' +
     '</div>';
   }
+  // 내용증명 - 발신인이 수신인에게 통고 내용을 공식 발송·증거화 (강제력은 없고 발송 사실·내용만 증명)
+  function renderContentProof(state, cfg) {
+    var s = state;
+    var amount = Number(s.amount) || 0;
+    var sender = lgParty('발신인 (통고인)', [
+      ['성　명', vOr(s.srName)], ['주민등록번호', vOr(s.srId)],
+      ['주　소', vOr(s.srAddr)], ['연　락　처', vOr(s.srTel)],
+    ]);
+    var receiver = lgParty('수신인 (피통고인)', [
+      ['성　명', vOr(s.rcName)], ['주민등록번호', vOr(s.rcId)],
+      ['주　소', vOr(s.rcAddr)], ['연　락　처', vOr(s.rcTel)],
+    ]);
+    var terms = [];
+    if (s.deadline) terms.push(['이 행 기 한', lgDate(s.deadline) + ' 까지']);
+    return '<div class="lg-page">' +
+      '<div class="lg-title">' + esc(cfg.docTitle) + '</div>' +
+      '<div class="lg-parties">' + sender + receiver + '</div>' +
+      '<div class="lg-sec">' + (esc(s.subject) || '통고 내용') + '</div>' +
+      (amount > 0 ? '<div class="lg-amount"><div class="lg-amount-kr">일금 ' + calc.korAmount(amount) + '원정</div>' +
+        '<div class="lg-amount-num">₩ ' + comma(amount) + '</div></div>' : '') +
+      '<div class="lg-content">' + (esc(s.content) || '&nbsp;') + '</div>' +
+      (terms.length ? '<table class="lg-terms"><tbody>' + lgRows(terms) + '</tbody></table>' : '') +
+      (s.special ? '<div class="lg-sec">유의사항</div><div class="lg-special">' + esc(s.special) + '</div>' : '') +
+      '<div class="lg-decl">' + (esc(s.lead) || '위와 같은 사실을 통고하오니 참고하시기 바랍니다.') + '</div>' +
+      '<div class="lg-date">' + korDate(s.date) + '</div>' +
+      '<div class="lg-signline">발신인　<span class="lg-sign">' + vOr(s.srName) + sealHTML(s, cfg) + '</span></div>' +
+    '</div>';
+  }
+  // 미성년자 해외여행동의서 - 친권자·미성년자·동행인 3자 정보 + 여행정보
+  function renderTravelConsent(state, cfg) {
+    var s = state;
+    var parent = lgParty('친권자 (동의인)', [
+      ['성　명', vOr(s.parentName)], ['자녀와의 관계', vOr(s.relation)],
+      ['주　소', vOr(s.parentAddr)], ['연　락　처', vOr(s.parentTel)],
+      ['여권번호(선택)', vOr(s.parentPassport)],
+    ]);
+    var child = lgParty('미성년자 (여행자)', [
+      ['성　명', vOr(s.childName)], ['생년월일', vOr(s.childBirth)],
+      ['여권번호(선택)', vOr(s.childPassport)],
+    ]);
+    var comp = lgParty('동행인', [
+      ['성　명', vOr(s.compName)], ['자녀와의 관계·소속', vOr(s.compRelation)],
+      ['연　락　처', vOr(s.compTel)], ['여권번호(선택)', vOr(s.compPassport)],
+    ]);
+    var tripRows = [
+      ['여행 국가·도시', vOr(s.destination)],
+      ['여행 기간', (s.startDate ? lgDate(s.startDate) : '&nbsp;') + (s.endDate ? ' ~ ' + lgDate(s.endDate) : '')],
+    ];
+    if (s.purpose) tripRows.push(['여행 목적', esc(s.purpose)]);
+    if (s.lodging) tripRows.push(['숙　소', esc(s.lodging)]);
+    return '<div class="lg-page">' +
+      '<div class="lg-title">' + esc(cfg.docTitle) + '</div>' +
+      '<div class="lg-parties lg-parties-col">' + parent + child + comp + '</div>' +
+      '<div class="lg-sec">여행 정보</div>' +
+      '<table class="lg-terms"><tbody>' + lgRows(tripRows) + '</tbody></table>' +
+      '<div class="lg-decl">' + (esc(s.content) || '위 본인은 미성년자인 자녀의 친권자로서, 위 자녀가 위 기간 동안 위 동행인과 함께 여행하는 것에 동의합니다.') + '</div>' +
+      (s.special ? '<div class="lg-sec">특이사항</div><div class="lg-special">' + esc(s.special) + '</div>' : '') +
+      '<div class="lg-date">' + korDate(s.date) + '</div>' +
+      '<div class="lg-signline">친권자　<span class="lg-sign">' + vOr(s.parentName) + sealHTML(s, cfg) + '</span></div>' +
+    '</div>';
+  }
   function legal(state, cfg, opts) {
     opts = opts || {};
     var inner;
     if (cfg.variant === 'mandate') inner = renderMandate(state, cfg);
     else if (cfg.variant === 'pledge') inner = renderPledge(state, cfg);
     else if (cfg.variant === 'agreement') inner = renderAgreement(state, cfg);
+    else if (cfg.variant === 'contentproof') inner = renderContentProof(state, cfg);
+    else if (cfg.variant === 'travelconsent') inner = renderTravelConsent(state, cfg);
     else inner = renderLoan(state, cfg);
     return wrap(inner, opts);
   }
@@ -731,6 +794,65 @@
     return wrap(inner, opts);
   }
 
+  // ===== 프리랜서 용역계약서 (contract, variant service) - 절 machinery(cl) 재사용 =====
+  function renderServiceContract(state, cfg, opts) {
+    opts = opts || {};
+    var s = state;
+    function cl(no, label, body) {
+      return '<li><span class="ec-no">' + no + '. ' + label + '</span><span class="ec-val">' + body + '</span></li>';
+    }
+    var term = s.endDate
+      ? esc(s.startDate) + ' 부터 ' + esc(s.endDate) + ' 까지'
+      : (s.startDate ? esc(s.startDate) + ' 부터 (용역 완료 시까지)' : '&nbsp;');
+    var amount = Number(s.amount) || 0;
+    var payInfo =
+      '<div>· 용역대금 : ' + (amount > 0 ? '일금 ' + calc.korAmount(amount) + '원정 (₩' + comma(amount) + ')' : '&nbsp;') + '</div>' +
+      '<div>· 지급 일정 : ' + (esc(s.paySchedule) || '&nbsp;') + '</div>' +
+      '<div>· 원천징수 : ' + (s.withhold ? '사업소득세 3.3%(소득세 3% + 지방소득세 0.3%) 공제 후 지급' : '원천징수 없이 전액 지급') + '</div>';
+    var inner =
+      '<div class="ec-page">' +
+        '<div class="ec-title">' + (esc(cfg.docTitle) || '프리랜서 용역계약서') + '</div>' +
+        '<div class="ec-intro"><b>' + vOr(s.coName) + '</b> (이하 "갑")과(와) <b>' + vOr(s.frName) + '</b> (이하 "을")은(는) 다음과 같이 용역계약을 체결한다.</div>' +
+        '<ol class="ec-clauses">' +
+          cl(1, '용역의 내용', (esc(s.scope) || '&nbsp;')) +
+          cl(2, '계약기간', term) +
+          cl(3, '수행 장소', (esc(s.workplace) || '갑·을 협의에 따름')) +
+          '<li><span class="ec-no">4. 용역대금·지급</span><span class="ec-val"><div class="ec-pay">' + payInfo + '</div></span></li>' +
+          cl(5, '갑의 의무', '갑은 을이 용역을 수행하는 데 필요한 자료·정보를 제공하고, 제4조에서 정한 일정에 따라 용역대금을 지급한다.') +
+          cl(6, '을의 의무', '을은 선량한 관리자의 주의로 용역을 성실히 수행하며, 갑의 사전 서면 동의 없이 제3자에게 용역의 전부 또는 일부를 재위탁하지 아니한다.') +
+          cl(7, '결과물의 귀속', '을이 용역 수행 중 작성·제작한 결과물에 관한 저작권 등 지식재산권은 갑이 용역대금을 완제하는 것을 조건으로 갑에게 귀속한다.' + (s.ipNote ? ' ' + esc(s.ipNote) : '')) +
+          cl(8, '하자보수', '을이 납품한 결과물에 하자(오류·누락 등)가 있는 경우, 을은 갑의 요청을 받은 날로부터 상당한 기간 내에 무상으로 보수하거나 다시 납품한다. 다만 갑의 요청사항 변경이나 갑이 제공한 자료의 오류로 인한 것은 그러하지 아니한다.') +
+          cl(9, '비밀유지', '갑과 을은 본 계약과 관련하여 알게 된 상대방의 영업비밀 및 미공개 정보를 계약기간은 물론 계약 종료 후에도 제3자에게 누설하지 아니한다.') +
+          cl(10, '계약의 해지', '갑 또는 을이 본 계약을 위반한 경우, 상대방은 상당한 기간을 정하여 서면으로 시정을 요구하고 그 기간 내에 시정되지 아니하면 계약을 해지할 수 있다.') +
+          cl(11, '손해배상', '갑 또는 을이 본 계약을 위반하여 상대방에게 손해를 끼친 경우 그 손해를 배상한다.') +
+          cl(12, '관할 및 기타', '본 계약과 관련한 분쟁은 갑과 을이 협의하여 해결하되, 협의가 이루어지지 아니하면 민사소송법에 따른 관할법원에 제기한다. 이 계약에 정함이 없는 사항은 관계 법령 및 상관례에 따른다.') +
+        '</ol>' +
+        (s.note ? '<div class="ec-sec">특약사항</div><div class="ec-note">' + esc(s.note) + '</div>' : '') +
+        '<div class="ec-date">' + korDate(s.date) + '</div>' +
+        '<div class="ec-sign">' +
+          '<div class="ec-party"><span class="ec-plabel">(갑)</span>' +
+            '<div class="ec-plines">' +
+              '<div>상호(성명) : ' + vOr(s.coName) + (s.coRegNo ? '　　사업자등록번호 : ' + esc(s.coRegNo) : '') + '</div>' +
+              '<div>주　　소 : ' + vOr(s.coAddr) + '</div>' +
+              '<div>연 락 처 : ' + vOr(s.coTel) + '　　대표자 : ' + vOr(s.coCeo) + sealHTML(s, cfg) + '</div>' +
+            '</div>' +
+          '</div>' +
+          '<div class="ec-party"><span class="ec-plabel">(을)</span>' +
+            '<div class="ec-plines">' +
+              '<div>상호(성명) : ' + vOr(s.frName) + (s.frRegNo ? '　　사업자등록번호 : ' + esc(s.frRegNo) : '') + '</div>' +
+              '<div>주　　소 : ' + vOr(s.frAddr) + '</div>' +
+              '<div>연 락 처 : ' + vOr(s.frTel) + '<span class="ec-signhint">(서명)</span></div>' +
+            '</div>' +
+          '</div>' +
+        '</div>' +
+      '</div>';
+    return wrap(inner, opts);
+  }
+  function contract(state, cfg, opts) {
+    if (cfg.variant === 'service') return renderServiceContract(state, cfg, opts);
+    return renderContract(state, cfg, opts);
+  }
+
   // ===== 지출결의서 (expense) - 품목·합계 machinery 재사용 + 결재란 =====
   function renderExpense(state, cfg, opts) {
     opts = opts || {};
@@ -830,7 +952,7 @@
     'career': renderCareer,
     'legal': legal,
     'payslip': renderPayslip,
-    'contract': renderContract,
+    'contract': contract,
     'expense': renderExpense,
     'handover': renderHandover,
   };

@@ -65,6 +65,13 @@ export function textThumb(tool) {
         '<span class="ttt-ph p3" style="background:#d6dae2"></span><span class="ttt-ph p2" style="background:#c3c8d2"></span>' +
         '<span class="ttt-ph p1" style="background:var(--accent)"></span>' +
       '</div></div>',
+    'pdf-watermark':
+      '<div class="ttt-i2p"><div class="ttt-pdf" style="position:relative"><span>PDF</span>' +
+        '<span style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;transform:rotate(-30deg);font-size:12px;font-weight:800;color:rgba(255,255,255,.55);white-space:nowrap">대외비</span>' +
+      '</div></div>',
+    'pdf-rotate':
+      '<div class="ttt-i2p"><div class="ttt-pdf" style="transform:rotate(90deg)"><span>PDF</span></div>' +
+      '<span class="ttt-arrow">↻</span><div class="ttt-pdf"><span>PDF</span></div></div>',
     'idphoto':
       '<div class="ttt-idp"><div class="ttt-idp-frame"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="9.5" r="3.4"/><path d="M6 18.5c1.1-3 3.2-4.5 6-4.5s4.9 1.5 6 4.5"/></svg></div><div class="ttt-idp-tag">3×4</div></div>',
     'qr':

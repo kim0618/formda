@@ -24,44 +24,57 @@ allowed-tools: Read, Write, Edit, Glob, Grep, Bash, WebSearch, WebFetch
 > **제외(저수요·저CPC, 오픈 후 트래픽 보고 추가)**: 상장·표창장, 가정통신문, 텍스트 정렬 — 도구는 있으나 가이드 ROI 낮음.
 
 ### A. 개인 금전·법률 클러스터 (고CPC YMYL · →차용증/위임장)
-- [ ] 1. 차용증 쓰는 법: 효력·이자제한법·공증 (+지불각서·현금보관증 차이 흡수) →loan
-- [ ] 2. 🆕 가족 간 돈거래 차용증과 증여세 주의 →loan
-- [ ] 3. 🆕 지불각서·각서 쓰는 법(돈 갚겠다는 각서) →loan
-- [ ] 4. 위임장 작성법: 인감증명서·관공서·은행 대리 →mandate
+- [x] 1. 차용증 쓰는 법: 효력·이자제한법·공증 (+지불각서·현금보관증 차이 흡수) →loan (how-to-write-loan, 2026-06-30)
+- [x] 2. 🆕 가족 간 돈거래 차용증과 증여세 주의 →loan (family-loan-gift-tax, 2026-06-30)
+- [x] 3. 🆕 지불각서·각서 쓰는 법(돈 갚겠다는 각서) →loan (how-to-write-payment-agreement, 2026-06-30)
+- [x] 4. 위임장 작성법: 인감증명서·관공서·은행 대리 →mandate (how-to-write-mandate, 2026-06-30)
 
 ### B. 퇴사·경력증명 클러스터 (고수요+법적 · →재직증명서/사직서)
-- [ ] 5. 사직서 작성법: 제출 시기·민법 660조·인수인계 →resignation
-- [ ] 6. 재직·경력·퇴직증명서 차이와 발급(3종 흡수) →employment
-- [ ] 7. 🆕 경력증명서 발급, 퇴사 후에도 받는 법(근로기준법) →employment
-- [ ] 8. [허브] 퇴사할 때 챙길 서류 총정리 →resignation/employment
+- [x] 5. 사직서 작성법: 제출 시기·민법 660조·인수인계 →resignation (how-to-write-resignation, 2026-06-30)
+- [x] 6. 재직·경력·퇴직증명서 차이와 발급(3종 흡수) →employment (employment-certificate-types, 2026-06-30)
+- [x] 7. 🆕 경력증명서 발급, 퇴사 후에도 받는 법(근로기준법) →employment (how-to-get-employment-certificate, 2026-06-30)
+- [x] 8. [허브] 퇴사할 때 챙길 서류 총정리 →resignation/employment (documents-when-leaving-job, 2026-06-30)
 
 ### C. 취업 서류 클러스터 (head term 포화 → 롱테일 · →이력서/자소서/경력기술서)
-- [ ] 9. 신입 이력서 작성법(경력 없을 때) →resume
-- [ ] 10. 자기소개서 문항별 작성·예시(성장과정·지원동기·포부) →cover-letter
-- [ ] 11. 경력기술서 작성법(성과 수치화·STAR) →career
-- [ ] 12. [허브] 취업 서류 3종 한 번에 준비 →resume/cover-letter/career
+- [x] 9. 신입 이력서 작성법(경력 없을 때) →resume (how-to-write-resume, 2026-06-30)
+- [x] 10. 자기소개서 문항별 작성·예시(성장과정·지원동기·포부) →cover-letter (how-to-write-cover-letter, 2026-06-30)
+- [x] 11. 경력기술서 작성법(성과 수치화·STAR) →career (how-to-write-career, 2026-06-30)
+- [x] 12. [허브] 취업 서류 3종 한 번에 준비 →resume/cover-letter/career (prepare-job-application-documents, 2026-06-30)
 
 ### D. 거래 문서 클러스터 (사업자 CPC · →비즈니스 5종)
-- [ ] 13. 거래명세서 작성법과 세금계산서 차이 →statement
-- [ ] 14. 영수증 발행: 간이·현금영수증·소득공제 →receipt
-- [ ] 15. 청구서 작성법(대금 청구·납부기한) →invoice
-- [ ] 16. 발주서 작성법(납기·결제조건) →order
-- [ ] 17. [허브] 프리랜서·1인 사업자가 챙길 문서 5가지 →estimate/statement/invoice/receipt
+- [x] 13. 거래명세서 작성법과 세금계산서 차이 →statement (how-to-write-statement, 2026-06-30)
+- [x] 14. 영수증 발행: 간이·현금영수증·소득공제 →receipt (how-to-issue-receipt, 2026-06-30)
+- [x] 15. 청구서 작성법(대금 청구·납부기한) →invoice (how-to-write-invoice, 2026-06-30)
+- [x] 16. 발주서 작성법(납기·결제조건) →order (how-to-write-order, 2026-06-30)
+- [x] 17. [허브] 프리랜서·1인 사업자가 챙길 문서 5가지 →estimate/statement/invoice/receipt (documents-for-freelancers, 2026-06-30)
 
 ### E. 단독 고수요 (개별 검색량 강함)
-- [ ] 18. 무료 명함 만드는 법: 규격·필수정보·디자인 →business-card
-- [ ] 19. 여권 영문이름 표기법: 로마자·성씨(Kim/Gim) →name-roman
-- [ ] 20. QR코드 무료로 만드는 법: URL·와이파이·연락처 →qr
-- [ ] 21. 자기소개서 글자수 맞추는 법(공백 포함/제외) →char-count
-- [ ] 22. 한글 주소 영문 변환: 도로명·해외배송 →address-roman
+- [x] 18. 무료 명함 만드는 법: 규격·필수정보·디자인 →business-card (how-to-make-business-card, 2026-06-30)
+- [x] 19. 여권 영문이름 표기법: 로마자·성씨(Kim/Gim) →name-roman (how-to-romanize-korean-name, 2026-06-30)
+- [x] 20. QR코드 무료로 만드는 법: URL·와이파이·연락처 →qr (how-to-make-qr-code, 2026-06-30)
+- [x] 21. 자기소개서 글자수 맞추는 법(공백 포함/제외) →char-count (how-to-count-characters, 2026-06-30)
+- [x] 22. 한글 주소 영문 변환: 도로명·해외배송 →address-roman (how-to-romanize-address, 2026-06-30)
 
 ### F. 비교 허브 (롱테일·ChatGPT 인용 magnet)
 - [x] (견적서 작성법 = how-to-write-estimate, 2026-06-26)
-- [ ] 23. [허브] 견적서·거래명세서·세금계산서 차이 한눈에 →estimate/statement
-- [ ] 24. [허브] 1인 사업자 세금계산서·증빙 기초 →estimate/receipt/invoice
+- [x] 23. [허브] 견적서·거래명세서·세금계산서 차이 한눈에 →estimate/statement (business-documents-difference, 2026-06-30)
+- [x] 24. [허브] 1인 사업자 세금계산서·증빙 기초 →estimate/receipt/invoice (freelancer-tax-basics, 2026-06-30)
 
 ### 생산 순서 (가치순 8배치 × 3편; 허브는 위성 작성 후가 유리)
 1차 **1·10·13**(차용증·자소서·명세서) → 2차 **7·18·19**(경력증명서·명함·영문이름) → 3차 **5·2·14**(사직서·가족차용증·영수증) → 4차 **6·20·9**(증명서3종·QR·신입이력서) → 5차 **4·3·15**(위임장·지불각서·청구서) → 6차 **11·21·16**(경력기술서·글자수·발주서) → 7차 **22·12·8**(주소·취업허브·퇴사허브) → 8차 **17·23·24**(프리랜서·비교허브·세금기초)
+
+## 신규 도구 짝 가이드 (오픈 후 추가된 도구용, 큐 밖 - 사용자 승인 하에 진행)
+런칭 후 32종 → 37종으로 늘어난 신규 도구 각각의 짝 가이드. 위 25편 큐와 별개 트랙. **가이드 작성 여부는 매번 사용자에게 먼저 물어보고 진행** (도구만 요청받았는데 가이드까지 자체 판단으로 만들지 않는다).
+- [x] 내용증명 → how-to-send-content-proof, 2026-07-03 (steps형·FAQ6)
+- [x] 프리랜서 용역계약서 → how-to-write-freelance-contract, 2026-07-03 (strategy형·FAQ4)
+- [x] 미성년자 해외여행동의서 → how-to-write-travel-consent, 2026-07-03 (compare형·FAQ5)
+- [x] 급여명세서 → how-to-issue-payslip, 2026-07-03 (requirements형·FAQ6)
+- [x] 근로계약서 → how-to-write-employment-contract, 2026-07-03 (steps형·FAQ4)
+- [x] 지출결의서 → how-to-write-expense-report, 2026-07-03 (compare형·FAQ5)
+- [x] 인수인계서 → how-to-write-handover, 2026-07-03 (requirements형·FAQ4)
+- [x] 합의서·각서 → how-to-write-agreement, 2026-07-03 (strategy형·FAQ5)
+- [x] 퇴직증명서 → how-to-get-resignation-certificate, 2026-07-03 (compare형·FAQ6, 기존 how-to-get-employment-certificate는 tool필드 오류로 'employment'였던 것을 'career-certificate'로 정정)
+- [ ] PDF 워터마크 / PDF 회전 → 가이드 미작성 (유틸 도구는 기존 pdf-merge·pdf-split·image-to-pdf도 짝 가이드 없음 - 일관성 유지 위해 보류)
 
 ## 주제 큐 — Phase 2: 런칭 후 (트래픽 쌓인 뒤 활성화)
 네이버 서치어드바이저 검색어/웹문서 TOP30 + GA/`/report` 기반으로 큐를 월 1회 갱신, 먹힌 주제 더블다운(클러스터). 지금은 비활성.

@@ -162,6 +162,9 @@
           lf('name', '성명', '홍길동') +
         '</div>' +
         '<div class="form-sec"><h2>수여 내용</h2>' +
+          '<div class="field"><label>제목</label>' +
+            '<input id="f-docTitle" placeholder="상장" oninput="Formda.app.onField(\'docTitle\', this.value)">' +
+            '<p class="field-help">표창장·감사장·공로상 등으로 바꾸려면 이 칸에 직접 입력하세요. 비우면 "상장"으로 표시됩니다.</p></div>' +
           '<div class="field"><label>수여 문구·공적</label>' +
             '<textarea id="f-body" rows="6" placeholder="위 사람은 ~하여 그 공이 크므로 이 상장을 수여합니다." oninput="Formda.app.onField(\'body\', this.value)"></textarea></div>' +
           '<div class="row2">' + lf('docNo', '상장 번호 (선택)', '2026-001') + lf('date', '수여일자', '', 'date') + '</div>' +
@@ -460,6 +463,68 @@
           '<p class="field-help">관공서·금융·부동산 제출 시 인감도장 날인 + <b>인감증명서(3개월 이내) 별도 첨부</b>가 필요합니다.</p>' +
         '</div>';
     }
+    if (cfg.variant === 'contentproof') {
+      return '' +
+        '<div class="form-sec"><h2>발신인 (통고인)</h2>' +
+          '<div class="row2">' + lf('srName', '성명', '홍길동') + lf('srId', '주민등록번호 (선택)', '600101-1******') + '</div>' +
+          lf('srAddr', '주소', '서울시 ...') +
+          lf('srTel', '연락처', '010-0000-0000') +
+          sealField(cfg, '발신인 도장·서명 이미지 (선택)') +
+        '</div>' +
+        '<div class="form-sec"><h2>수신인 (피통고인)</h2>' +
+          '<div class="row2">' + lf('rcName', '성명 (필수)', '김철수') + lf('rcId', '주민등록번호 (선택)', '900101-1******') + '</div>' +
+          lf('rcAddr', '주소', '서울시 ...') +
+          lf('rcTel', '연락처 (선택)', '010-0000-0000') +
+          '<p class="field-help">우체국은 <b>수신인 성명 없이 주소만</b> 적으면 내용증명 접수를 받아 주지 않습니다. 성명을 반드시 적으세요.</p>' +
+        '</div>' +
+        '<div class="form-sec"><h2>통고 내용</h2>' +
+          lf('subject', '제목', '물품대금 지급 최고') +
+          '<div class="field"><label>청구 금액 (원, 선택)</label>' +
+            '<input id="f-amount" inputmode="numeric" placeholder="3,000,000" oninput="Formda.app.onMoney(\'amount\', this)">' +
+            '<p class="field-help">금전 청구가 아니면 비워 두세요. 입력하면 한글 정자로 자동 변환됩니다.</p></div>' +
+          '<div class="field"><label>본문 (사실관계·요구사항)</label>' +
+            '<textarea id="f-content" rows="6" placeholder="예)\n발신인은 2026년 5월 1일 수신인과 물품공급계약을 체결하고 물품을 공급하였으나, 수신인은 대금 300만원을 현재까지 지급하지 않고 있습니다.\n\n이에 발신인은 수신인에게 위 대금을 아래 기한까지 지급하여 주실 것을 통고합니다." oninput="Formda.app.onField(\'content\', this.value)"></textarea>' +
+            '<p class="field-help">언제·무슨 일이 있었는지(사실관계)를 먼저 적고, 무엇을 요구하는지를 명확히 적으세요.</p></div>' +
+          lf('deadline', '이행기한 (선택)', '', 'date') +
+          '<div class="field"><label>유의사항 (선택)</label>' +
+            '<textarea id="f-special" rows="2" placeholder="비우면 표준 문구(법적 조치 예고)가 들어갑니다." oninput="Formda.app.onField(\'special\', this.value)"></textarea></div>' +
+          '<div class="field"><label>맺음 문구 (선택)</label>' +
+            '<input id="f-lead" placeholder="비우면 표준 문구가 들어갑니다." oninput="Formda.app.onField(\'lead\', this.value)"></div>' +
+          '<div class="field"><label>작성일자</label><input id="f-date" type="date" oninput="Formda.app.onField(\'date\', this.value)"></div>' +
+          '<p class="field-help">내용증명은 <b>동일한 내용 3부</b>(발신인 보관용·수신인 발송용·우체국 보관용)를 만들어 우체국 창구에서 등기로 발송합니다. 상대방에게 도달한 날짜까지 증명하려면 <b>배달증명</b>을 함께 신청하세요.</p>' +
+        '</div>';
+    }
+    if (cfg.variant === 'travelconsent') {
+      return '' +
+        '<div class="form-sec"><h2>친권자 (동의인)</h2>' +
+          '<div class="row2">' + lf('parentName', '성명', '홍길동') + lf('relation', '자녀와의 관계', '부') + '</div>' +
+          lf('parentAddr', '주소', '서울시 ...') +
+          '<div class="row2">' + lf('parentTel', '연락처', '010-0000-0000') + lf('parentPassport', '여권번호 (선택)', 'M12345678') + '</div>' +
+          sealField(cfg, '친권자 도장·서명 이미지 (선택)') +
+        '</div>' +
+        '<div class="form-sec"><h2>미성년자 (여행자)</h2>' +
+          '<div class="row2">' + lf('childName', '성명', '홍서연') + lf('childBirth', '생년월일', '', 'date') + '</div>' +
+          lf('childPassport', '여권번호 (선택)', 'M23456789') +
+        '</div>' +
+        '<div class="form-sec"><h2>동행인</h2>' +
+          '<div class="row2">' + lf('compName', '성명', '김이모') + lf('compRelation', '자녀와의 관계·소속', '이모 / 인솔교사 등') + '</div>' +
+          '<div class="row2">' + lf('compTel', '연락처', '010-0000-0000') + lf('compPassport', '여권번호 (선택)', '') + '</div>' +
+          '<p class="field-help">부모 <b>모두</b>가 함께 여행하면 이 동의서 없이 가족관계증명서만으로 충분합니다. 이 동의서는 부모 중 <b>한 명만</b> 동행하거나, 조부모·친척·인솔교사 등 <b>제3자와</b> 여행할 때 필요합니다.</p>' +
+        '</div>' +
+        '<div class="form-sec"><h2>여행 정보</h2>' +
+          lf('destination', '여행 국가·도시', '태국 방콕') +
+          '<div class="row2">' + lf('startDate', '출발일', '', 'date') + lf('endDate', '귀국일', '', 'date') + '</div>' +
+          '<div class="row2">' + lf('purpose', '여행 목적 (선택)', '가족 여행 / 어학연수 / 캠프 등') + lf('lodging', '숙소 (선택)', '현지 호텔명') + '</div>' +
+        '</div>' +
+        '<div class="form-sec"><h2>동의 내용·작성</h2>' +
+          '<div class="field"><label>동의 문구 (선택)</label>' +
+            '<textarea id="f-content" rows="2" placeholder="비우면 표준 동의 문구가 들어갑니다." oninput="Formda.app.onField(\'content\', this.value)"></textarea></div>' +
+          '<div class="field"><label>특이사항 (선택)</label>' +
+            '<textarea id="f-special" rows="2" placeholder="예: 비상연락처, 의료행위 동의 여부 등" oninput="Formda.app.onField(\'special\', this.value)"></textarea></div>' +
+          lf('date', '작성일자', '', 'date') +
+          '<p class="field-help">미국·캐나다·필리핀·베트남·남아공 등 일부 국가는 <b>영문 공증 동의서</b>와 번역·공증된 가족관계증명서를 별도로 요구합니다. 이 도구는 한국어 참고용 양식이므로, 방문국 요구사항은 해당 국가 주한대사관이나 항공사에 여행 최소 2~3주 전 확인하세요.</p>' +
+        '</div>';
+    }
     return '' +
       '<div class="form-sec"><h2>채권자 (빌려준 사람)</h2>' +
         '<div class="row2">' + lf('crName', '성명', '홍길동') + lf('crId', '주민등록번호', '600101-1******') + '</div>' +
@@ -557,7 +622,45 @@
   function insChk(id, label) {
     return '<label class="ec-chk"><input type="checkbox" id="f-' + id + '" onchange="Formda.app.onCheck(\'' + id + '\', this.checked)">' + label + '</label>';
   }
+  function serviceContractForm(cfg) {
+    return '' +
+      '<div class="form-sec"><h2>갑 (발주자)</h2>' +
+        '<div class="row2">' + lf('coName', '상호(성명)', '폼다 주식회사') + lf('coRegNo', '사업자등록번호 (선택)', '123-45-67890') + '</div>' +
+        '<div class="row2">' + lf('coCeo', '대표자', '김폼다') + lf('coTel', '연락처', '02-1234-5678') + '</div>' +
+        lf('coAddr', '주소', '서울시 강남구 테헤란로 1') +
+      '</div>' +
+      '<div class="form-sec"><h2>을 (프리랜서)</h2>' +
+        '<div class="row2">' + lf('frName', '성명(상호)', '홍길동') + lf('frRegNo', '사업자등록번호 (선택)', '123-45-67890') + '</div>' +
+        lf('frAddr', '주소', '서울시 ...') +
+        lf('frTel', '연락처', '010-0000-0000') +
+      '</div>' +
+      '<div class="form-sec"><h2>용역 내용·기간</h2>' +
+        '<div class="field"><label>용역의 내용</label>' +
+          '<textarea id="f-scope" rows="3" placeholder="예: 회사 홈페이지 리뉴얼 디자인 및 퍼블리싱 (메인 1종, 서브 4종)" oninput="Formda.app.onField(\'scope\', this.value)"></textarea></div>' +
+        '<div class="row2">' + lf('startDate', '용역개시일', '', 'date') + lf('endDate', '용역종료일 (선택)', '', 'date') + '</div>' +
+        '<p class="field-help">용역종료일을 비우면 "용역 완료 시까지"로 표기됩니다.</p>' +
+        lf('workplace', '수행 장소 (선택)', '재택 (필요 시 발주자 사무실)') +
+      '</div>' +
+      '<div class="form-sec"><h2>용역대금</h2>' +
+        '<div class="field"><label>용역대금 (원)</label>' +
+          '<input id="f-amount" inputmode="numeric" placeholder="3,000,000" oninput="Formda.app.onMoney(\'amount\', this)">' +
+          '<p class="field-help">금액은 미리보기에서 한글 정자로 자동 변환됩니다.</p></div>' +
+        lf('paySchedule', '지급 일정', '계약체결 시 50%, 결과물 납품·검수 완료 후 50%') +
+        insChk('withhold', '사업소득세 3.3% 원천징수 후 지급') +
+        '<p class="field-help">프리랜서(개인사업자)에게 용역대금을 지급할 때는 원천징수의무자인 발주자가 지급액에서 사업소득세 3.3%(소득세 3% + 지방소득세 0.3%)를 떼고 지급하는 것이 일반적입니다.</p>' +
+      '</div>' +
+      '<div class="form-sec"><h2>결과물·특약·작성</h2>' +
+        '<div class="field"><label>결과물 귀속 추가사항 (선택)</label>' +
+          '<input id="f-ipNote" placeholder="예: 을은 포트폴리오 목적으로 결과물 일부를 공개할 수 있다." oninput="Formda.app.onField(\'ipNote\', this.value)"></div>' +
+        '<div class="field"><label>특약사항 (선택)</label>' +
+          '<textarea id="f-note" rows="2" placeholder="추가로 정할 사항이 있으면 적으세요." oninput="Formda.app.onField(\'note\', this.value)"></textarea></div>' +
+        lf('date', '계약일자', '', 'date') +
+        sealField(cfg, '갑 도장·서명 이미지 (선택)') +
+        '<p class="field-help">이 계약은 여러 업종에 두루 쓸 수 있는 <b>참고용 일반 양식</b>입니다. 소프트웨어 분야처럼 관계 부처가 만든 업종별 공식 표준계약서(예: 과학기술정보통신부 SW종사자 표준계약서)가 있다면 그 표준계약서를 우선 확인하세요. 또한 계약 명칭과 무관하게 근무시간·장소를 구속하고 상당한 지휘·감독을 하는 등 실질적으로 근로자처럼 일하게 하면 근로기준법상 근로자로 인정될 수 있으니 유의하세요.</p>' +
+      '</div>';
+  }
   function contractForm(cfg) {
+    if (cfg.variant === 'service') return serviceContractForm(cfg);
     return '' +
       '<div class="form-sec"><h2>사업주</h2>' +
         '<div class="row2">' + lf('bizName', '사업체명', '폼다 주식회사') + lf('bizRegNo', '사업자등록번호 (선택)', '123-45-67890') + '</div>' +

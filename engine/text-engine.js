@@ -53,6 +53,48 @@
     return { main: main, alts: alts };
   }
 
+  // ---------- 주소 전용: 인접 음절 간 자음동화·유음화 반영 ----------
+  // 인명과 달리 지명·도로명은 실제 발음대로 적어야 한다(예: 종로→Jongno, 왕십리→Wangsimni, 신라→Silla).
+  // CHO 인덱스: 2=ㄴ, 5=ㄹ, 6=ㅁ. JONG 문자값 'k'/'t'/'p'=파열음 받침, 'n'/'m'/'ng'=비음 받침, 'l'=유음 받침.
+  function jamoIndices(ch) {
+    var c = ch.charCodeAt(0) - 0xAC00;
+    if (c < 0 || c > 11171) return null;
+    return { cho: (c / 588) | 0, jung: ((c % 588) / 28) | 0, jong: c % 28 };
+  }
+  function romanizeAddrWord(s) {
+    var syl = [];
+    for (var i = 0; i < s.length; i++) {
+      var idx = jamoIndices(s[i]);
+      syl.push(idx ? { cho: idx.cho, jung: idx.jung, jongStr: JONG[idx.jong] } : { literal: s[i] });
+    }
+    for (var k = 0; k < syl.length - 1; k++) {
+      var cur = syl[k], nxt = syl[k + 1];
+      if (cur.literal || nxt.literal) continue;
+      var cj = cur.jongOverride || cur.jongStr;
+      if ((cj === 'k' || cj === 't' || cj === 'p') && (nxt.cho === 2 || nxt.cho === 5 || nxt.cho === 6)) {
+        // 비음화: ㄱㄷㅂ받침 + ㄴㄹㅁ초성 -> ㅇㄴㅁ받침 (백마->baengma, 왕십리의 '십'->sim)
+        cur.jongOverride = cj === 'k' ? 'ng' : (cj === 't' ? 'n' : 'm');
+        if (nxt.cho === 5) nxt.choOverride = 'n'; // 뒤따르는 ㄹ도 비음화(왕십리의 '리'->ni)
+      } else if ((cj === 'ng' || cj === 'm') && nxt.cho === 5) {
+        // ㄹ의 비음화: ㅇㅁ받침 + ㄹ초성 -> ㄹ이 ㄴ으로 (종로->jongno)
+        nxt.choOverride = 'n';
+      } else if (cj === 'n' && nxt.cho === 5) {
+        // 유음화: ㄴ+ㄹ -> ㄹㄹ (신라->silla)
+        cur.jongOverride = 'l';
+        nxt.choOverride = 'l';
+      } else if (cj === 'l' && nxt.cho === 2) {
+        // 유음화(역방향): ㄹ+ㄴ -> ㄹㄹ (별내->byeollae)
+        nxt.choOverride = 'l';
+      }
+    }
+    var out = '';
+    for (var m = 0; m < syl.length; m++) {
+      var c2 = syl[m];
+      out += c2.literal || ((c2.choOverride || CHO[c2.cho]) + JUNG[c2.jung] + (c2.jongOverride || c2.jongStr));
+    }
+    return out;
+  }
+
   // ---------- 주소 로마자 변환 (참고용 근사: 국립국어원 표기법 + 도로명 접미사) ----------
   var ADDR_CITY = { '서울': 'Seoul', '부산': 'Busan', '대구': 'Daegu', '인천': 'Incheon', '광주': 'Gwangju', '대전': 'Daejeon', '울산': 'Ulsan', '세종': 'Sejong' };
   // 긴 접미사 먼저. [한글접미사, 영문, 도시형(접미사 없이 도시명만)]
@@ -69,12 +111,12 @@
       if (tok.length > suf.length && tok.slice(-suf.length) === suf) {
         var base = tok.slice(0, tok.length - suf.length);
         if (ADDR_SUF[i][2] && ADDR_CITY[base]) return { text: ADDR_CITY[base] };   // 서울특별시 → Seoul
-        var baseR = ADDR_CITY[base] || cap(romanizeWord(base));
+        var baseR = ADDR_CITY[base] || cap(romanizeAddrWord(base));
         return { text: baseR + ADDR_SUF[i][1] };
       }
     }
     if (ADDR_CITY[tok]) return { text: ADDR_CITY[tok] };
-    return { text: cap(romanizeWord(tok)) };
+    return { text: cap(romanizeAddrWord(tok)) };
   }
   function romanizeAddress(s) {
     var toks = s.trim().split(/\s+/).filter(Boolean);
@@ -966,6 +1008,286 @@
         a.download = '증명사진_' + preset.w + 'x' + preset.h + '.jpg';
         document.body.appendChild(a); a.click(); document.body.removeChild(a);
       });
+    },
+
+    // PDF 워터마크 삽입 - 캔버스로 텍스트를 그려 PNG로 만든 뒤 각 페이지에 도장처럼 찍기 (한글 폰트 임베딩 없이 브라우저 렌더링 재사용)
+    'pdfwatermark': function (host) {
+      host.innerHTML =
+        '<div class="tt-wrap stack i2p">' +
+          '<div class="tt-main">' +
+            '<div class="tt-bar"><span class="tt-bar-label">PDF 선택 <span id="wmCnt" class="tt-cnt"></span></span>' +
+              '<div class="tt-actions"><button class="mini-btn danger" data-act="clear">지우기</button></div></div>' +
+            '<div class="i2p-drop" id="wmDrop" tabindex="0" role="button" aria-label="PDF 선택">' +
+              '<input type="file" id="wmFile" accept="application/pdf,.pdf" hidden>' +
+              '<svg class="i2p-drop-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V4"/><path d="m8 8 4-4 4 4"/><path d="M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"/></svg>' +
+              '<p class="i2p-drop-t">PDF를 끌어다 놓거나 <b>클릭해서 선택</b></p>' +
+              '<p class="i2p-drop-s">한 개의 PDF · 모든 페이지에 워터마크가 반복해서 찍힙니다</p>' +
+            '</div>' +
+            '<div class="pdf-list" id="wmList"></div>' +
+          '</div>' +
+          '<div class="tt-side">' +
+            '<div class="i2p-opts" id="wmOpts" style="display:none">' +
+              '<div class="i2p-opt"><div class="i2p-opt-h">워터마크 문구</div>' +
+                '<input id="wmText" placeholder="예: 대외비" value="대외비" maxlength="20"></div>' +
+              '<div class="i2p-opt"><div class="i2p-opt-h">배치</div><div class="tt-opt-row">' +
+                '<label class="tt-chip"><input type="radio" name="wmpos" value="tile" checked>반복(타일)</label>' +
+                '<label class="tt-chip"><input type="radio" name="wmpos" value="center">가운데 1개</label>' +
+              '</div></div>' +
+              '<div class="i2p-opt"><div class="i2p-opt-h">진하기</div><div class="tt-opt-row">' +
+                '<label class="tt-chip"><input type="radio" name="wmop" value="18">연하게</label>' +
+                '<label class="tt-chip"><input type="radio" name="wmop" value="32" checked>보통</label>' +
+                '<label class="tt-chip"><input type="radio" name="wmop" value="50">진하게</label>' +
+              '</div></div>' +
+            '</div>' +
+            '<button class="mini-btn i2p-make" id="wmMake" disabled>워터마크 넣기</button>' +
+            '<p class="tt-hint">처리는 모두 사용자 브라우저에서 이루어지며, 파일이 서버로 전송되지 않습니다.</p>' +
+          '</div>' +
+        '</div>';
+
+      var cur = null;   // { name, size, pages, bytes }
+      var listEl = host.querySelector('#wmList');
+      var drop = host.querySelector('#wmDrop');
+      var fileInput = host.querySelector('#wmFile');
+      var makeBtn = host.querySelector('#wmMake');
+      var cntEl = host.querySelector('#wmCnt');
+      var opts = host.querySelector('#wmOpts');
+      var textInput = host.querySelector('#wmText');
+      var busy = false;
+
+      var pdflibPromise = null;
+      function ensurePdfLib() {
+        if (window.PDFLib) return Promise.resolve();
+        if (!pdflibPromise) {
+          pdflibPromise = new Promise(function (resolve, reject) {
+            var s = document.createElement('script');
+            s.src = 'https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js';
+            s.async = true;
+            s.onload = resolve;
+            s.onerror = function () { pdflibPromise = null; reject(new Error('PDF 라이브러리를 불러오지 못했습니다.')); };
+            document.head.appendChild(s);
+          });
+        }
+        return pdflibPromise;
+      }
+      function sizeStr(b) { return b < 1024 * 1024 ? Math.max(1, Math.round(b / 1024)) + ' KB' : (b / 1024 / 1024).toFixed(1) + ' MB'; }
+      function opt(name) { return (host.querySelector('input[name=' + name + ']:checked') || {}).value; }
+
+      async function setFile(file) {
+        if (!file || !(file.type === 'application/pdf' || /\.pdf$/i.test(file.name))) return;
+        try { await ensurePdfLib(); } catch (e) { alert(e.message); return; }
+        try {
+          var bytes = await file.arrayBuffer();
+          var doc = await window.PDFLib.PDFDocument.load(bytes, { ignoreEncryption: true });
+          cur = { name: file.name, size: file.size, pages: doc.getPageCount(), bytes: bytes };
+        } catch (e) { alert('PDF를 열 수 없습니다. 손상되었거나 암호가 걸린 파일일 수 있습니다.'); return; }
+        render();
+      }
+      function render() {
+        if (!cur) { listEl.innerHTML = ''; cntEl.textContent = ''; opts.style.display = 'none'; makeBtn.disabled = true; return; }
+        listEl.innerHTML = '<div class="pdf-item">' +
+          '<span class="pdf-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h9l3 3v15H6z"/><path d="M14 3v4h4"/></svg></span>' +
+          '<span class="pdf-meta"><span class="pdf-name">' + esc(cur.name) + '</span><span class="pdf-sub">' + cur.pages + '쪽 · ' + sizeStr(cur.size) + '</span></span></div>';
+        cntEl.textContent = '(' + cur.pages + '쪽)';
+        opts.style.display = '';
+        makeBtn.disabled = false;
+      }
+
+      drop.addEventListener('click', function () { fileInput.click(); });
+      drop.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); fileInput.click(); } });
+      fileInput.addEventListener('change', function () { if (fileInput.files[0]) setFile(fileInput.files[0]); fileInput.value = ''; });
+      ['dragenter', 'dragover'].forEach(function (ev) { drop.addEventListener(ev, function (e) { e.preventDefault(); drop.classList.add('over'); }); });
+      ['dragleave', 'dragend'].forEach(function (ev) { drop.addEventListener(ev, function () { drop.classList.remove('over'); }); });
+      drop.addEventListener('drop', function (e) { e.preventDefault(); drop.classList.remove('over'); if (e.dataTransfer && e.dataTransfer.files[0]) setFile(e.dataTransfer.files[0]); });
+      host.querySelector('[data-act=clear]').addEventListener('click', function () { cur = null; render(); });
+
+      // 워터마크 텍스트는 pdf-lib 표준 폰트가 한글을 지원하지 않아, 브라우저 캔버스로 그린 뒤 PNG로 임베드한다.
+      function dataUrlToBytes(dataUrl) {
+        var base64 = dataUrl.split(',')[1];
+        var bin = atob(base64);
+        var bytes = new Uint8Array(bin.length);
+        for (var i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+        return bytes;
+      }
+      function makeWatermarkPng(text, opacityPct) {
+        var fontSize = 40;
+        var mCanvas = document.createElement('canvas');
+        var mctx = mCanvas.getContext('2d');
+        mctx.font = 'bold ' + fontSize + 'px sans-serif';
+        var textW = Math.max(mctx.measureText(text).width, fontSize);
+        var size = Math.ceil(Math.SQRT2 * (textW + fontSize));
+        var canvas = document.createElement('canvas');
+        canvas.width = size; canvas.height = size;
+        var ctx = canvas.getContext('2d');
+        ctx.translate(size / 2, size / 2);
+        ctx.rotate(-Math.PI / 4);
+        ctx.font = 'bold ' + fontSize + 'px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillStyle = 'rgba(120,120,120,' + (opacityPct / 100) + ')';
+        ctx.fillText(text, 0, 0);
+        return { dataUrl: canvas.toDataURL('image/png'), size: size };
+      }
+
+      async function stamp() {
+        if (busy || !cur) return;
+        var text = (textInput.value || '').trim();
+        if (!text) { alert('워터마크 문구를 입력하세요.'); return; }
+        busy = true;
+        var label = makeBtn.textContent; makeBtn.textContent = '처리 중...'; makeBtn.disabled = true;
+        try {
+          await ensurePdfLib();
+          var PDFLib = window.PDFLib;
+          var src = await PDFLib.PDFDocument.load(cur.bytes, { ignoreEncryption: true });
+          var wm = makeWatermarkPng(text, +opt('wmop') || 32);
+          var pngImage = await src.embedPng(dataUrlToBytes(wm.dataUrl));
+          var pos = opt('wmpos') || 'tile';
+          var pages = src.getPages();
+          pages.forEach(function (page) {
+            var size = page.getSize();
+            if (pos === 'center') {
+              var side = Math.min(size.width, size.height) * 0.6;
+              page.drawImage(pngImage, { x: (size.width - side) / 2, y: (size.height - side) / 2, width: side, height: side });
+            } else {
+              var step = wm.size * 0.9;
+              for (var y = -wm.size / 2; y < size.height + wm.size / 2; y += step) {
+                for (var x = -wm.size / 2; x < size.width + wm.size / 2; x += step) {
+                  page.drawImage(pngImage, { x: x, y: y, width: wm.size, height: wm.size });
+                }
+              }
+            }
+          });
+          var bytes = await src.save();
+          var blob = new Blob([bytes], { type: 'application/pdf' });
+          var url = URL.createObjectURL(blob);
+          var a = document.createElement('a'); a.href = url; a.download = 'formda-watermarked.pdf';
+          document.body.appendChild(a); a.click(); document.body.removeChild(a);
+          setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+        } catch (e) {
+          alert('워터마크 삽입 중 오류가 발생했습니다: ' + (e && e.message ? e.message : e));
+        } finally { makeBtn.textContent = label; makeBtn.disabled = false; busy = false; }
+      }
+      makeBtn.addEventListener('click', stamp);
+      render();
+    },
+
+    // PDF 페이지 회전 - 전체/홀수/짝수 페이지를 90도 단위로 상대 회전
+    'pdfrotate': function (host) {
+      host.innerHTML =
+        '<div class="tt-wrap stack i2p">' +
+          '<div class="tt-main">' +
+            '<div class="tt-bar"><span class="tt-bar-label">PDF 선택 <span id="rtCnt" class="tt-cnt"></span></span>' +
+              '<div class="tt-actions"><button class="mini-btn danger" data-act="clear">지우기</button></div></div>' +
+            '<div class="i2p-drop" id="rtDrop" tabindex="0" role="button" aria-label="PDF 선택">' +
+              '<input type="file" id="rtFile" accept="application/pdf,.pdf" hidden>' +
+              '<svg class="i2p-drop-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V4"/><path d="m8 8 4-4 4 4"/><path d="M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"/></svg>' +
+              '<p class="i2p-drop-t">PDF를 끌어다 놓거나 <b>클릭해서 선택</b></p>' +
+              '<p class="i2p-drop-s">한 개의 PDF · 스캔이 옆으로 눕거나 거꾸로 나온 경우에 씁니다</p>' +
+            '</div>' +
+            '<div class="pdf-list" id="rtList"></div>' +
+          '</div>' +
+          '<div class="tt-side">' +
+            '<div class="i2p-opts" id="rtOpts" style="display:none">' +
+              '<div class="i2p-opt"><div class="i2p-opt-h">회전 방향</div><div class="tt-opt-row">' +
+                '<label class="tt-chip"><input type="radio" name="rtangle" value="90" checked>90° 시계방향</label>' +
+                '<label class="tt-chip"><input type="radio" name="rtangle" value="-90">90° 반시계방향</label>' +
+                '<label class="tt-chip"><input type="radio" name="rtangle" value="180">180°</label>' +
+              '</div></div>' +
+              '<div class="i2p-opt"><div class="i2p-opt-h">적용 범위</div><div class="tt-opt-row">' +
+                '<label class="tt-chip"><input type="radio" name="rtscope" value="all" checked>전체 페이지</label>' +
+                '<label class="tt-chip"><input type="radio" name="rtscope" value="odd">홀수 쪽만</label>' +
+                '<label class="tt-chip"><input type="radio" name="rtscope" value="even">짝수 쪽만</label>' +
+              '</div></div>' +
+              '<p class="tt-hint">양면 스캔에서 뒷면만 거꾸로 나왔다면 홀수 쪽·짝수 쪽만 골라 회전하세요.</p>' +
+            '</div>' +
+            '<button class="mini-btn i2p-make" id="rtMake" disabled>회전하기</button>' +
+            '<p class="tt-hint">처리는 모두 사용자 브라우저에서 이루어지며, 파일이 서버로 전송되지 않습니다.</p>' +
+          '</div>' +
+        '</div>';
+
+      var cur = null;   // { name, size, pages, bytes }
+      var listEl = host.querySelector('#rtList');
+      var drop = host.querySelector('#rtDrop');
+      var fileInput = host.querySelector('#rtFile');
+      var makeBtn = host.querySelector('#rtMake');
+      var cntEl = host.querySelector('#rtCnt');
+      var opts = host.querySelector('#rtOpts');
+      var busy = false;
+
+      var pdflibPromise = null;
+      function ensurePdfLib() {
+        if (window.PDFLib) return Promise.resolve();
+        if (!pdflibPromise) {
+          pdflibPromise = new Promise(function (resolve, reject) {
+            var s = document.createElement('script');
+            s.src = 'https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js';
+            s.async = true;
+            s.onload = resolve;
+            s.onerror = function () { pdflibPromise = null; reject(new Error('PDF 라이브러리를 불러오지 못했습니다.')); };
+            document.head.appendChild(s);
+          });
+        }
+        return pdflibPromise;
+      }
+      function sizeStr(b) { return b < 1024 * 1024 ? Math.max(1, Math.round(b / 1024)) + ' KB' : (b / 1024 / 1024).toFixed(1) + ' MB'; }
+      function opt(name) { return (host.querySelector('input[name=' + name + ']:checked') || {}).value; }
+
+      async function setFile(file) {
+        if (!file || !(file.type === 'application/pdf' || /\.pdf$/i.test(file.name))) return;
+        try { await ensurePdfLib(); } catch (e) { alert(e.message); return; }
+        try {
+          var bytes = await file.arrayBuffer();
+          var doc = await window.PDFLib.PDFDocument.load(bytes, { ignoreEncryption: true });
+          cur = { name: file.name, size: file.size, pages: doc.getPageCount(), bytes: bytes };
+        } catch (e) { alert('PDF를 열 수 없습니다. 손상되었거나 암호가 걸린 파일일 수 있습니다.'); return; }
+        render();
+      }
+      function render() {
+        if (!cur) { listEl.innerHTML = ''; cntEl.textContent = ''; opts.style.display = 'none'; makeBtn.disabled = true; return; }
+        listEl.innerHTML = '<div class="pdf-item">' +
+          '<span class="pdf-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h9l3 3v15H6z"/><path d="M14 3v4h4"/></svg></span>' +
+          '<span class="pdf-meta"><span class="pdf-name">' + esc(cur.name) + '</span><span class="pdf-sub">' + cur.pages + '쪽 · ' + sizeStr(cur.size) + '</span></span></div>';
+        cntEl.textContent = '(' + cur.pages + '쪽)';
+        opts.style.display = '';
+        makeBtn.disabled = false;
+      }
+
+      drop.addEventListener('click', function () { fileInput.click(); });
+      drop.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); fileInput.click(); } });
+      fileInput.addEventListener('change', function () { if (fileInput.files[0]) setFile(fileInput.files[0]); fileInput.value = ''; });
+      ['dragenter', 'dragover'].forEach(function (ev) { drop.addEventListener(ev, function (e) { e.preventDefault(); drop.classList.add('over'); }); });
+      ['dragleave', 'dragend'].forEach(function (ev) { drop.addEventListener(ev, function () { drop.classList.remove('over'); }); });
+      drop.addEventListener('drop', function (e) { e.preventDefault(); drop.classList.remove('over'); if (e.dataTransfer && e.dataTransfer.files[0]) setFile(e.dataTransfer.files[0]); });
+      host.querySelector('[data-act=clear]').addEventListener('click', function () { cur = null; render(); });
+
+      async function rotate() {
+        if (busy || !cur) return;
+        busy = true;
+        var label = makeBtn.textContent; makeBtn.textContent = '처리 중...'; makeBtn.disabled = true;
+        try {
+          await ensurePdfLib();
+          var PDFLib = window.PDFLib;
+          var src = await PDFLib.PDFDocument.load(cur.bytes, { ignoreEncryption: true });
+          var delta = +opt('rtangle') || 90;
+          var scope = opt('rtscope') || 'all';
+          src.getPages().forEach(function (page, idx) {
+            var pageNum = idx + 1;
+            var apply = scope === 'all' || (scope === 'odd' && pageNum % 2 === 1) || (scope === 'even' && pageNum % 2 === 0);
+            if (!apply) return;
+            var next = ((page.getRotation().angle + delta) % 360 + 360) % 360;
+            page.setRotation(PDFLib.degrees(next));
+          });
+          var bytes = await src.save();
+          var blob = new Blob([bytes], { type: 'application/pdf' });
+          var url = URL.createObjectURL(blob);
+          var a = document.createElement('a'); a.href = url; a.download = 'formda-rotated.pdf';
+          document.body.appendChild(a); a.click(); document.body.removeChild(a);
+          setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+        } catch (e) {
+          alert('PDF 회전 중 오류가 발생했습니다: ' + (e && e.message ? e.message : e));
+        } finally { makeBtn.textContent = label; makeBtn.disabled = false; busy = false; }
+      }
+      makeBtn.addEventListener('click', rotate);
+      render();
     },
   };
 

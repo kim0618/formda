@@ -62,7 +62,7 @@
           return s + Math.round((it.qty || 0) * (it.price || 0) * 0.1);
         }, 0);
       } else {
-        vat = gross * 0.1;
+        vat = Math.round(gross * 0.1);
       }
       supply = gross;
       total = supply + vat;

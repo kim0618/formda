@@ -118,6 +118,7 @@
       this.setVal('orgTel', s.orgTel);
       this.setVal('orgAddr', s.orgAddr);
       this.setVal('docNo', s.docNo);
+      this.setVal('docTitle', s.docTitle);
       this.setVal('hireDate', s.hireDate);
       this.setVal('lastDay', s.lastDay);
       this.setVal('recipient', s.recipient);
@@ -218,7 +219,7 @@
           name: '', birth: '', addr: '', dept: '', position: '', period: '', body: '', purpose: '',
           docNo: '', date: this.today(), orgName: '', orgCeo: '', orgReg: '', orgTel: '', orgAddr: '',
           hireDate: '', lastDay: '', recipient: '', handover: '',
-          recipientSub: '', orgTitle: '', sealImg: null,
+          recipientSub: '', orgTitle: '', docTitle: '', sealImg: null,
         });
         return;
       }
@@ -247,6 +248,14 @@
         return;
       }
       if (this.docType === 'contract') {
+        if (this.cfg.variant === 'service') {
+          this.applyState({
+            coName: '', coRegNo: '', coCeo: '', coAddr: '', coTel: '', frName: '', frRegNo: '', frAddr: '', frTel: '',
+            scope: '', startDate: '', endDate: '', workplace: '', amount: 0, paySchedule: '', withhold: true, ipNote: '',
+            date: this.today(), note: '', sealImg: null,
+          });
+          return;
+        }
         this.applyState({
           bizName: '', bizRegNo: '', bizCeo: '', bizAddr: '', bizTel: '', wName: '', wBirth: '', wAddr: '', wTel: '',
           startDate: '', endDate: '', workplace: '', jobDesc: '', workTime: '', breakTime: '', workDays: '', holiday: '',
@@ -280,6 +289,19 @@
           this.applyState({
             content: '', lead: '', special: '', date: this.today(),
             prName: '', prId: '', prAddr: '', prTel: '', agName: '', agId: '', agAddr: '', agTel: '', sealImg: null,
+          });
+        } else if (this.cfg.variant === 'contentproof') {
+          this.applyState({
+            subject: '', amount: 0, content: '', deadline: '', special: '', lead: '', date: this.today(),
+            srName: '', srId: '', srAddr: '', srTel: '', rcName: '', rcId: '', rcAddr: '', rcTel: '', sealImg: null,
+          });
+        } else if (this.cfg.variant === 'travelconsent') {
+          this.applyState({
+            parentName: '', relation: '', parentAddr: '', parentTel: '', parentPassport: '',
+            childName: '', childBirth: '', childPassport: '',
+            compName: '', compRelation: '', compTel: '', compPassport: '',
+            destination: '', startDate: '', endDate: '', purpose: '', lodging: '',
+            content: '', special: '', date: this.today(), sealImg: null,
           });
         } else {
           this.applyState({
