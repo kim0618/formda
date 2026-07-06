@@ -141,11 +141,8 @@
     document.body.removeChild(a);
   }
 
-  function printDoc() { window.print(); }
-
   root.Formda.exporter = {
     downloadPDF: downloadPDF,
     downloadPNG: downloadPNG,
-    printDoc: printDoc,
   };
 })(typeof window !== 'undefined' ? window : this);

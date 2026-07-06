@@ -203,7 +203,7 @@
       '</div>' +
       '<div class="form-sec"><h2>증명 내용</h2>' +
         '<div class="field"><label>증명 문구</label>' +
-          '<textarea id="f-body" rows="2" oninput="Formda.app.onField(\'body\', this.value)"></textarea></div>' +
+          '<textarea id="f-body" rows="4" oninput="Formda.app.onField(\'body\', this.value)"></textarea></div>' +
         '<div class="row2">' + lf('purpose', '용도', '관공서 제출용') + lf('date', '발급일자', '', 'date') + '</div>' +
         lf('docNo', '발급번호 (선택)', '예: 2026-001') +
       '</div>' +
@@ -620,7 +620,7 @@
 
   // ===== 근로계약서 (contract) - 고용노동부 표준근로계약서 =====
   function insChk(id, label) {
-    return '<label class="ec-chk"><input type="checkbox" id="f-' + id + '" onchange="Formda.app.onCheck(\'' + id + '\', this.checked)">' + label + '</label>';
+    return '<label class="ec-chk"><input type="checkbox" id="f-' + id + '" onchange="Formda.app.onCheck(\'' + id + '\', this.checked)"><span>' + label + '</span></label>';
   }
   function serviceContractForm(cfg) {
     return '' +

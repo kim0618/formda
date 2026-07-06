@@ -209,7 +209,7 @@ img { max-width: 100%; }
 /* A4 한 장 (794 x 1123 = A4 @96dpi) */
 .doc-page { width: 794px; height: 1123px; background: #fff; color: #111; padding: 56px 52px;
   box-shadow: var(--shadow-paper); overflow: hidden; position: relative; }
-.doc-fit { transform-origin: top center; }   /* 내용이 넘치면 app.fitDoc이 scale 적용 */
+.doc-fit { transform-origin: top center; }   /* 뷰어 확대·축소는 app.fitPreview가 .doc-pages 전체에 scale 적용(콘텐츠 자동 축소 아님) */
 /* 무료 워터마크(중앙 로고). 프리미엄 제거 훅 = body.fd-premium */
 /* 편집 중 미리보기: 옅고 작게(내 숫자 확인 방해 최소화). 다운로드·인쇄 시엔 아래에서 뚜렷하게. */
 .doc-wm { position: absolute; inset: 0; pointer-events: none; z-index: 5;
@@ -344,13 +344,13 @@ body.fd-premium .doc-url { display: none; }
 .thumb-doc .doc-page.card { width: 620px; height: 344px; padding: 36px 40px; }
 .cd { display: flex; flex-direction: column; height: 100%; }
 .cd-top { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
-.cd-brand { display: flex; align-items: center; gap: 12px; min-width: 0; }
-.cd-logo { height: 40px; max-width: 160px; object-fit: contain; }
-.cd-company { font-size: 21px; font-weight: 800; color: var(--accent, #1e3a8a); letter-spacing: -0.3px; }
-.cd-slogan { font-size: 11px; color: #999; white-space: nowrap; }
-.cd-id { margin-top: 28px; display: flex; align-items: baseline; gap: 14px; }
-.cd-name { font-size: 30px; font-weight: 800; color: #111; letter-spacing: 2px; }
-.cd-role { font-size: 13px; color: #555; }
+.cd-brand { display: flex; align-items: center; gap: 12px; min-width: 0; flex: 1 1 auto; max-width: 65%; }
+.cd-logo { height: 40px; max-width: 160px; object-fit: contain; flex: none; }
+.cd-company { font-size: 21px; font-weight: 800; color: var(--accent, #1e3a8a); letter-spacing: -0.3px; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cd-slogan { font-size: 11px; color: #999; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 0 1 auto; max-width: 35%; min-width: 0; }
+.cd-id { margin-top: 28px; display: flex; align-items: baseline; gap: 14px; min-width: 0; }
+.cd-name { font-size: 30px; font-weight: 800; color: #111; letter-spacing: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; max-width: 60%; }
+.cd-role { font-size: 13px; color: #555; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; flex: 1 1 auto; }
 .cd-divider { height: 2px; width: 46px; background: var(--accent, #1e3a8a); margin: 16px 0; }
 .cd-contacts { margin-top: auto; display: flex; flex-direction: column; gap: 7px; }
 .cd-line { font-size: 12.5px; color: #333; display: flex; align-items: center; gap: 9px; }
@@ -388,7 +388,7 @@ body.fd-premium .doc-url { display: none; }
 .ct-info { width: 78%; margin: 0 auto 30px; border-collapse: collapse; font-size: 14px; }
 .ct-info td { border: 1px solid #c6cad1; padding: 11px 14px; }
 .ct-info .k { background: #f5f6f8; font-weight: 600; width: 30%; text-align: center; color: #555; white-space: nowrap; }
-.ct-body { text-align: center; font-size: 15px; line-height: 2; margin: 28px 0 12px; max-height: 120px; overflow: hidden; }
+.ct-body { text-align: center; font-size: 15px; line-height: 2; margin: 28px 0 12px; max-height: 210px; overflow: hidden; }
 .ct-letter { text-align: left; text-indent: 1.4em; line-height: 2.2; width: 80%; margin: 30px auto 12px; max-height: 232px; overflow: hidden; }
 .ct-purpose { text-align: center; font-size: 13px; color: #444; margin-bottom: 8px; }
 .ct-date { text-align: center; font-size: 15px; margin-bottom: 0; letter-spacing: 2px; }
@@ -462,7 +462,7 @@ body.fd-premium .doc-url { display: none; }
 .aw-mid { margin-top: 60px; display: flex; flex-direction: column; gap: 30px; }
 .aw-sub { font-size: 16px; color: #555; margin-bottom: 12px; letter-spacing: 1px; }
 .aw-name { font-family: 'Nanum Myeongjo', 'Batang', 'AppleMyungjo', serif; font-size: 38px; font-weight: 700; letter-spacing: 14px; color: #111; }
-.aw-body { font-size: 18px; line-height: 2.2; width: 82%; max-height: 300px; overflow: hidden; margin: 0 auto; color: #222; white-space: pre-wrap; overflow-wrap: break-word; }
+.aw-body { font-size: 18px; line-height: 2.2; width: 82%; max-height: 380px; overflow: hidden; margin: 0 auto; color: #222; white-space: pre-wrap; overflow-wrap: break-word; }
 .aw-bottom { margin-top: auto; }   /* 수여기관 하단 고정 (제목은 상단 고정, 공적만 가운데서 일정선까지) */
 .aw-date { font-size: 17px; letter-spacing: 2px; margin-bottom: 28px; }
 .aw-org { font-size: 21px; font-weight: 700; }
@@ -551,8 +551,9 @@ body.fd-premium .doc-url { display: none; }
 .ec-signhint { color: #999; font-size: 11px; margin-left: 10px; }
 /* 근로계약서 입력폼: 사회보험 체크 */
 .ec-ins-row { display: flex; flex-wrap: wrap; gap: 9px 18px; padding: 2px 0; }
-.ec-chk { display: inline-flex; align-items: center; gap: 5px; font-size: 13px; color: #444; cursor: pointer; white-space: nowrap; }
-.ec-chk input { width: 15px; height: 15px; accent-color: var(--point); }
+.ec-chk { display: inline-flex; align-items: center; font-size: 13px; line-height: 1; color: #444; cursor: pointer; white-space: nowrap; }
+.ec-chk input { width: 15px; height: 15px; margin: 0; padding: 0; vertical-align: middle; accent-color: var(--point); }
+.ec-chk span { margin-left: 6px; }
 
 .text-tool { margin: 22px 0 8px; }
 .tt-wrap { background: var(--white); border: 1px solid var(--line); border-radius: 16px; padding: 18px; box-shadow: var(--shadow-card); }

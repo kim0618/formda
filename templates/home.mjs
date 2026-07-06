@@ -65,7 +65,7 @@ ${header('')}
       <div class="step3-arrow">→</div>
       <div class="step3"><div class="step3-top"><span class="step3-n">2</span>${stepIco('eye')}</div><b>A4 미리보기 확인</b><p>입력하는 즉시 문서에 그대로 반영됩니다.</p></div>
       <div class="step3-arrow">→</div>
-      <div class="step3"><div class="step3-top"><span class="step3-n">3</span>${stepIco('save')}</div><b>PDF·PNG 저장</b><p>PDF·PNG로 저장하거나 바로 인쇄할 수 있습니다.</p></div>
+      <div class="step3"><div class="step3-top"><span class="step3-n">3</span>${stepIco('save')}</div><b>PDF·PNG 저장</b><p>PDF나 PNG로 바로 저장할 수 있습니다.</p></div>
     </div>
   </section>
 
@@ -115,7 +115,7 @@ export function featureCard(t, doc) {
   return `<a class="feature" href="/tools/${t.slug}.html">
     <div class="feature-thumb"><div class="feat-doc">${doc}</div></div>
     <div class="feature-body">
-      <div class="feature-tags"><span class="tag pop">대표 문서</span><span class="tag free">무료</span><span class="tag alt">PDF · PNG · 인쇄</span></div>
+      <div class="feature-tags"><span class="tag pop">대표 문서</span><span class="tag free">무료</span><span class="tag alt">PDF · PNG</span></div>
       <h3>${t.navTitle} 작성기</h3>
       <p>${t.summary || ''}</p>
       ${feats ? `<ul class="feature-list">${feats}</ul>` : ''}

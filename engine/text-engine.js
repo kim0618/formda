@@ -169,10 +169,18 @@
           '<div class="tt-side"><div class="tt-stats" id="ttStats"></div></div>' +
         '</div>';
       var ta = host.querySelector('#ttIn');
+      // 결합 이모지(가족·국기·피부톤 등 ZWJ/서로게이트 결합)를 화면에 보이는 글자 1개로 세기 위해
+      // 가능하면 Intl.Segmenter(자소 단위)를 쓰고, 미지원 브라우저는 코드포인트 단위로 대체한다.
+      var segmenter = (typeof Intl !== 'undefined' && Intl.Segmenter) ? new Intl.Segmenter(undefined, { granularity: 'grapheme' }) : null;
+      function graphemeLen(str) {
+        if (!str) return 0;
+        if (segmenter) { var n = 0; for (var it = segmenter.segment(str)[Symbol.iterator](); ;) { var r = it.next(); if (r.done) break; n++; } return n; }
+        return Array.from(str).length;
+      }
       function render() {
         var s = ta.value;
-        var withSp = Array.from(s).length;
-        var noSp = Array.from(s.replace(/\s/g, '')).length;
+        var withSp = graphemeLen(s);
+        var noSp = graphemeLen(s.replace(/\s/g, ''));
         var lines = s.length ? s.split(/\r\n|\r|\n/).length : 0;
         var words = s.trim() ? s.trim().split(/\s+/).length : 0;
         var bytes = (typeof Blob !== 'undefined') ? new Blob([s]).size : unescape(encodeURIComponent(s)).length;
@@ -291,9 +299,19 @@
         var size = +(((host.querySelector('input[name=qrsize]:checked')) || {}).value) || 280;
         // UTF-8 바이트 길이 (한글 3바이트). 보정레벨 M 기준 약 2,300바이트가 한계 → 넘으면 라이브러리가 에러
         var bytes = (typeof Blob !== 'undefined') ? new Blob([v]).size : v.length;
+        // qrcodejs 1.0.0은 서로게이트 쌍(대부분의 이모지 등 BMP 밖 문자)을 UTF-8로 잘못 인코딩해
+        // 스캔 시 글자가 깨질 수 있다. 라이브러리를 직접 고칠 수 없으니 사전에 감지해 경고만 표시한다.
+        var hasAstral = /[\uD800-\uDBFF][\uDC00-\uDFFF]/.test(v);
         try {
           new QRCode(out, { text: v, width: size, height: size, colorDark: '#111111', colorLight: '#ffffff', correctLevel: QRCode.CorrectLevel.M });
           dl.style.display = '';
+          if (hasAstral) {
+            var warn = document.createElement('div');
+            warn.className = 'tt-hint';
+            warn.style.color = '#b45309';
+            warn.textContent = '⚠ 이모지 등 일부 문자는 QR코드에서 깨져 보일 수 있습니다. 스캔이 안 되면 이모지를 빼고 다시 생성해 보세요.';
+            out.parentNode.insertBefore(warn, out.nextSibling);
+          }
         } catch (e) {
           out.innerHTML = '<div class="tt-empty">내용이 너무 깁니다 (' + bytes.toLocaleString('ko-KR') + '바이트). QR코드 용량을 넘었으니 글자 수를 줄여 주세요. 긴 내용은 링크로 만들어 그 주소를 넣는 것이 좋습니다.</div>';
           dl.style.display = 'none';
@@ -635,6 +653,9 @@
           try {
             var bytes = await arr[i].arrayBuffer();
             var doc = await window.PDFLib.PDFDocument.load(bytes, { ignoreEncryption: true });
+            // ignoreEncryption은 열람만 허용할 뿐 실제 복호화는 하지 않아, 암호 걸린 PDF를 그대로 진행하면
+            // 결과물이 조용히 깨진다(0페이지·손상). 여기서 미리 걸러 다른 손상 파일과 동일하게 처리한다.
+            if (doc.isEncrypted) throw new Error('encrypted');
             entries.push({ file: arr[i], name: arr[i].name, size: arr[i].size, pages: doc.getPageCount() });
           } catch (e) { skipped++; }
         }
@@ -688,6 +709,7 @@
           for (var i = 0; i < entries.length; i++) {
             var bytes = await entries[i].file.arrayBuffer();
             var src = await PDFLib.PDFDocument.load(bytes, { ignoreEncryption: true });
+            if (src.isEncrypted) throw new Error('암호가 걸린 PDF(' + entries[i].name + ')는 처리할 수 없습니다. 암호를 해제한 뒤 다시 시도해 주세요.');
             var copied = await out.copyPages(src, src.getPageIndices());
             copied.forEach(function (p) { out.addPage(p); });
           }
@@ -776,6 +798,7 @@
         try {
           var bytes = await file.arrayBuffer();
           var doc = await window.PDFLib.PDFDocument.load(bytes, { ignoreEncryption: true });
+          if (doc.isEncrypted) throw new Error('encrypted');
           cur = { name: file.name, size: file.size, pages: doc.getPageCount(), bytes: bytes };
         } catch (e) { alert('PDF를 열 수 없습니다. 손상되었거나 암호가 걸린 파일일 수 있습니다.'); return; }
         render();
@@ -798,7 +821,8 @@
           var m = part.match(/^(\d+)\s*-\s*(\d+)$/);
           if (m) {
             var a = +m[1], b = +m[2]; if (a > b) { var t = a; a = b; b = t; }
-            for (var p = a; p <= b; p++) { if (p >= 1 && p <= max && !seen[p]) { seen[p] = 1; out.push(p - 1); } }
+            // b가 비정상적으로 큰 값(오타 등)이어도 실제 페이지 수(max)를 넘어서는 순회하지 않도록 상한을 건다.
+            for (var p = Math.max(a, 1); p <= b && p <= max; p++) { if (!seen[p]) { seen[p] = 1; out.push(p - 1); } }
           } else if (/^\d+$/.test(part)) {
             var n = +part; if (n >= 1 && n <= max && !seen[n]) { seen[n] = 1; out.push(n - 1); }
           }
@@ -835,6 +859,7 @@
           await ensurePdfLib();
           var PDFLib = window.PDFLib;
           var src = await PDFLib.PDFDocument.load(cur.bytes, { ignoreEncryption: true });
+          if (src.isEncrypted) throw new Error('암호가 걸린 PDF는 처리할 수 없습니다. 암호를 해제한 뒤 다시 시도해 주세요.');
           if (m === 'range') {
             var out = await PDFLib.PDFDocument.create();
             var copied = await out.copyPages(src, indices);
@@ -866,8 +891,15 @@
       var PRESETS = [
         { id: 'id34', label: '증명사진 3×4', w: 30, h: 40 },
         { id: 'passport', label: '여권 3.5×4.5', w: 35, h: 45 },
-        { id: 'visa2', label: '미국비자 2×2in', w: 50.8, h: 50.8 },
+        { id: 'visa2', label: '미국비자 2×2in', w: 50.8, h: 50.8, maxKB: 240 }, // 미국 국무부 DS-160 파일 용량 상한
       ];
+      // 화질 0.95 고정 저장 시 preset.maxKB(있다면)를 넘을 수 있어, 넘으면 화질을 단계적으로 낮춰 재인코딩한다.
+      function jpegWithinSize(canvas, maxKB) {
+        var q = 0.95, url = canvas.toDataURL('image/jpeg', q);
+        function kb(u) { return (u.length - u.indexOf(',') - 1) * 0.75 / 1024; }
+        while (maxKB && kb(url) > maxKB && q > 0.4) { q -= 0.05; url = canvas.toDataURL('image/jpeg', q); }
+        return url;
+      }
       var DPI = 300, CW = 320, CH = 420; // 미리보기 캔버스 논리 크기
       host.innerHTML =
         '<div class="tt-wrap stack idp">' +
@@ -1004,7 +1036,7 @@
         octx.imageSmoothingQuality = 'high';
         octx.drawImage(img, sx, sy, sw, sh, 0, 0, outW, outH);
         var a = document.createElement('a');
-        a.href = out.toDataURL('image/jpeg', 0.95);
+        a.href = jpegWithinSize(out, preset.maxKB);
         a.download = '증명사진_' + preset.w + 'x' + preset.h + '.jpg';
         document.body.appendChild(a); a.click(); document.body.removeChild(a);
       });
@@ -1078,6 +1110,7 @@
         try {
           var bytes = await file.arrayBuffer();
           var doc = await window.PDFLib.PDFDocument.load(bytes, { ignoreEncryption: true });
+          if (doc.isEncrypted) throw new Error('encrypted');
           cur = { name: file.name, size: file.size, pages: doc.getPageCount(), bytes: bytes };
         } catch (e) { alert('PDF를 열 수 없습니다. 손상되었거나 암호가 걸린 파일일 수 있습니다.'); return; }
         render();
@@ -1108,13 +1141,22 @@
         for (var i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
         return bytes;
       }
-      function makeWatermarkPng(text, opacityPct) {
+      function makeWatermarkPng(text, opacityPct, maxTile) {
         var fontSize = 40;
         var mCanvas = document.createElement('canvas');
         var mctx = mCanvas.getContext('2d');
         mctx.font = 'bold ' + fontSize + 'px sans-serif';
         var textW = Math.max(mctx.measureText(text).width, fontSize);
         var size = Math.ceil(Math.SQRT2 * (textW + fontSize));
+        // 문구가 길어 타일 크기가 페이지 대비 너무 커지면(반복 모드가 성기어짐) 글자 크기를 줄여
+        // 타일이 maxTile 이내로 들어오게 한다. 가운데 모드(maxTile 미지정)는 그대로 둔다.
+        if (maxTile && size > maxTile) {
+          var scale = maxTile / size;
+          fontSize = Math.max(10, fontSize * scale);
+          mctx.font = 'bold ' + fontSize + 'px sans-serif';
+          textW = Math.max(mctx.measureText(text).width, fontSize);
+          size = Math.ceil(Math.SQRT2 * (textW + fontSize));
+        }
         var canvas = document.createElement('canvas');
         canvas.width = size; canvas.height = size;
         var ctx = canvas.getContext('2d');
@@ -1138,10 +1180,14 @@
           await ensurePdfLib();
           var PDFLib = window.PDFLib;
           var src = await PDFLib.PDFDocument.load(cur.bytes, { ignoreEncryption: true });
-          var wm = makeWatermarkPng(text, +opt('wmop') || 32);
-          var pngImage = await src.embedPng(dataUrlToBytes(wm.dataUrl));
+          if (src.isEncrypted) throw new Error('암호가 걸린 PDF는 처리할 수 없습니다. 암호를 해제한 뒤 다시 시도해 주세요.');
           var pos = opt('wmpos') || 'tile';
           var pages = src.getPages();
+          var firstSize = pages.length ? pages[0].getSize() : { width: 595, height: 842 };
+          // 타일 모드는 짧은 변의 1/2.5 정도를 상한으로 둬, 문구가 길어도 최소 격자 밀도를 보장한다.
+          var maxTile = pos === 'tile' ? Math.min(firstSize.width, firstSize.height) / 2.5 : undefined;
+          var wm = makeWatermarkPng(text, +opt('wmop') || 32, maxTile);
+          var pngImage = await src.embedPng(dataUrlToBytes(wm.dataUrl));
           pages.forEach(function (page) {
             var size = page.getSize();
             if (pos === 'center') {
@@ -1237,6 +1283,7 @@
         try {
           var bytes = await file.arrayBuffer();
           var doc = await window.PDFLib.PDFDocument.load(bytes, { ignoreEncryption: true });
+          if (doc.isEncrypted) throw new Error('encrypted');
           cur = { name: file.name, size: file.size, pages: doc.getPageCount(), bytes: bytes };
         } catch (e) { alert('PDF를 열 수 없습니다. 손상되었거나 암호가 걸린 파일일 수 있습니다.'); return; }
         render();
@@ -1267,6 +1314,7 @@
           await ensurePdfLib();
           var PDFLib = window.PDFLib;
           var src = await PDFLib.PDFDocument.load(cur.bytes, { ignoreEncryption: true });
+          if (src.isEncrypted) throw new Error('암호가 걸린 PDF는 처리할 수 없습니다. 암호를 해제한 뒤 다시 시도해 주세요.');
           var delta = +opt('rtangle') || 90;
           var scope = opt('rtscope') || 'all';
           src.getPages().forEach(function (page, idx) {

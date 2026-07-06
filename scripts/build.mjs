@@ -120,7 +120,7 @@ out('search-index.js', 'window.Formda=window.Formda||{};window.Formda.searchInde
 console.log('[6/6] sitemap + robots');
 // 도구·홈·카테고리처럼 개별 날짜가 없는 URL의 lastmod (사이트 최종 수정일).
 // 콘텐츠 리프레시 때 이 값을 올리면 전 URL의 재크롤 신호가 갱신된다.
-const SITE_MODIFIED = '2026-07-01';
+const SITE_MODIFIED = '2026-07-03';
 // 가이드 허브는 최신 가이드 날짜를 lastmod로.
 const guidesLatest = guides.map((g) => g.date).sort().slice(-1)[0] || SITE_MODIFIED;
 const urls = [

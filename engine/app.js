@@ -661,17 +661,32 @@
       var kids = Array.prototype.slice.call(flow.children);
       if (!kids.length) return;
       var CONTENT_H = 1011, MAX_PAGES = 20;
+      function hasCls(el, cls) { return (' ' + (el.className || '') + ' ').indexOf(' ' + cls + ' ') !== -1; }
+      function heightOf(el) {
+        var st = window.getComputedStyle(el);
+        return el.offsetHeight + (parseFloat(st.marginTop) || 0) + (parseFloat(st.marginBottom) || 0);
+      }
+      // 제목(cl-q 문항/섹션 라벨, cl-exp 경력 항목)이 페이지 경계에서 본문과 분리되지 않도록,
+      // 제목부터 다음 제목 전까지의 본문 단락(cl-p)을 한 그룹으로 묶어 페이지네이션한다.
+      var boundaries = [0];
+      for (var i = 1; i < kids.length; i++) {
+        if (hasCls(kids[i], 'cl-exp') || hasCls(kids[i], 'cl-q')) boundaries.push(i);
+      }
+      var groups = boundaries.map(function (start, idx) {
+        var end = idx + 1 < boundaries.length ? boundaries[idx + 1] : kids.length;
+        return kids.slice(start, end);
+      });
       var pages = [[]], curH = 0;
-      for (var i = 0; i < kids.length; i++) {
-        var st = window.getComputedStyle(kids[i]);
-        var h = kids[i].offsetHeight + (parseFloat(st.marginTop) || 0) + (parseFloat(st.marginBottom) || 0);
-        if (curH + h > CONTENT_H && pages[pages.length - 1].length) {
+      for (var g = 0; g < groups.length; g++) {
+        var group = groups[g], gH = 0;
+        for (var j = 0; j < group.length; j++) gH += heightOf(group[j]);
+        if (curH + gH > CONTENT_H && pages[pages.length - 1].length) {
           // 상한 미만이면 새 페이지로 분할. 상한 도달 시엔 내용을 버리지 않고
           // 마지막 페이지에 계속 쌓아 소실을 방지한다(비정상적으로 긴 문서 방어).
           if (pages.length < MAX_PAGES) { pages.push([]); curH = 0; }
         }
-        pages[pages.length - 1].push(kids[i].outerHTML);
-        curH += h;
+        for (var k = 0; k < group.length; k++) pages[pages.length - 1].push(group[k].outerHTML);
+        curH += gH;
       }
       var html = '';
       for (var p = 0; p < pages.length; p++) {
@@ -783,7 +798,6 @@
     downloadPDF: function (btn) { this.recordDocNo(); this.trackCreate(); F.exporter.downloadPDF(this.cfg.fileName + (this.state.no ? '_' + this.state.no : ''), btn, this.cfg.pageSize); },
     downloadPNG: function (btn) { this.recordDocNo(); this.trackCreate(); F.exporter.downloadPNG(this.cfg.fileName + (this.state.no ? '_' + this.state.no : ''), btn); },
     trackCreate: function () { if (F.trackCreate) F.trackCreate(this.slug || this.docType); },
-    print: function () { F.exporter.printDoc(); },
 
     // ----- 모바일 탭 -----
     showPane: function (p) {

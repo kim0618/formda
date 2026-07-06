@@ -54,11 +54,13 @@
 
   // 정보 박스 (공급자 / 공급받는자 공통). rows: 5행(등록번호·상호·대표자·주소·전화)
   function partyBox(label, f, seal) {
+    var bizRow = f.biz ? '<tr><td class="k">업태/종목</td><td class="v">' + esc(f.biz) + '</td></tr>' : '';
     return '<table class="qt-supplier"><tbody>' +
-      '<tr><th class="qt-side" rowspan="5">' + label + '</th><td class="k">등록번호</td><td class="v">' + (esc(f.reg) || '&nbsp;') + '</td></tr>' +
+      '<tr><th class="qt-side" rowspan="' + (f.biz ? 6 : 5) + '">' + label + '</th><td class="k">등록번호</td><td class="v">' + (esc(f.reg) || '&nbsp;') + '</td></tr>' +
       '<tr><td class="k">상　호</td><td class="v">' + (esc(f.name) || '&nbsp;') + '</td></tr>' +
       '<tr><td class="k">대표자</td><td class="v"><span>' + (esc(f.ceo) || '&nbsp;') + '</span>' + (seal || '') + '</td></tr>' +
       '<tr><td class="k">주　소</td><td class="v">' + (esc(f.addr) || '&nbsp;') + '</td></tr>' +
+      bizRow +
       '<tr><td class="k">전　화</td><td class="v">' + (esc(f.tel) || '&nbsp;') + '</td></tr>' +
       '</tbody></table>';
   }
@@ -84,7 +86,7 @@
         '<div class="qt-lead">' + esc(cfg.leadPhrase) + '</div>' +
         '<div class="qt-parties">' +
           partyBox(cfg.partyToLabel || '공급받는자', { reg: state.toReg, name: state.to, ceo: state.toCeo, addr: state.toAddr, tel: state.toTel }, '') +
-          partyBox(cfg.partyFromLabel || '공급자', { reg: state.fromReg, name: state.from, ceo: state.fromCeo, addr: state.fromAddr, tel: state.fromTel }, sealHTML(state, cfg)) +
+          partyBox(cfg.partyFromLabel || '공급자', { reg: state.fromReg, name: state.from, ceo: state.fromCeo, addr: state.fromAddr, tel: state.fromTel, biz: state.fromBiz }, sealHTML(state, cfg)) +
         '</div>' +
         amountBox(t, cfg);
     }
@@ -184,7 +186,7 @@
       receiver;
   }
 
-  // .doc-fit = 자동 맞춤 대상(내용이 A4 높이 넘으면 app.fitDoc이 축소)
+  // .doc-fit = 뷰어 확대·축소 대상 요소(콘텐츠 높이 초과 시 자동 축소는 하지 않음; 긴 자유 텍스트는 개별 CSS max-height로 클리핑됨)
   function pageEl(inner, cls) { return '<div class="doc-page' + (cls ? ' ' + cls : '') + '"><div class="doc-fit">' + inner + '</div><div class="doc-wm" aria-hidden="true"></div><div class="doc-url" aria-hidden="true">formda.kr · 무료 문서 작성</div></div>'; }
 
   function wrap(inner, opts, cls) {
@@ -209,9 +211,10 @@
     var rows = '';
     for (var k = 0; k < n; k++) {
       var it = state.items[k];
-      if (!it) { rows += '<tr class="qt-er"><td></td><td></td><td></td><td></td></tr>'; continue; }
+      if (!it) { rows += '<tr class="qt-er"><td></td><td></td><td></td><td></td><td></td></tr>'; continue; }
       var line = (it.qty || 0) * (it.price || 0);
       rows += '<tr><td class="l">' + (esc(it.name) || '') + '</td>' +
+        '<td class="l">' + (esc(it.spec) || '') + '</td>' +
         '<td class="c">' + (it.qty || '') + '</td>' +
         '<td class="r">' + (it.price ? comma(it.price) : '') + '</td>' +
         '<td class="r">' + (line ? comma(line) : '') + '</td></tr>';
@@ -225,8 +228,9 @@
         '<div class="rc-amount-kr">일금 ' + (t.total > 0 ? calc.korAmount(t.total) + '원정' : '') + '</div>' +
         '<div class="rc-amount-num">₩ ' + comma(t.total) + '</div></div>' +
       '<div class="rc-confirm">위 금액을 정히 영수합니다.</div>' +
-      '<table class="rc-items"><colgroup><col style="width:50%"><col style="width:14%"><col style="width:18%"><col style="width:18%"></colgroup>' +
-        '<thead><tr><th>품　목</th><th>수량</th><th>단가</th><th>금액</th></tr></thead><tbody>' + rows + '</tbody></table>' +
+      '<table class="rc-items"><colgroup><col style="width:38%"><col style="width:16%"><col style="width:12%"><col style="width:17%"><col style="width:17%"></colgroup>' +
+        '<thead><tr><th>품　목</th><th>규격</th><th>수량</th><th>단가</th><th>금액</th></tr></thead><tbody>' + rows + '</tbody></table>' +
+      (state.note ? '<div class="qt-note">' + esc(state.note) + '</div>' : '') +
       '<table class="qt-supplier rc-supplier"><tbody>' +
         '<tr><th class="qt-side" rowspan="6">공급자</th><td class="k">등록번호</td><td class="v">' + (esc(state.fromReg) || '&nbsp;') + '</td></tr>' +
         '<tr><td class="k">상　호</td><td class="v">' + (esc(state.from) || '&nbsp;') + '</td></tr>' +
@@ -419,7 +423,7 @@
   }
 
   // ===== 이력서 (resume) 가족 =====
-  function rsTable(list, cols, minRows, headers) {
+  function rsTable(list, cols, minRows, headers, widths) {
     var n = Math.max((list || []).length, minRows);
     var rows = '';
     for (var i = 0; i < n; i++) {
@@ -429,7 +433,8 @@
       }).join('') + '</tr>';
     }
     var thead = '<tr>' + headers.map(function (h) { return '<th>' + h + '</th>'; }).join('') + '</tr>';
-    return '<table class="rs-table"><thead>' + thead + '</thead><tbody>' + rows + '</tbody></table>';
+    var colgroup = widths ? '<colgroup>' + widths.map(function (w) { return '<col style="width:' + w + '%">'; }).join('') + '</colgroup>' : '';
+    return '<table class="rs-table">' + colgroup + '<thead>' + thead + '</thead><tbody>' + rows + '</tbody></table>';
   }
   function renderResume(state, cfg, opts) {
     opts = opts || {};
@@ -450,10 +455,10 @@
       '<div class="rs-page">' +
       '<div class="rs-title">' + esc(cfg.docTitle) + '</div>' +
       '<div class="rs-top"><div class="rs-info-wrap">' + info + '</div><div class="rs-photo">' + photo + '</div></div>' +
-      '<div class="rs-sec">학력사항</div>' + rsTable(s.edu, eduCols, eduMin, ['재학기간', '학교명', '전공·학위', '졸업구분']) +
-      '<div class="rs-sec">경력사항</div>' + rsTable(s.career, carCols, carMin, ['근무기간', '회사명', '직위·부서', '담당업무']) +
+      '<div class="rs-sec">학력사항</div>' + rsTable(s.edu, eduCols, eduMin, ['재학기간', '학교명', '전공·학위', '졸업구분'], [22, 30, 32, 16]) +
+      '<div class="rs-sec">경력사항</div>' + rsTable(s.career, carCols, carMin, ['근무기간', '회사명', '직위·부서', '담당업무'], [20, 20, 18, 42]) +
       '<div class="rs-sec">자격·기타</div><div class="rs-etc">' + (esc(s.etc) || '&nbsp;') + '</div>' +
-      '<div class="rs-foot"><span>' + (s.date ? '작성일 : ' + esc(s.date) : '') + '</span>' +
+      '<div class="rs-foot"><span>' + (s.date ? '작성일 : ' + korDate(s.date) : '') + '</span>' +
         '<span>작성자 : ' + (esc(s.name) || '&nbsp;') + ' (인)</span></div>' +
       '</div>';
     return wrap(inner, opts);
@@ -625,7 +630,7 @@
       ['여권번호(선택)', vOr(s.parentPassport)],
     ]);
     var child = lgParty('미성년자 (여행자)', [
-      ['성　명', vOr(s.childName)], ['생년월일', vOr(s.childBirth)],
+      ['성　명', vOr(s.childName)], ['생년월일', lgDate(s.childBirth)],
       ['여권번호(선택)', vOr(s.childPassport)],
     ]);
     var comp = lgParty('동행인', [
@@ -869,6 +874,7 @@
         '<td class="l">' + (esc(it.spec) || '') + '</td><td class="r">' + (line ? comma(line) : '') + '</td></tr>';
     }
     var approvers = String(s.approvers || '담당,팀장,대표').split(',').map(function (x) { return x.trim(); }).filter(Boolean);
+    if (!approvers.length) approvers = ['담당', '팀장', '대표'];
     var appHead = approvers.map(function (a) { return '<th>' + esc(a) + '</th>'; }).join('');
     var appBody = approvers.map(function () { return '<td></td>'; }).join('');
     var approval = '<table class="ex-approval"><tbody>' +

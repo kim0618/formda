@@ -15,7 +15,7 @@ function josa(word, withBatchim, withoutBatchim) {
 // 카테고리에 faq가 없을 때의 폴백 (전 카테고리에 faq를 채우면 거의 안 쓰임)
 const FAQ = [
   { q: '입력한 정보가 서버에 저장되나요?', a: '아니요. 입력 정보는 서버로 전송하지 않고 사용자 브라우저에서만 처리됩니다.' },
-  { q: '무료인가요?', a: '네. 문서 작성과 PDF·PNG 저장, 인쇄까지 모두 무료로 제공합니다.' },
+  { q: '무료인가요?', a: '네. 문서 작성과 PDF·PNG 저장까지 모두 무료로 제공합니다.' },
 ];
 
 const GUIDE_ICONS = {

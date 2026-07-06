@@ -35,14 +35,14 @@ ok('공급자 라벨 박스', docHTML.includes('공급자') && docHTML.includes(
 ok('표준 항목(대표자·업태/종목)', docHTML.includes('대표자') && docHTML.includes('업태/종목') && docHTML.includes('김폼다'));
 ok('품목표 규격 열', docHTML.includes('<th>규격</th>') && docHTML.includes('반응형'));
 ok('수신처 + 귀하', docHTML.includes('폼다테크 주식회사') && docHTML.includes('귀하'));
-ok('합계 자동계산 (3,630,000)', docHTML.includes('3,630,000'));
-ok('한글금액(一金 ...원整)', docHTML.includes('一金 삼백육십삼만원整'));
+ok('합계 자동계산 (4,620,000)', docHTML.includes('4,620,000'));
+ok('한글금액(一金 ...원整)', docHTML.includes('一金 사백육십이만원整'));
 ok('도장칸 (인)', docHTML.includes('(인)'));
 ok('비고 줄바꿈 유지', docHTML.includes('입금계좌'));
 
 // 무료: 항상 1페이지
 const onePage = (docHTML.match(/class="doc-page"/g) || []).length === 1;
-ok('품목 2개 → 1페이지', onePage);
+ok('품목 4개 → 1페이지', onePage);
 
 // 품목 많아도 1페이지 (멀티페이지 없음)
 const many = JSON.parse(JSON.stringify(tool.sample));

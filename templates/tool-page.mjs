@@ -93,7 +93,6 @@ ${header(tool.category)}
       <div class="pane-head">
         <span class="pv-label">미리보기</span>
         <div class="head-actions no-print">
-          <button class="mini-btn pv-exp" type="button" onclick="Formda.app.print()">인쇄</button>
           <button class="mini-btn pv-exp" type="button" onclick="Formda.app.downloadPNG(this)">PNG 저장</button>
           <button class="mini-btn primary pv-exp" type="button" onclick="Formda.app.downloadPDF(this)">PDF 다운로드</button>
           <div class="zoom">
@@ -238,7 +237,7 @@ function jsonLd(tool) {
     step: [
       { '@type': 'HowToStep', position: 1, name: '정보 입력', text: howtoInputText(tool) },
       { '@type': 'HowToStep', position: 2, name: '실시간 미리보기', text: `입력하는 즉시 A4 ${tool.navTitle} 문서에 그대로 반영됩니다.` },
-      { '@type': 'HowToStep', position: 3, name: 'PDF·PNG 저장', text: '완성된 문서를 PDF·PNG로 저장하거나 인쇄합니다.' },
+      { '@type': 'HowToStep', position: 3, name: 'PDF·PNG 저장', text: '완성된 문서를 PDF나 PNG로 저장합니다.' },
     ],
   };
   const crumb = {
