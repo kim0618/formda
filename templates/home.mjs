@@ -145,14 +145,21 @@ function popularTools(live) {
 }
 
 // 추가 라이브 도구 카드 (대표 카드 아래 그리드; 견적서 외 도구가 생기면 자동 노출)
+// 텍스트 도구는 결과물 형식이 제각각이라(복사만/PNG만/PDF만) 카테고리 일괄 "PDF·PNG" 표기가 틀릴 수 있음 - kind별로 정확히 표기
+const TEXT_OUTPUT_TAG = {
+  qr: 'PNG', idphoto: 'JPG',
+  img2pdf: 'PDF', pdfmerge: 'PDF', pdfsplit: 'PDF', pdfwatermark: 'PDF', pdfrotate: 'PDF',
+  // count·roman-name·roman-addr·align은 다운로드 파일이 없는 복사 전용 도구라 태그 생략
+};
 function liveCard(t, thumbs) {
   const suffix = t.category === 'text' ? '' : ' 작성기';
+  const tag = t.category === 'text' ? TEXT_OUTPUT_TAG[t.kind] : 'PDF·PNG';
   return `<a class="tool-card" href="/tools/${t.slug}.html" style="--accent:${t.accent || '#4f46e5'}">
     <div class="thumb"><div class="thumb-doc">${thumbs[t.slug] || ''}</div></div>
     <div class="tool-meta">
       <div class="nm"><span class="tool-ic">${svg(t.icon)}</span>${t.navTitle}${suffix}</div>
       <p class="de">${t.use || t.summary || ''}</p>
-      <div class="meta-row"><span class="tag free">무료</span><span class="tag alt">PDF·PNG</span><span class="go">만들기 →</span></div>
+      <div class="meta-row"><span class="tag free">무료</span>${tag ? `<span class="tag alt">${tag}</span>` : ''}<span class="go">만들기 →</span></div>
     </div>
   </a>`;
 }
