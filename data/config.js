@@ -5,7 +5,7 @@
 // 이벤트: view_pricing / click_single / click_subscribe / submit_email / submit_feedback / create / repeat_create
 export const config = {
   GA_ID: '',
-  WEB3FORMS_KEY: '',
+  WEB3FORMS_KEY: 'c78af39f-1266-45ab-9c93-8c7b277fb74a',
   PRICE_SINGLE: 1000,   // 단건(워터마크 제거)
   PRICE_SUB: 4900,      // 구독(월, 비즈니스 도구)
   PRICE_SUB_YEAR: 53900, // 구독(연) = 월 11개월치(1개월 할인)

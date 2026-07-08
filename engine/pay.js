@@ -110,13 +110,21 @@
       var params = { doc_type: docType, plan: kind };
       if (hasPeriods) params.period = selPeriod;
       if (F.track) F.track('submit_email', params);
-      var done = function () { form.hidden = true; body.querySelector('.fd-modal-done').hidden = false; };
+      var done = function (ok) {
+        form.style.display = 'none';
+        var el = body.querySelector('.fd-modal-done');
+        el.hidden = false;
+        el.classList.toggle('err', !ok);
+        el.textContent = ok
+          ? '신청 완료! 출시되면 이메일로 알려 드릴게요. 감사합니다 🙌'
+          : '전송에 실패했어요. jptcalc@naver.com으로 이메일을 보내 주시면 꼭 챙길게요.';
+      };
       if (F.postLead) {
         F.postLead({
           type: 'email_signup', plan: kind, period: hasPeriods ? selPeriod : '', doc_type: docType, email: email,
           subject: '[폼다] 출시 알림 신청 - ' + kind + (hasPeriods ? '/' + selPeriod : '') + ' / ' + docType,
-        }).then(done).catch(done);
-      } else { done(); }
+        }).then(done).catch(function () { done(false); });
+      } else { done(true); }
     });
 
     overlay.classList.add('on');

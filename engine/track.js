@@ -87,11 +87,19 @@
       btn.disabled = true; btn.textContent = '보내는 중...';
       var ctx = pageContext();
       track('submit_feedback', { context: ctx });
-      var done = function () { form.hidden = true; fbOverlay.querySelector('.fd-modal-done').hidden = false; };
+      var done = function (ok) {
+        form.style.display = 'none';
+        var el = fbOverlay.querySelector('.fd-modal-done');
+        el.hidden = false;
+        el.classList.toggle('err', !ok);
+        el.textContent = ok
+          ? '의견 고맙습니다! 검토해서 반영할게요 🙌'
+          : '전송에 실패했어요. jptcalc@naver.com으로 직접 보내 주시면 꼭 확인할게요.';
+      };
       postLead({
         type: 'tool_request', context: ctx, message: msg, email: (form.email.value || '').trim(),
         subject: '[폼다] 도구 요청/피드백 - ' + ctx,
-      }).then(done).catch(done);
+      }).then(done).catch(function () { done(false); });
     });
     document.body.appendChild(fbOverlay);
   }
@@ -99,6 +107,7 @@
     if (!fbOverlay) fbBuild();
     var form = fbOverlay.querySelector('.fd-fb-form');
     form.hidden = false;
+    form.style.display = '';
     fbOverlay.querySelector('.fd-modal-done').hidden = true;
     var e0 = fbOverlay.querySelector('.fd-fb-err'); if (e0) e0.hidden = true;
     var t0 = form.querySelector('textarea'); if (t0) t0.classList.remove('err');

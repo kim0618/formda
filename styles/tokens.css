@@ -1228,6 +1228,7 @@ body.fd-modal-open { overflow: hidden; }
   box-shadow: 0 0 0 3px var(--point-soft); }
 .fd-modal-form .btn { flex: none; }
 .fd-modal-done { font-size: 14px; line-height: 1.6; color: var(--ok); font-weight: 600; text-align: center; padding: 14px 0; }
+.fd-modal-done.err { color: #dc2626; }
 
 /* 피드백 모달 안의 textarea (결제 모달과 공유하는 .fd-modal-form) */
 .fd-modal-form textarea { width: 100%; padding: 11px 12px; border: 1px solid var(--line);
