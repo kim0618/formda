@@ -1,4 +1,0 @@
-User-agent: *
-Allow: /
-Disallow: /proof.html
-Sitemap: https://formda.kr/sitemap.xml

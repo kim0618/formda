@@ -1,5 +1,6 @@
 // 폼다 빌드 - registry -> 정적 HTML (tools·home·category·pages) + sitemap + robots
-import { writeFileSync, mkdirSync, rmSync, existsSync, readFileSync } from 'node:fs';
+// 결과물은 전부 dist/ 안에만 생성한다(소스와 분리, Cloudflare Pages 배포 대상 = dist/ 하나).
+import { writeFileSync, mkdirSync, rmSync, readFileSync, cpSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import vm from 'node:vm';
@@ -12,9 +13,10 @@ import { textToolPage, textThumb } from '../templates/text-tool-page.mjs';
 import { guidePage, guidesIndexPage } from '../templates/guide-page.mjs';
 import { homePage } from '../templates/home.mjs';
 import { categoryPage } from '../templates/category.mjs';
-import { trustPages } from '../templates/page.mjs';
+import { trustPages, notFoundPage } from '../templates/page.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
+const DIST = join(ROOT, 'dist');
 
 // ---- 카드 썸네일: 엔진(doc-render)을 그대로 로드해 샘플이 채워진 완성 문서를 렌더 ----
 const THUMB_DATE = '2026-06-24'; // 썸네일용 고정 날짜 (빌드 결정성)
@@ -50,16 +52,18 @@ function renderThumb(tool) {
 const THUMBS = Object.fromEntries(tools.map((t) => [t.slug, renderThumb(t)]));
 
 function out(relPath, content) {
-  const full = join(ROOT, relPath);
+  const full = join(DIST, relPath);
   mkdirSync(dirname(full), { recursive: true });
   writeFileSync(full, content, 'utf8');
   console.log('  ✓', relPath);
 }
 
-// 생성물 폴더 정리 (소스 폴더는 건드리지 않음)
-for (const dir of ['tools', 'category', 'pages', 'guides']) {
-  const p = join(ROOT, dir);
-  if (existsSync(p)) rmSync(p, { recursive: true, force: true });
+// dist/ 전체 초기화 후 정적 자산(engine·styles·assets)을 그대로 복사.
+// data/·templates/·scripts/ 등 소스 코드는 절대 dist/에 들어가지 않는다.
+rmSync(DIST, { recursive: true, force: true });
+mkdirSync(DIST, { recursive: true });
+for (const dir of ['engine', 'styles', 'assets']) {
+  cpSync(join(ROOT, dir), join(DIST, dir), { recursive: true });
 }
 
 console.log('[1/6] 도구 페이지');
@@ -80,6 +84,7 @@ console.log('[4/6] 신뢰 페이지');
 for (const p of trustPages()) {
   out(`pages/${p.slug}.html`, p.html);
 }
+out('404.html', notFoundPage());
 
 console.log('[5/6] 가이드');
 out('guides/index.html', guidesIndexPage(guides));
@@ -131,17 +136,17 @@ const urls = [
   ...guides.map((g) => ({ loc: `/guides/${g.slug}.html`, priority: '0.6', lastmod: g.updated || g.date })),
   ...['about', 'terms', 'privacy', 'contact'].map((s) => ({ loc: `/pages/${s}.html`, priority: '0.3', lastmod: SITE_MODIFIED })),
 ];
+// Cloudflare Pages가 /foo.html을 /foo로 308 리다이렉트하므로(끌 수 없는 기본 동작),
+// sitemap도 리다이렉트 없이 바로 200이 나는 최종 URL(확장자 제거)로 등록한다.
 const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-${urls.map((u) => `  <url><loc>${site.domain}${u.loc}</loc>${u.lastmod ? `<lastmod>${u.lastmod}</lastmod>` : ''}<priority>${u.priority}</priority></url>`).join('\n')}
+${urls.map((u) => `  <url><loc>${site.domain}${u.loc.replace(/\.html$/, '')}</loc>${u.lastmod ? `<lastmod>${u.lastmod}</lastmod>` : ''}<priority>${u.priority}</priority></url>`).join('\n')}
 </urlset>
 `;
 out('sitemap.xml', sitemap);
 
-// QA·검수 산출물(proof.html)은 색인 제외
 out('robots.txt', `User-agent: *
 Allow: /
-Disallow: /proof.html
 Sitemap: ${site.domain}/sitemap.xml
 `);
 

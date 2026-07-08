@@ -11,6 +11,9 @@ const TRUST_PAGES = [
 
 export function head({ title, description, canonical, keywords, robots, ogType, publishedTime, modifiedTime }) {
   const type = ogType || 'website';
+  // Cloudflare Pages는 /foo.html을 /foo로 308 리다이렉트하는 게 기본 동작이라(끌 수 없음),
+  // 캐노니컬·og:url은 실제 최종 서빙 URL(확장자 없는 형태)과 일치시킨다.
+  const canonicalPath = String(canonical || '').replace(/\.html$/, '');
   const articleMeta = type === 'article'
     ? `${publishedTime ? `<meta property="article:published_time" content="${publishedTime}" />\n` : ''}${modifiedTime ? `<meta property="article:modified_time" content="${modifiedTime}" />\n` : ''}`
     : '';
@@ -22,11 +25,11 @@ export function head({ title, description, canonical, keywords, robots, ogType, 
 <script>document.documentElement.classList.add('js');if('scrollRestoration'in history)history.scrollRestoration='manual'</script>
 <title>${escAttr(title)}</title>
 <meta name="description" content="${escAttr(description || site.description)}" />
-${robots ? `<meta name="robots" content="${robots}" />\n` : ''}${keywords ? `<meta name="keywords" content="${escAttr(keywords)}" />\n` : ''}<link rel="canonical" href="${site.domain}${canonical}" />
+${robots ? `<meta name="robots" content="${robots}" />\n` : ''}${keywords ? `<meta name="keywords" content="${escAttr(keywords)}" />\n` : ''}<link rel="canonical" href="${site.domain}${canonicalPath}" />
 <meta property="og:type" content="${type}" />
 ${articleMeta}<meta property="og:title" content="${escAttr(title)}" />
 <meta property="og:description" content="${escAttr(description || site.description)}" />
-<meta property="og:url" content="${site.domain}${canonical}" />
+<meta property="og:url" content="${site.domain}${canonicalPath}" />
 <meta property="og:site_name" content="${site.name}" />
 <meta property="og:image" content="${site.domain}/assets/og.png" />
 <meta property="og:image:width" content="1200" />

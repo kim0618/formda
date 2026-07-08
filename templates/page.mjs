@@ -1,6 +1,66 @@
 // 신뢰 페이지 4종 (소개·이용약관·개인정보처리방침·문의) - E-E-A-T 런칭부터
 import { head, header, footer } from './shell.mjs';
-import { site } from '../data/registry.js';
+import { site, categories, toolsBySlug } from '../data/registry.js';
+import { svg } from './icons.mjs';
+
+// 404 페이지 배경 장식 - 실제 도구 아이콘 몇 개를 흩뿌려 "문서를 잃어버렸다" 분위기 연출
+const NOT_FOUND_SCATTER = [
+  { slug: 'estimate', x: 10, y: 8, r: -14, s: 1 },
+  { slug: 'resume', x: 84, y: 14, r: 11, s: 0.9 },
+  { slug: 'loan', x: 6, y: 70, r: 9, s: 0.85 },
+  { slug: 'qr', x: 90, y: 68, r: -10, s: 0.85 },
+];
+const NOT_FOUND_POPULAR = ['estimate', 'receipt', 'resume', 'business-card', 'loan', 'char-count'];
+
+// 404 페이지 - 검색엔진 색인 제외, 홈/카테고리로 바로 이동할 수 있게 안내
+export function notFoundPage() {
+  const scatter = NOT_FOUND_SCATTER.map((s) => {
+    const t = toolsBySlug[s.slug];
+    return `<span class="nf-ic" style="left:${s.x}%;top:${s.y}%;transform:rotate(${s.r}deg) scale(${s.s});--accent:${t.accent || '#4f46e5'}">${svg(t.icon)}</span>`;
+  }).join('');
+  const popular = NOT_FOUND_POPULAR.map((slug) => {
+    const t = toolsBySlug[slug];
+    return `<a class="nf-tool" href="/tools/${slug}.html" style="--accent:${t.accent || '#4f46e5'}">
+        <span class="nf-tool-ic">${svg(t.icon)}</span>
+        <span>${t.navTitle}</span>
+      </a>`;
+  }).join('\n      ');
+  const catLinks = categories
+    .map((c) => `<a class="nf-cat" href="/category/${c.slug}.html">${c.label}</a>`)
+    .join('\n      ');
+  return `${head({
+    title: `페이지를 찾을 수 없습니다 | ${site.name}`,
+    description: '요청하신 페이지를 찾을 수 없습니다. 폼다 홈에서 원하는 문서를 다시 찾아보세요.',
+    canonical: '/404.html',
+    robots: 'noindex',
+  })}
+${header('')}
+<main class="wrap">
+  <div class="not-found">
+    <div class="not-found-hero">
+      ${scatter}
+      <div class="not-found-code">404</div>
+    </div>
+    <h1>이 문서는 찾을 수 없어요</h1>
+    <p>주소가 바뀌었거나 삭제된 페이지일 수 있습니다.<br>상단 검색으로 찾아보시거나, 아래에서 바로 시작해 보세요.</p>
+    <div class="hero-cta">
+      <a class="btn-cta primary" href="/">홈으로</a>
+      <a class="btn-cta ghost" href="/guides/">가이드 보기</a>
+    </div>
+    <div class="not-found-sec">
+      <h2>자주 찾는 문서</h2>
+      <div class="not-found-tools">
+        ${popular}
+      </div>
+    </div>
+    <div class="not-found-cats">
+      ${catLinks}
+    </div>
+  </div>
+</main>
+${footer()}
+`;
+}
 
 function wrapPage({ slug, title, bodyHTML, description }) {
   return `${head({
