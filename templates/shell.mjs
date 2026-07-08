@@ -38,6 +38,7 @@ ${articleMeta}<meta property="og:title" content="${escAttr(title)}" />
 <meta name="twitter:title" content="${escAttr(title)}" />
 <meta name="twitter:description" content="${escAttr(description || site.description)}" />
 <meta name="twitter:image" content="${site.domain}/assets/og.png" />
+${config.NAVER_SITE_VERIFICATION ? `<meta name="naver-site-verification" content="${config.NAVER_SITE_VERIFICATION}" />\n` : ''}<link rel="alternate" type="application/rss+xml" title="${site.name} 가이드" href="/rss.xml" />
 <link rel="icon" href="/assets/favicon.png" type="image/png" />
 <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png" />
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />

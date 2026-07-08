@@ -4,8 +4,9 @@
 //  - WEB3FORMS_KEY: Web3Forms access key(공개키, 클라이언트 노출 OK). 채우면 이메일/피드백 수집 시작.
 // 이벤트: view_pricing / click_single / click_subscribe / submit_email / submit_feedback / create / repeat_create
 export const config = {
-  GA_ID: '',
+  GA_ID: 'G-M1JPMD9R75',
   WEB3FORMS_KEY: 'c78af39f-1266-45ab-9c93-8c7b277fb74a',
+  NAVER_SITE_VERIFICATION: 'd53ec112248db6e5ab2ceab5ac2bb681dc30441b',
   PRICE_SINGLE: 1000,   // 단건(워터마크 제거)
   PRICE_SUB: 4900,      // 구독(월, 비즈니스 도구)
   PRICE_SUB_YEAR: 53900, // 구독(연) = 월 11개월치(1개월 할인)

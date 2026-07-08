@@ -1045,7 +1045,7 @@ body.fd-premium .doc-url { display: none; }
 /* ---------- 카테고리 허브 ---------- */
 .cat-hero { background: var(--white); border: 1px solid var(--line); border-radius: var(--radius); padding: 26px 24px; margin-bottom: 8px; }
 .cat-hero h1 { font-size: 24px; font-weight: 800; margin-bottom: 8px; }
-.cat-hero p { color: var(--gray); font-size: 15px; max-width: 720px; }
+.cat-hero p { color: var(--gray); font-size: 15px; max-width: 720px; word-break: keep-all; }
 .cat-badges { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
 .cat-badge { font-size: 12.5px; font-weight: 600; color: var(--gray); background: var(--bg); border: 1px solid var(--line); border-radius: 999px; padding: 6px 12px; }
 .cat-badge:first-child { color: var(--point); background: var(--point-soft); border-color: #c7cdf7; }

@@ -72,7 +72,7 @@ export function textThumb(tool) {
     'pdf-rotate':
       '<div class="ttt-i2p"><div class="ttt-pdf" style="transform:rotate(90deg)"><span>PDF</span></div>' +
       '<span class="ttt-arrow">↻</span><div class="ttt-pdf"><span>PDF</span></div></div>',
-    'idphoto':
+    'id-photo':
       '<div class="ttt-idp"><div class="ttt-idp-frame"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="9.5" r="3.4"/><path d="M6 18.5c1.1-3 3.2-4.5 6-4.5s4.9 1.5 6 4.5"/></svg></div><div class="ttt-idp-tag">3×4</div></div>',
     'qr':
       '<div class="ttt-qr"><svg viewBox="0 0 84 84" width="230" height="230" xmlns="http://www.w3.org/2000/svg"><g fill="#1a1a1a">' +

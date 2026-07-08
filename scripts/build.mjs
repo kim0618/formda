@@ -125,7 +125,7 @@ out('search-index.js', 'window.Formda=window.Formda||{};window.Formda.searchInde
 console.log('[6/6] sitemap + robots');
 // 도구·홈·카테고리처럼 개별 날짜가 없는 URL의 lastmod (사이트 최종 수정일).
 // 콘텐츠 리프레시 때 이 값을 올리면 전 URL의 재크롤 신호가 갱신된다.
-const SITE_MODIFIED = '2026-07-03';
+const SITE_MODIFIED = '2026-07-08';
 // 가이드 허브는 최신 가이드 날짜를 lastmod로.
 const guidesLatest = guides.map((g) => g.date).sort().slice(-1)[0] || SITE_MODIFIED;
 const urls = [
@@ -149,5 +149,24 @@ out('robots.txt', `User-agent: *
 Allow: /
 Sitemap: ${site.domain}/sitemap.xml
 `);
+
+console.log('[rss] 가이드 피드');
+// 가이드(블로그) 최신순 RSS 2.0 피드. 도구 페이지는 뉴스성이 없어 제외.
+const rssEsc = (s) => String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+const rssGuides = [...guides].sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+const rssBuildDate = new Date(`${rssGuides[0]?.date || SITE_MODIFIED}T00:00:00Z`).toUTCString();
+const rss = `<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0">
+<channel>
+<title>${rssEsc(site.name)} 가이드</title>
+<link>${site.domain}/guides/</link>
+<description>${rssEsc(site.description)}</description>
+<language>ko</language>
+<lastBuildDate>${rssBuildDate}</lastBuildDate>
+${rssGuides.map((g) => `<item><title>${rssEsc(g.title || g.navTitle)}</title><link>${site.domain}/guides/${g.slug}</link><guid>${site.domain}/guides/${g.slug}</guid><description>${rssEsc(g.seoDescription || g.lead || '')}</description><pubDate>${new Date(`${g.date}T00:00:00Z`).toUTCString()}</pubDate></item>`).join('\n')}
+</channel>
+</rss>
+`;
+out('rss.xml', rss);
 
 console.log(`\n완료: 도구 ${tools.length} · 카테고리 ${categories.length} · 가이드 ${guides.length} · 신뢰 4 · sitemap ${urls.length} URL`);
