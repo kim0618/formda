@@ -36,9 +36,11 @@ function pricingBlock(tool) {
     <div class="fd-price-btns">
       <button type="button" class="fd-price-btn single" onclick="Formda.pay.open('single')">
         <span class="fp-t">워터마크 없이 저장</span><span class="fp-p">건당 1,000원</span>
+        <span class="fp-note">지금 보는 문서 1건</span>
       </button>
       <button type="button" class="fd-price-btn sub" onclick="Formda.pay.open('subscribe')">
         <span class="fp-t">무제한 저장</span><span class="fp-p">월 4,900원</span>
+        <span class="fp-note">전체 문서 워터마크 제거 무제한</span>
       </button>
     </div>
   </div>`;
@@ -67,7 +69,8 @@ ${header(tool.category)}
 <main class="wrap">
   <div class="crumb"><a href="/">홈</a> › <a href="/category/${cat.slug}.html">${cat.label}</a> › ${tool.navTitle}</div>
   <h1 class="title">${tool.navTitle} 작성기</h1>
-  <p class="subtitle">회사 정보와 품목만 입력하면 ${tool.navTitle} PDF·PNG를 바로 만들 수 있습니다. 가입 없이 무료.</p>
+  <p class="use-lead"><b>${tool.use}</b>${tool.example ? ` <span class="use-eg">예: ${tool.example}</span>` : ''}</p>
+  <p class="subtitle">입력만 하면 ${tool.navTitle} PDF·PNG로 바로 완성됩니다. 가입 없이 무료.</p>
   ${trustBadge()}
   ${steps()}
 
@@ -82,7 +85,7 @@ ${header(tool.category)}
       <div class="pane-head">
         <span class="pv-label">입력</span>
         <div class="head-actions no-print">
-          <button class="mini-btn" type="button" onclick="Formda.app.loadSample()">샘플 불러오기</button>
+          <button class="mini-btn sample" type="button" onclick="Formda.app.loadSample()">✨ 예시로 10초 만에 확인하기</button>
           <button class="mini-btn danger" type="button" onclick="Formda.app.clearAll()">전체 비우기</button>
         </div>
       </div>
@@ -110,6 +113,7 @@ ${header(tool.category)}
   </div>
   </div>
 
+  ${legalNoteHTML(tool)}
   ${guideHTML(tool)}
 </main>
 
@@ -146,6 +150,31 @@ function guideIco(key) {
   return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">${p}</svg>`;
 }
 
+// 저장·요금 안내 공통 FAQ (전 도구 동일). 무료/워터마크 경계를 정직하게 명시하되,
+// 워터마크 제거는 수요검증(painted-door)이라 "준비 중·알림 신청"으로 안내한다.
+const SAVE_FAQ = [
+  { q: '저장은 무료인가요?', a: '네. 가입이나 결제 없이 완성한 문서를 PDF·PNG로 무료 저장할 수 있습니다. 문서 내용과 작성 기능에는 제한이 없습니다.' },
+  { q: 'PDF와 PNG 둘 다 무료인가요?', a: '네, 두 형식 모두 무료입니다. 인쇄용은 PDF, 카톡·메일 첨부용은 PNG로 저장하시면 됩니다.' },
+  { q: '무료로 저장하면 워터마크가 붙나요?', a: '무료 저장본에는 폼다 로고 워터마크와 하단에 사이트 주소가 옅게 표기됩니다. 문서 자체는 그대로 사용할 수 있습니다.' },
+  { q: '워터마크만 없앨 수는 없나요?', a: '워터마크 없이 저장하는 기능을 준비하고 있습니다. 미리보기 아래 버튼에서 알림을 신청하시면 출시 시 가장 먼저 안내해 드립니다.' },
+]
+  .map((f) => `<div class="g-faq-item"><p class="faq-q">Q. ${f.q}</p><p>${f.a}</p></div>`)
+  .join('\n');
+
+// 민감 문서(법률·노무) 안내: 법률 자문이 아님을 명시해 분쟁 리스크를 차단한다.
+// 법률형(차용증·합의서·내용증명·지불각서·위임장·프리랜서계약서) vs 노무형(근로계약서)로 문구 구분.
+const LEGAL_NOTE_LABOR = new Set(['employment-contract']);
+const LEGAL_NOTE_LEGAL = new Set(['loan', 'agreement', 'content-proof', 'payment-pledge', 'mandate', 'freelance-contract']);
+function legalNoteHTML(tool) {
+  const isLabor = LEGAL_NOTE_LABOR.has(tool.slug);
+  const isLegal = LEGAL_NOTE_LEGAL.has(tool.slug);
+  if (!isLabor && !isLegal) return '';
+  const body = isLabor
+    ? '이 도구는 표준 근로계약서 양식을 제공할 뿐, 노무 자문이 아닙니다. 근로조건·수당·계약 형태는 근로기준법과 개별 사정에 따라 달라질 수 있으니, 중요한 계약은 공인노무사나 고용노동부 상담을 함께 확인하시기 바랍니다.'
+    : `이 도구는 일반적인 ${tool.navTitle} 양식을 제공할 뿐, 법률 자문이 아닙니다. 문서의 법적 효력과 분쟁 결과는 금액·조건·개별 상황에 따라 달라질 수 있으니, 중요한 사안은 변호사 등 전문가의 검토를 받으시길 권합니다.`;
+  return `<div class="legal-note no-print"><span class="ln-ico">⚖️</span><p><b>법적 효력 안내</b> · ${body}</p></div>`;
+}
+
 // 프리렌더 본문 (정적 = 네이버 색인 + 애드센스). 제목+리드+섹션 카드로 분리.
 function guideHTML(tool) {
   const p = tool.prerender;
@@ -160,7 +189,7 @@ function guideHTML(tool) {
     <p class="guide-lead">${p.intro}</p>
     <div class="guide-cards">
       ${cards}
-      <article class="g-card g-faq"><div class="g-card-head"><span class="g-ico">${guideIco('faq')}</span><h3>자주 묻는 질문</h3></div>${faq}</article>
+      <article class="g-card g-faq"><div class="g-card-head"><span class="g-ico">${guideIco('faq')}</span><h3>자주 묻는 질문</h3></div>${faq}${SAVE_FAQ}</article>
     </div>
     ${relatedHTML(tool)}
   </section>`;

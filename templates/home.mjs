@@ -21,11 +21,11 @@ ${header('')}
 <section class="hero">
   <div class="hero-in">
     <div class="hero-copy">
-      <h1>가입 없이,<br>견적서 PDF를 바로 만드세요</h1>
-      <p>회사 정보와 품목만 입력하면 공급가액·부가세·합계를 자동 계산해 견적서를 완성합니다.</p>
+      <h1>견적서부터 사직서까지,<br>입력하면 바로 PDF로 완성됩니다</h1>
+      <p>거래명세서·청구서·영수증·차용증·이력서까지, 설치도 가입도 없이 무료로 만드세요.</p>
       <div class="hero-cta">
         <a class="btn-cta primary" href="/tools/${lead.slug}.html">견적서 바로 만들기</a>
-        <a class="btn-cta ghost" href="#tools">문서 전체 보기</a>
+        <a class="btn-cta ghost" href="#tools" onclick="window.Formda&&Formda.track&&Formda.track('click_browse_all')">문서 전체 보기</a>
       </div>
       <div class="badges">
         <span class="badge"><b>🔒</b> 서버 저장 없음</span>

@@ -189,7 +189,15 @@
     },
 
     loadSample: function () {
+      if (F.track) F.track('load_sample', { doc_type: this.slug || this.docType });
       this.applyState(JSON.parse(JSON.stringify(this.sampleState)));
+    },
+
+    // 첫 실입력 1회만 계측 (전환 퍼널: 방문 → 입력 시작 → 다운로드)
+    markInput: function () {
+      if (this._inputTracked) return;
+      this._inputTracked = true;
+      if (F.track) F.track('start_input', { doc_type: this.slug || this.docType });
     },
 
     clearAll: function () {
@@ -330,6 +338,7 @@
     loadProfileRaw: function () { try { return JSON.parse(this.fetch(this.PROFILE_KEY) || 'null'); } catch (e) { return null; } },
 
     saveProfile: function () {
+      if (F.track) F.track('save_profile', { doc_type: this.slug || this.docType });
       var s = this.state, p = {};
       this.PROFILE_FIELDS.forEach(function (k) { p[k] = s[k] || ''; });
       var textOk = this.store(this.PROFILE_KEY, JSON.stringify(p));
@@ -389,9 +398,10 @@
       var el = document.getElementById('f-' + id);
       if (el) el.checked = !!v;
     },
-    onCheck: function (key, checked) { this.state[key] = !!checked; this.renderDoc(); },
+    onCheck: function (key, checked) { this.markInput(); this.state[key] = !!checked; this.renderDoc(); },
 
     onField: function (id, v) {
+      this.markInput();
       var prev = this.state[id];
       this.state[id] = v;
       this.renderDoc();
@@ -412,6 +422,7 @@
     },
 
     onMoney: function (id, el) {
+      this.markInput();
       var c = F.calc.cleanInt(el.value, F.calc.MAX_PRICE_DIGITS);
       this.state[id] = c.value;
       el.value = c.digits ? c.value.toLocaleString('ko-KR') : '';
@@ -795,8 +806,8 @@
     zoomReset: function () { this.userZoom = 1; this.fitPreview(); },
 
     // ----- 내보내기 -----
-    downloadPDF: function (btn) { this.recordDocNo(); this.trackCreate(); F.exporter.downloadPDF(this.cfg.fileName + (this.state.no ? '_' + this.state.no : ''), btn, this.cfg.pageSize); },
-    downloadPNG: function (btn) { this.recordDocNo(); this.trackCreate(); F.exporter.downloadPNG(this.cfg.fileName + (this.state.no ? '_' + this.state.no : ''), btn); },
+    downloadPDF: function (btn) { this.recordDocNo(); if (F.track) F.track('download_pdf', { doc_type: this.slug || this.docType }); this.trackCreate(); F.exporter.downloadPDF(this.cfg.fileName + (this.state.no ? '_' + this.state.no : ''), btn, this.cfg.pageSize); },
+    downloadPNG: function (btn) { this.recordDocNo(); if (F.track) F.track('download_png', { doc_type: this.slug || this.docType }); this.trackCreate(); F.exporter.downloadPNG(this.cfg.fileName + (this.state.no ? '_' + this.state.no : ''), btn); },
     trackCreate: function () { if (F.trackCreate) F.trackCreate(this.slug || this.docType); },
 
     // ----- 모바일 탭 -----

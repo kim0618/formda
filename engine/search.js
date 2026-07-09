@@ -76,14 +76,28 @@
       }
     }
 
+    // 검색 사용 계측: 키 입력마다가 아니라 비어있다 유의미한 검색어(2자+)가 되는 순간 1회만.
+    var searched = false;
+    function trackSearch(q) {
+      if (!q) { searched = false; return; }
+      if (searched || q.length < 2) return;
+      searched = true;
+      if (window.Formda && window.Formda.track) window.Formda.track('use_search');
+    }
+
     function update() {
       var q = input.value;
       items = search(q);
       active = -1;
       render(q.trim().length > 0);
+      trackSearch(q.trim());
     }
 
-    function go(it) { if (it) location.href = it.u || ('/tools/' + it.slug + '.html'); }
+    function go(it) {
+      if (!it) return;
+      if (window.Formda && window.Formda.track) window.Formda.track('search_select', { target: it.slug || it.u || '' });
+      location.href = it.u || ('/tools/' + it.slug + '.html');
+    }
 
     function updateLazy() { ensureIndex(update); }
     input.addEventListener('input', updateLazy);

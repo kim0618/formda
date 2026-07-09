@@ -84,6 +84,16 @@ img { max-width: 100%; }
 .crumb { font-size: 13px; color: var(--gray); margin-bottom: 8px; }
 .crumb a:hover { color: var(--point); }
 .title { font-size: 24px; font-weight: 800; margin-bottom: 4px; letter-spacing: -.4px; }
+/* 상단 유스케이스: "언제 쓰는지"를 굵게 먼저. 전환 유도 (도구별 tool.use) */
+/* 민감 문서 법적 고지 (차용증·근로계약서 등). 눈에 띄되 위협적이지 않게 */
+.legal-note { display: flex; gap: 9px; align-items: flex-start; margin: 18px 0 4px; padding: 12px 15px;
+  background: #fffbeb; border: 1px solid #fde68a; border-radius: 10px; }
+.legal-note .ln-ico { font-size: 16px; line-height: 1.5; flex: none; }
+.legal-note p { font-size: 12.5px; color: #78560a; line-height: 1.55; margin: 0; }
+.legal-note b { color: #92400e; font-weight: 700; }
+.use-lead { font-size: 15.5px; color: var(--ink); margin: 2px 0 6px; line-height: 1.5; }
+.use-lead b { font-weight: 700; }
+.use-lead .use-eg { display: inline-block; margin-left: 4px; font-size: 13px; font-weight: 500; color: var(--gray); }
 .subtitle { color: var(--gray); font-size: 14px; margin-bottom: 14px; }
 
 /* ---------- 트러스트 배지 (모두의문서 벤치마크) ---------- */
@@ -146,6 +156,10 @@ img { max-width: 100%; }
   border: 1px solid #c7cdf7; border-radius: 8px; padding: 7px 12px; cursor: pointer; }
 .mini-btn.danger { color: var(--gray); background: var(--bg); border-color: var(--line); }
 .mini-btn.primary { color: #fff; background: var(--point); border-color: var(--point); }
+/* 샘플 버튼 강조: 빈 폼에서 막막함 제거 = 첫 성공 경험 유도. 채워진 문서 도장(solid)으로 눈에 띄게 */
+.mini-btn.sample { color: #fff; background: var(--point); border-color: var(--point); box-shadow: 0 2px 8px rgba(79,70,229,.28); animation: sample-pulse 2.4s ease-in-out infinite; }
+@keyframes sample-pulse { 0%,100% { box-shadow: 0 2px 8px rgba(79,70,229,.28); } 50% { box-shadow: 0 2px 14px rgba(79,70,229,.5); } }
+@media (prefers-reduced-motion: reduce) { .mini-btn.sample { animation: none; } }
 .mini-btn:hover { filter: brightness(.97); }
 .form-sec { padding-bottom: 16px; margin-bottom: 16px; border-bottom: 1px solid var(--line); }
 .form-sec h2 { font-size: 13.5px; font-weight: 700; margin-bottom: 12px; color: var(--ink); }
@@ -1216,6 +1230,9 @@ body.fd-premium .doc-url { display: none; }
 .fd-price-btn .fp-p { font-size: 11.5px; color: var(--gray); }
 .fd-price-btn.sub { border-color: color-mix(in srgb, var(--point) 40%, #fff); background: var(--point-soft); }
 .fd-price-btn.sub .fp-p { color: var(--point-dark); font-weight: 600; }
+/* 혜택 한 줄: 가격 아래 담백한 둘째 줄(카드 크기 유지, 상자·구분선 없음) */
+.fd-price-btn .fp-note { margin-top: 2px; font-size: 11px; line-height: 1.3; color: var(--gray); }
+.fd-price-btn.sub .fp-note { color: var(--point-dark); font-weight: 600; }
 
 /* 모바일 하단바 워터마크 제거 버튼 */
 .mobile-bar .btn-buy { flex: .8; background: var(--point-soft); color: var(--point-dark); font-size: 13px; }
