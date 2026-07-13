@@ -61,7 +61,7 @@
         box.innerHTML = items.map(function (it, i) {
           var badge = it.g ? '<span class="sr-bd sr-bd-g">가이드</span>' : '<span class="sr-bd sr-bd-t">도구</span>';
           var meta = it.g ? esc(it.d) : (esc(it.c) + ' · ' + esc(it.d));
-          return '<a class="sr-item' + (i === active ? ' on' : '') + '" href="' + (it.u || ('/tools/' + it.slug + '.html')) + '">' +
+          return '<a class="sr-item' + (i === active ? ' on' : '') + '" href="' + (it.u || ('/tools/' + it.slug)) + '">' +
             '<span class="sr-ic" style="color:' + esc(it.ac) + '">' + it.svg + '</span>' +
             '<span class="sr-tx"><b>' + esc(it.t) + '</b><small>' + meta + '</small></span>' +
             badge + '</a>';
@@ -96,7 +96,7 @@
     function go(it) {
       if (!it) return;
       if (window.Formda && window.Formda.track) window.Formda.track('search_select', { target: it.slug || it.u || '' });
-      location.href = it.u || ('/tools/' + it.slug + '.html');
+      location.href = it.u || ('/tools/' + it.slug);
     }
 
     function updateLazy() { ensureIndex(update); }

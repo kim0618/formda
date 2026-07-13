@@ -51,10 +51,19 @@ function renderThumb(tool) {
 }
 const THUMBS = Object.fromEntries(tools.map((t) => [t.slug, renderThumb(t)]));
 
+// Cloudflare Pages가 .html을 확장자 없는 URL로 308 리다이렉트하므로,
+// 내부 링크·JSON-LD가 .html을 가리키면 클릭·크롤마다 불필요한 리다이렉트를 거친다.
+// canonical·sitemap과 동일하게 확장자 없는 URL로 통일한다.
+function cleanLinks(html) {
+  return html
+    .replace(/href="\/(tools|category|pages|guides)\/([a-z0-9-]+)\.html([#?][^"]*)?"/g, 'href="/$1/$2$3"')
+    .replace(/https:\/\/formda\.kr\/(tools|category|pages|guides)\/([a-z0-9-]+)\.html/g, 'https://formda.kr/$1/$2');
+}
+
 function out(relPath, content) {
   const full = join(DIST, relPath);
   mkdirSync(dirname(full), { recursive: true });
-  writeFileSync(full, content, 'utf8');
+  writeFileSync(full, relPath.endsWith('.html') ? cleanLinks(content) : content, 'utf8');
   console.log('  ✓', relPath);
 }
 
@@ -97,7 +106,7 @@ console.log('[검색] 인덱스');
 const guideSvg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4.5A1.5 1.5 0 0 1 5.5 3H18v16H5.5A1.5 1.5 0 0 0 4 20.5z"/><path d="M4 20.5A1.5 1.5 0 0 1 5.5 19H18"/><path d="M8 7.5h6M8 11h5"/></svg>';
 const toolEntries = tools.filter((t) => !t.stub).map((t) => ({
   slug: t.slug,
-  u: '/tools/' + t.slug + '.html',
+  u: '/tools/' + t.slug,
   g: 0,
   t: t.navTitle,
   c: (categoryBySlug[t.category] || {}).label || '',
@@ -109,7 +118,7 @@ const toolEntries = tools.filter((t) => !t.stub).map((t) => ({
 }));
 const guideEntries = guides.map((g) => ({
   slug: g.slug,
-  u: '/guides/' + g.slug + '.html',
+  u: '/guides/' + g.slug,
   g: 1,
   t: g.navTitle || g.title,
   c: '가이드',
