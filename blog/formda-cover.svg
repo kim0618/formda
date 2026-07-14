@@ -1,0 +1,64 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1200" viewBox="0 0 1080 1200" font-family="Pretendard, 'Apple SD Gothic Neo', 'Malgun Gothic', 'Noto Sans KR', sans-serif">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0.35" y2="1">
+      <stop offset="0" stop-color="#eef2ff"/>
+      <stop offset="0.55" stop-color="#f1f3fc"/>
+      <stop offset="1" stop-color="#f8fafc"/>
+    </linearGradient>
+    <filter id="cardShadow" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="16" stdDeviation="24" flood-color="#1a1a2e" flood-opacity="0.14"/>
+    </filter>
+  </defs>
+
+  <rect width="1080" height="1200" fill="url(#bg)"/>
+  <!-- 장식 원 -->
+  <circle cx="980" cy="120" r="220" fill="#4f46e5" opacity="0.06"/>
+  <circle cx="90" cy="1120" r="180" fill="#4f46e5" opacity="0.05"/>
+
+  <!-- 브랜드 -->
+  <text x="540" y="230" font-size="52" font-weight="800" fill="#4f46e5" letter-spacing="-1" text-anchor="middle">폼다</text>
+
+  <!-- 메인 카피 -->
+  <text x="540" y="360" font-size="74" font-weight="800" fill="#1a1a2e" letter-spacing="-2" text-anchor="middle">복잡한 서류,</text>
+  <text x="540" y="452" font-size="74" font-weight="800" fill="#1a1a2e" letter-spacing="-2" text-anchor="middle">입력하면 바로 PDF</text>
+
+  <!-- 서브 -->
+  <text x="540" y="530" font-size="31" font-weight="500" fill="#4b5563" text-anchor="middle">계약서 · 차용증 · 사직서 · 내용증명 등 20종 · 무료</text>
+
+  <!-- 칩 -->
+  <g font-size="27" font-weight="600" fill="#4338ca" text-anchor="middle">
+    <rect x="300" y="580" width="200" height="60" rx="30" fill="#fff" stroke="#dfe3f5"/>
+    <text x="400" y="618">가입 없이</text>
+    <rect x="516" y="580" width="152" height="60" rx="30" fill="#fff" stroke="#dfe3f5"/>
+    <text x="592" y="618">1분 작성</text>
+    <rect x="684" y="580" width="96" height="60" rx="30" fill="#fff" stroke="#dfe3f5"/>
+    <text x="732" y="618">PDF</text>
+  </g>
+
+  <!-- A4 문서 미리보기 (견적서, og 이식) -->
+  <g transform="rotate(3 540 850)" filter="url(#cardShadow)">
+    <rect x="392" y="700" width="296" height="372" rx="10" fill="#ffffff"/>
+    <rect x="392" y="700" width="296" height="6" rx="3" fill="#4f46e5"/>
+    <text x="540" y="754" font-size="22" font-weight="800" fill="#1a1a2e" text-anchor="middle" letter-spacing="6">견 적 서</text>
+    <line x1="418" y1="772" x2="662" y2="772" stroke="#1a1a2e" stroke-width="2"/>
+    <rect x="418" y="788" width="110" height="8" rx="4" fill="#e5e7f2"/>
+    <rect x="588" y="788" width="74" height="8" rx="4" fill="#e5e7f2"/>
+    <rect x="418" y="812" width="244" height="66" rx="4" fill="#f7f8fa" stroke="#e5e7f2"/>
+    <rect x="432" y="826" width="130" height="7" rx="3" fill="#d8dcec"/>
+    <rect x="432" y="842" width="160" height="7" rx="3" fill="#e5e7f2"/>
+    <rect x="432" y="858" width="100" height="7" rx="3" fill="#e5e7f2"/>
+    <rect x="418" y="896" width="244" height="36" rx="4" fill="#eef2ff" stroke="#c7cef5"/>
+    <text x="432" y="920" font-size="14" font-weight="700" fill="#4338ca">합계금액</text>
+    <text x="648" y="920" font-size="15" font-weight="800" fill="#1a1a2e" text-anchor="end">3,630,000</text>
+    <g fill="#eef0f6">
+      <rect x="418" y="948" width="244" height="8" rx="3"/>
+      <rect x="418" y="968" width="244" height="8" rx="3"/>
+      <rect x="418" y="988" width="244" height="8" rx="3"/>
+      <rect x="418" y="1008" width="180" height="8" rx="3"/>
+    </g>
+  </g>
+
+  <!-- 화자 라인 + 도메인 -->
+  <text x="540" y="1132" font-size="27" font-weight="600" fill="#6b7280" text-anchor="middle">1인 사업자 · 직장인의 문서 노트</text>
+  <text x="540" y="1176" font-size="26" font-weight="700" fill="#4f46e5" text-anchor="middle">formda.kr</text>
+</svg>
