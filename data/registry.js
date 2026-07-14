@@ -226,6 +226,9 @@ export const categories = [
 export const tools = [
   {
     slug: 'estimate',
+    calcLinks: [
+      { label: '부가가치세 계산기', href: 'https://www.jptcalc.kr/calc/tax/vat/?utm_source=formda&utm_medium=related&utm_campaign=estimate' },
+    ],
     category: 'business',
     title: '견적서 만들기',
     navTitle: '견적서',
@@ -386,6 +389,9 @@ export const tools = [
   },
   {
     slug: 'statement',
+    calcLinks: [
+      { label: '부가가치세 계산기', href: 'https://www.jptcalc.kr/calc/tax/vat/?utm_source=formda&utm_medium=related&utm_campaign=statement' },
+    ],
     category: 'business',
     title: '거래명세서 만들기',
     navTitle: '거래명세서',
@@ -867,6 +873,9 @@ export const tools = [
   },
   {
     slug: 'invoice',
+    calcLinks: [
+      { label: '부가가치세 계산기', href: 'https://www.jptcalc.kr/calc/tax/vat/?utm_source=formda&utm_medium=related&utm_campaign=invoice' },
+    ],
     category: 'business',
     title: '청구서 만들기',
     navTitle: '청구서',
@@ -1731,6 +1740,10 @@ export const tools = [
   },
   {
     slug: 'resignation',
+    calcLinks: [
+      { label: '퇴직금 계산기', href: 'https://www.jptcalc.kr/calc/salary/severance/?utm_source=formda&utm_medium=related&utm_campaign=resignation' },
+      { label: '실업급여 계산기', href: 'https://www.jptcalc.kr/calc/salary/unemployment/?utm_source=formda&utm_medium=related&utm_campaign=resignation' },
+    ],
     category: 'job',
     title: '사직서 만들기',
     navTitle: '사직서',
@@ -1810,6 +1823,9 @@ export const tools = [
   },
   {
     slug: 'handover',
+    calcLinks: [
+      { label: '퇴직금 계산기', href: 'https://www.jptcalc.kr/calc/salary/severance/?utm_source=formda&utm_medium=related&utm_campaign=handover' },
+    ],
     category: 'job',
     title: '인수인계서 만들기',
     navTitle: '인수인계서',
@@ -2148,6 +2164,10 @@ export const tools = [
   },
   {
     slug: 'loan',
+    calcLinks: [
+      { label: '대출이자 계산기', href: 'https://www.jptcalc.kr/calc/realestate/loan/?utm_source=formda&utm_medium=related&utm_campaign=loan' },
+      { label: '증여세 계산기', href: 'https://www.jptcalc.kr/calc/realestate/gift/?utm_source=formda&utm_medium=related&utm_campaign=loan' },
+    ],
     category: 'life',
     title: '차용증 만들기',
     navTitle: '차용증',
@@ -3405,6 +3425,10 @@ export const tools = [
     },
 
     related: ['employment', 'statement', 'estimate'],
+    calcLinks: [
+      { label: '연봉 실수령액 계산기', href: 'https://www.jptcalc.kr/calc/salary/take-home-pay/?utm_source=formda&utm_medium=related&utm_campaign=payslip' },
+      { label: '4대보험 계산기', href: 'https://www.jptcalc.kr/calc/tax/four-insurance/?utm_source=formda&utm_medium=related&utm_campaign=payslip' },
+    ],
 
     prerender: {
       intro:
@@ -3486,6 +3510,10 @@ export const tools = [
   },
   {
     slug: 'employment-contract',
+    calcLinks: [
+      { label: '시급·일급 계산기', href: 'https://www.jptcalc.kr/calc/salary/hourly-wage/?utm_source=formda&utm_medium=related&utm_campaign=employment-contract' },
+      { label: '주휴수당 계산기', href: 'https://www.jptcalc.kr/calc/salary/weekly-holiday-pay/?utm_source=formda&utm_medium=related&utm_campaign=employment-contract' },
+    ],
     category: 'business',
     title: '근로계약서 만들기',
     navTitle: '근로계약서',
@@ -3619,6 +3647,10 @@ export const tools = [
   },
   {
     slug: 'freelance-contract',
+    calcLinks: [
+      { label: '3.3% 원천징수 계산기', href: 'https://www.jptcalc.kr/calc/tax/withholding/?utm_source=formda&utm_medium=related&utm_campaign=freelance-contract' },
+      { label: '월 순수입 계산기', href: 'https://www.jptcalc.kr/calc/tax/freelancer-income/?utm_source=formda&utm_medium=related&utm_campaign=freelance-contract' },
+    ],
     category: 'business',
     title: '프리랜서 용역계약서 만들기',
     navTitle: '프리랜서 용역계약서',

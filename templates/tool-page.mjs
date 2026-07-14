@@ -205,10 +205,13 @@ function relatedHTML(tool) {
   // 도구 → 관련 가이드 내부링크
   const guidePills = (guidesByTool[tool.slug] || [])
     .map((g) => `<a class="sibling-link" href="/guides/${g.slug}.html">${g.navTitle || g.title}</a>`);
+  // 도구 → 제이퍼(jptcalc) 관련 계산기 (크로스사이트, 새 탭)
+  const calcPills = (tool.calcLinks || [])
+    .map((c) => `<a class="sibling-link" href="${c.href}" target="_blank" rel="noopener">${c.label}</a>`);
   const group = (title, items) => items.length
     ? `<div class="sibling-group"><div class="sibling-title">${title}</div><div class="sibling-list">${items.join('')}</div></div>`
     : '';
-  return `<div class="sibling-section">${group('관련 문서 도구', toolPills)}${group('관련 가이드', guidePills)}</div>`;
+  return `<div class="sibling-section">${group('관련 문서 도구', toolPills)}${group('관련 가이드', guidePills)}${group('관련 계산기', calcPills)}</div>`;
 }
 
 // HowTo 1단계(입력) 안내를 문서 유형/도구별로 정확히. 하드코딩 "품목·금액"이

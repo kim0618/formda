@@ -29,6 +29,7 @@
       var prof = this.loadProfileRaw();
       if (prof && this.docType === 'business-invoice') this.applyProfile(prof);
       this.applyNextDocNo();
+      this.applyPrefill();   // ?d= 쿼리(제이퍼 브릿지)가 있으면 샘플 위에 덮어씀
       this.updateProfileBar();
       this.bindResize();
 
@@ -66,6 +67,104 @@
 
     today: function () {
       return new Date().toISOString().slice(0, 10);
+    },
+
+    // 크로스사이트 프리필: 제이퍼(jptcalc) 계산 결과를 ?d=<JSON>으로 받아 채움.
+    // 화이트리스트 키만 허용, 값은 정제(문자 60자 컷·금액 숫자화)해 XSS/오염 차단.
+    PREFILL_KEYS: {
+      payslip: ['company', 'bizNo', 'ceo', 'empName', 'empDept', 'empRank', 'empNo', 'empBirth',
+        'empHireDate', 'payMonth', 'payDate', 'workDaysN', 'workHoursTotal',
+        'hoursOT', 'hoursNight', 'hoursHoliday', 'note', 'earnings', 'deductions'],
+      loan: ['amount', 'rate', 'dueDate', 'repayMethod'],
+      freelance: ['amount'],
+      employment: ['payType', 'payAmount'],
+    },
+    // docType + variant → 프리필 타입(화이트리스트·빈문서 키). legal/contract는 variant마다 필드가 달라 구분 필수.
+    prefillType: function () {
+      if (this.docType === 'payslip') return 'payslip';
+      if (this.docType === 'legal') return (this.cfg && this.cfg.variant === 'loan') ? 'loan' : null;
+      if (this.docType === 'contract') return (this.cfg && this.cfg.variant === 'service') ? 'freelance' : 'employment';
+      return null;
+    },
+    // 프리필용 빈 문서 템플릿 (clearAll의 타입별 기본값과 동일, 신원란 공란)
+    blankFor: function (pt) {
+      if (pt === 'payslip') {
+        return {
+          company: '', bizNo: '', ceo: '', empName: '', empDept: '', empRank: '',
+          empHireDate: '', empNo: '', empBirth: '', payMonth: '', payDate: this.today(),
+          workDaysN: '', workHoursTotal: '', hoursOT: '', hoursNight: '', hoursHoliday: '',
+          earnings: this.psEarnDefault(), deductions: this.psDeductDefault(), note: '', sealImg: null,
+        };
+      }
+      if (pt === 'loan') {
+        return {
+          amount: 0, rate: '', dueDate: '', repayMethod: '', delayRate: '', special: '', body: '', date: this.today(),
+          crName: '', crId: '', crAddr: '', crTel: '', dbName: '', dbId: '', dbAddr: '', dbTel: '', sealImg: null,
+        };
+      }
+      if (pt === 'freelance') {
+        return {
+          coName: '', coRegNo: '', coCeo: '', coAddr: '', coTel: '', frName: '', frRegNo: '', frAddr: '', frTel: '',
+          scope: '', startDate: '', endDate: '', workplace: '', amount: 0, paySchedule: '', withhold: true, ipNote: '',
+          date: this.today(), note: '', sealImg: null,
+        };
+      }
+      if (pt === 'employment') {
+        return {
+          bizName: '', bizRegNo: '', bizCeo: '', bizAddr: '', bizTel: '', wName: '', wBirth: '', wAddr: '', wTel: '',
+          startDate: '', endDate: '', workplace: '', jobDesc: '', workTime: '', breakTime: '', workDays: '', holiday: '',
+          payType: '월급', payAmount: 0, bonus: '', allowance: '', wageDate: '', payMethod: '근로자 명의 예금통장에 입금',
+          insEmploy: true, insInjury: true, insPension: true, insHealth: true,
+          date: this.today(), note: '', sealImg: null,
+        };
+      }
+      return null;
+    },
+    pfNum: function (x) { var n = Number(x); return (isFinite(n) && n >= 0) ? Math.round(n) : 0; },
+    pfStr: function (x) { return (typeof x === 'string' || typeof x === 'number') ? String(x).slice(0, 60) : ''; },
+    applyPrefill: function () {
+      var raw;
+      try { raw = new URLSearchParams(window.location.search).get('d'); } catch (e) { return; }
+      if (!raw) return;
+      var data;
+      try { data = JSON.parse(raw); } catch (e) { return; }
+      if (!data || typeof data !== 'object' || Array.isArray(data)) return;
+      var pt = this.prefillType();
+      var allow = pt && this.PREFILL_KEYS[pt];
+      if (!allow) return;
+      // 프리필 시작점 = 샘플이 아닌 '빈 문서'. 브릿지엔 PII가 없으므로(금액만 전달)
+      // 신원란(회사·성명 등)은 비워 사용자가 채우게 하고, 넘어온 숫자만 덮어씀.
+      var s = this.blankFor(pt) || JSON.parse(JSON.stringify(this.state));
+      var self = this, maxRows = (this.cfg && this.cfg.maxRows) || 8, matched = 0;
+      allow.forEach(function (k) {
+        if (!Object.prototype.hasOwnProperty.call(data, k)) return;
+        var v = data[k];
+        if (k === 'earnings') {
+          if (!Array.isArray(v)) return;
+          s.earnings = v.slice(0, maxRows).map(function (r) {
+            r = r || {}; return { name: self.pfStr(r.name), amount: self.pfNum(r.amount), taxfree: !!r.taxfree };
+          });
+          if (!s.earnings.length) s.earnings = self.psEarnDefault();
+          matched++;
+        } else if (k === 'deductions') {
+          if (!Array.isArray(v)) return;
+          s.deductions = v.slice(0, maxRows).map(function (r) {
+            r = r || {}; return { name: self.pfStr(r.name), amount: self.pfNum(r.amount) };
+          });
+          if (!s.deductions.length) s.deductions = self.psDeductDefault();
+          matched++;
+        } else if (typeof v === 'number') {
+          s[k] = self.pfNum(v);       // 금액 등 숫자 필드는 숫자 유지(setMoney·한글금액)
+          matched++;
+        } else if (typeof v === 'string') {
+          s[k] = self.pfStr(v);
+          matched++;
+        }
+      });
+      // 유효 키가 하나도 안 맞으면 샘플 유지 + 가짜 prefill 이벤트 방지
+      if (!matched) return;
+      this.applyState(s);
+      if (F.track) F.track('prefill', { doc_type: this.slug || this.docType, source: 'jptcalc' });
     },
 
     // 상태를 폼 + 미리보기에 일괄 반영
@@ -170,6 +269,7 @@
       this.setVal('wageDate', s.wageDate); this.setVal('payMethod', s.payMethod);
       this.setCheck('insEmploy', s.insEmploy); this.setCheck('insInjury', s.insInjury);
       this.setCheck('insPension', s.insPension); this.setCheck('insHealth', s.insHealth);
+      this.setCheck('withhold', s.withhold);   // 프리랜서 용역계약서 원천징수 체크박스 동기화
       // 지출결의서 (expense) 가족 필드 (dept·no·date·note는 위에서 처리)
       this.setVal('writer', s.writer); this.setVal('approvers', s.approvers);
       // 인수인계서 (handover) 가족 필드
