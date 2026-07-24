@@ -3,3 +3,6 @@ node_modules/
 dist/
 *.log
 .env
+
+# 고객 이메일(개인정보) - public repo라 절대 커밋 금지
+LEADS.md
