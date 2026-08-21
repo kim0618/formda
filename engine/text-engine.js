@@ -133,7 +133,20 @@
   // ---------- 공통 유틸 ----------
   function comma(n) { return Number(n).toLocaleString('ko-KR'); }
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+  // ---------- GA4 유틸 전환 측정 ----------
+  // 문서 도구(app.js)는 download_pdf·create를 쏘지만 유틸 엔진은 지금까지 이벤트가 없어
+  // 유입의 21%(증명사진·PDF 유틸 등)가 측정 밖이었다. 파일이 실제로 나가는 지점에서만 발사한다.
+  // track.js 미로드·gtag 미설정이면 조용히 무시된다(스캐폴딩 안전).
+  function trackUtil(event, params) {
+    try {
+      var t = root.FORMDA_TEXT_TOOL || {};
+      var F = root.Formda;
+      if (F && F.track) F.track(event, Object.assign({ tool: t.slug || '', kind: t.kind || '' }, params || {}));
+    } catch (e) {}
+  }
+
   function copy(str, btn) {
+    trackUtil('copy_util', { len: String(str || '').length });
     function done() { if (!btn) return; var t = btn.textContent; btn.textContent = '복사됨'; btn.classList.add('done'); setTimeout(function () { btn.textContent = t; btn.classList.remove('done'); }, 1200); }
     if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(str).then(done, function () {});
     else { var ta = document.createElement('textarea'); ta.value = str; document.body.appendChild(ta); ta.select(); try { document.execCommand('copy'); } catch (e) {} document.body.removeChild(ta); done(); }
@@ -326,6 +339,7 @@
         var url = c ? c.toDataURL('image/png') : (out.querySelector('img') || {}).src;
         if (!url) return;
         var a = document.createElement('a'); a.href = url; a.download = 'qrcode.png';
+        trackUtil('download_util', { format: 'png' });
         document.body.appendChild(a); a.click(); document.body.removeChild(a);
       });
       // 라이브러리가 늦게 로드될 수 있어 한 번 더 시도
@@ -586,6 +600,7 @@
             }
           }
           pdf.save('formda-images.pdf');
+          trackUtil('download_util', { format: 'pdf' });
         } catch (e) {
           alert('PDF 생성 중 오류가 발생했습니다: ' + (e && e.message ? e.message : e));
         } finally {
@@ -717,6 +732,7 @@
           var blob = new Blob([merged], { type: 'application/pdf' });
           var url = URL.createObjectURL(blob);
           var a = document.createElement('a'); a.href = url; a.download = 'formda-merged.pdf';
+          trackUtil('download_util', { format: 'pdf' });
           document.body.appendChild(a); a.click(); document.body.removeChild(a);
           setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
         } catch (e) {
@@ -842,6 +858,7 @@
       function saveBlob(blob, name) {
         var url = URL.createObjectURL(blob);
         var a = document.createElement('a'); a.href = url; a.download = name;
+        trackUtil('download_util', { format: 'pdf' });
         document.body.appendChild(a); a.click(); document.body.removeChild(a);
         setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
       }
@@ -1038,6 +1055,7 @@
         var a = document.createElement('a');
         a.href = jpegWithinSize(out, preset.maxKB);
         a.download = '증명사진_' + preset.w + 'x' + preset.h + '.jpg';
+        trackUtil('download_util', { format: 'jpg', preset: preset.w + 'x' + preset.h });
         document.body.appendChild(a); a.click(); document.body.removeChild(a);
       });
     },
@@ -1206,6 +1224,7 @@
           var blob = new Blob([bytes], { type: 'application/pdf' });
           var url = URL.createObjectURL(blob);
           var a = document.createElement('a'); a.href = url; a.download = 'formda-watermarked.pdf';
+          trackUtil('download_util', { format: 'pdf' });
           document.body.appendChild(a); a.click(); document.body.removeChild(a);
           setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
         } catch (e) {
@@ -1328,6 +1347,7 @@
           var blob = new Blob([bytes], { type: 'application/pdf' });
           var url = URL.createObjectURL(blob);
           var a = document.createElement('a'); a.href = url; a.download = 'formda-rotated.pdf';
+          trackUtil('download_util', { format: 'pdf' });
           document.body.appendChild(a); a.click(); document.body.removeChild(a);
           setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
         } catch (e) {
