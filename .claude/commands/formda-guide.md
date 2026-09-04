@@ -114,7 +114,7 @@ date +"%Y-%m-%d (%a) u=%u"   # u: 1=월 2=화 3=수 4=목 5=금 6=토 7=일
 | [x] 1 | 2026-08-25(화) | id-photo | ③요건·체크리스트 | 리스크 환기 | 4 | 규격표+치수 SVG | 반려되지 않는 규격 요건 | 여권사진 500k 용량 · 증명사진 고화질로 바꾸는법(15) · 여권사진 비율 자르기(9) — slug: `id-photo-requirements` |
 | [x] 2 | 2026-08-28(금) | image-to-pdf | ①단계 워크스루 | 상황 던지기 | 5 | 번호리스트+체크리스트 | 여러 장을 한 파일로 제출 | 사진 합쳐서 pdf 파일 만들기 · 도구 총 224노출 — slug: `how-to-merge-photos-into-pdf` |
 | [x] 3 | 2026-09-01(화) | pdf-rotate | ②비교·구분 | 통념 반박 | 6 | 비교표+흐름 SVG | 화면 회전 vs 파일 자체 회전 | 도구 총 192노출 — slug: `pdf-rotate-view-vs-file` |
-| 4 | 2026-09-04(금) | pdf-split | ⑤허브·로드맵 | 질문형 | 4 | 체크리스트+분기표 | PDF 손볼 때 뭘 쓰나(4개 도구 분기) | pdf 낱장분리(23·CTR 8.7%) · pdf 한장 빼는 법 |
+| [x] 4 | 2026-09-04(금) | pdf-split | ⑤허브·로드맵 | 질문형 | 4 | 체크리스트+분기표 | PDF 손볼 때 뭘 쓰나(4개 도구 분기) | pdf 낱장분리(23·CTR 8.7%) · pdf 한장 빼는 법 — slug: `how-to-choose-pdf-tool` |
 
 **유형·FAQ 배정 근거**: 직전 2편이 `how-to-write-agreement`(strategy·FAQ5)·`how-to-get-resignation-certificate`(compare·FAQ6)라, 매 회차가 "직전 2편과 다른 유형·다른 FAQ 개수" 규칙을 충족하도록 역산했다. 4편 유형이 전부 다르다. 4회차를 허브형으로 맨 뒤에 둔 것은 앞 3편이 위성으로 깔린 뒤라야 링크가 살기 때문.
 
