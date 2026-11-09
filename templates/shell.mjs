@@ -45,7 +45,7 @@ ${config.NAVER_SITE_VERIFICATION ? `<meta name="naver-site-verification" content
 <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin />
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard-dynamic-subset.css" />
 <link rel="stylesheet" href="/styles/tokens.css" />
-${analytics()}<script>window.FORMDA_CFG=${JSON.stringify(publicConfig())};</script>
+${analytics()}${adsense()}<script>window.FORMDA_CFG=${JSON.stringify(publicConfig())};</script>
 </head>
 <body>`;
 }
@@ -103,6 +103,16 @@ export function analytics() {
   return `<link rel="preconnect" href="https://www.googletagmanager.com" />
 <script async src="https://www.googletagmanager.com/gtag/js?id=${id}"></script>
 <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag('js',new Date());gtag('config','${id}');</script>
+`;
+}
+
+// 애드센스 사이트 확인 메타 + 로더 - config.ADSENSE_CLIENT가 채워졌을 때만.
+// 광고 단위(<ins>)는 넣지 않는다. 승인 전엔 아무것도 표시되지 않는다.
+export function adsense() {
+  if (!config.ADSENSE_CLIENT) return '';
+  const id = config.ADSENSE_CLIENT;
+  return `<meta name="google-adsense-account" content="${id}" />
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${id}" crossorigin="anonymous"></script>
 `;
 }
 

@@ -7,6 +7,9 @@ export const config = {
   GA_ID: 'G-M1JPMD9R75',
   WEB3FORMS_KEY: 'c78af39f-1266-45ab-9c93-8c7b277fb74a',
   NAVER_SITE_VERIFICATION: 'd53ec112248db6e5ab2ceab5ac2bb681dc30441b',
+  // 애드센스 게시자 ID(제이퍼와 같은 계정). 채우면 <head> 확인 메타·로더 + ads.txt 생성. 비우면 전부 사라진다.
+  // 광고 단위는 승인 후 별도로 넣는다(2026-11-09 심사 신청용으로 추가).
+  ADSENSE_CLIENT: 'ca-pub-6112766558731601',
   PRICE_SINGLE: 1000,   // 단건(워터마크 제거)
   PRICE_SUB: 4900,      // 구독(월, 비즈니스 도구)
   PRICE_SUB_YEAR: 53900, // 구독(연) = 월 11개월치(1개월 할인)

@@ -6,6 +6,7 @@ import { fileURLToPath } from 'node:url';
 import vm from 'node:vm';
 
 import { site, categories, tools, categoryBySlug } from '../data/registry.js';
+import { config } from '../data/config.js';
 import { guides } from '../data/guides.js';
 import { svg } from '../templates/icons.mjs';
 import { toolPage, stubToolPage } from '../templates/tool-page.mjs';
@@ -158,6 +159,12 @@ out('robots.txt', `User-agent: *
 Allow: /
 Sitemap: ${site.domain}/sitemap.xml
 `);
+
+// 애드센스 ads.txt (게시자 ID가 있을 때만). 형식: 도메인, pub ID, DIRECT, 구글 인증기관 ID.
+if (config.ADSENSE_CLIENT) {
+  out('ads.txt', `google.com, ${config.ADSENSE_CLIENT.replace(/^ca-/, '')}, DIRECT, f08c47fec0942fa0
+`);
+}
 
 console.log('[rss] 가이드 피드');
 // 가이드(블로그) 최신순 RSS 2.0 피드. 도구 페이지는 뉴스성이 없어 제외.

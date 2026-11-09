@@ -12,3 +12,4 @@
 | 날짜 | 시각 | 스킬 | PC |
 |---|---|---|---|
 | 2026-07-03 | 09:26 | formda-guide | DESKTOP-C4EV6UM |
+| 2026-10-26 | 09:28 | usb-server-preflight | DESKTOP-C4EV6UM |
