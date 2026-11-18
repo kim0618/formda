@@ -334,6 +334,7 @@
 
   // ===== 이력서 (resume) 가족 =====
   function resumeForm(cfg) {
+    if (cfg.variant === 'alba') return albaResumeForm(cfg);
     return '' +
       '<div class="form-sec"><h2>인적사항</h2>' +
         '<div class="row2">' +
@@ -361,6 +362,48 @@
         '<button class="addrow" id="addCareerBtn" type="button" onclick="Formda.app.addCareer()">+ 경력 추가</button></div>' +
       '<div class="form-sec"><h2>자격·기타</h2>' +
         '<div class="field"><textarea id="f-etc" rows="3" placeholder="자격증, 어학, 수상 경력 등" oninput="Formda.app.onField(\'etc\', this.value)"></textarea></div>' +
+        '<div class="field"><label>작성일자</label><input id="f-date" type="date" oninput="Formda.app.onField(\'date\', this.value)"></div>' +
+      '</div>';
+  }
+
+  // 알바 이력서 (resume 가족 variant 'alba') - 희망 근무 조건·자기소개 칸이 추가되고 경력은 아르바이트 경력 기준
+  function albaResumeForm(cfg) {
+    function af(id, label, ph) {
+      return '<div class="field"><label>' + label + '</label><input id="f-' + id + '" placeholder="' + (ph || '') +
+        '" oninput="Formda.app.onField(\'' + id + '\', this.value)"></div>';
+    }
+    return '' +
+      '<div class="form-sec"><h2>인적사항</h2>' +
+        '<div class="row2">' + af('name', '성명') + af('birth', '생년월일', '2004-05-21') + '</div>' +
+        '<div class="row2">' + af('tel', '연락처', '010-0000-0000') + af('email', '이메일 (선택)') + '</div>' +
+        af('addr', '거주지', '예: 서울 마포구 합정동 (동까지만 적어도 됩니다)') +
+        '<div class="field"><label>사진 (선택)</label>' +
+          '<div class="seal-upload"><label class="seal-btn" for="f-photo">이미지 업로드</label>' +
+            '<input id="f-photo" type="file" accept="image/*" onchange="Formda.app.onPhoto(this)" hidden>' +
+            '<button class="seal-clear" type="button" onclick="Formda.app.clearPhoto()">제거</button></div>' +
+          '<div class="seal-name" id="photoName"></div></div>' +
+      '</div>' +
+      '<div class="form-sec"><h2>희망 근무 조건</h2>' +
+        af('applyPart', '지원 업무·매장', '예: 카페 홀·음료 제조 / 합정점') +
+        '<div class="row2">' + af('availDays', '근무 가능 요일', '예: 월·수·금, 주말 가능') + af('availTime', '근무 가능 시간', '예: 평일 18:00~22:00') + '</div>' +
+        '<div class="row2">' + af('availStart', '근무 시작 가능일', '예: 즉시 가능 / 12월 1일부터') + af('availPeriod', '희망 근무 기간', '예: 6개월 이상') + '</div>' +
+        '<p class="field-help">사장님이 가장 먼저 보는 칸입니다. "협의 가능"보다 <b>요일과 시간을 숫자로</b> 적으면 연락 받을 확률이 높아집니다.</p>' +
+      '</div>' +
+      '<div class="form-sec"><h2>학력사항</h2>' +
+        '<table class="items"><colgroup><col style="width:30%"><col style="width:28%"><col style="width:24%"><col style="width:13%"><col style="width:5%"></colgroup>' +
+          '<thead><tr><th>기간</th><th>학교명</th><th>전공·학년</th><th>상태</th><th></th></tr></thead><tbody id="eduRows"></tbody></table>' +
+        '<button class="addrow" id="addEduBtn" type="button" onclick="Formda.app.addEdu()">+ 학력 추가</button>' +
+        '<p class="field-help">상태 칸에는 재학·휴학·졸업 중 하나를 적습니다.</p></div>' +
+      '<div class="form-sec"><h2>아르바이트 경력</h2>' +
+        '<table class="items"><colgroup><col style="width:26%"><col style="width:24%"><col style="width:22%"><col style="width:23%"><col style="width:5%"></colgroup>' +
+          '<thead><tr><th>근무기간</th><th>근무지</th><th>담당업무</th><th>근무형태</th><th></th></tr></thead><tbody id="careerRows"></tbody></table>' +
+        '<button class="addrow" id="addCareerBtn" type="button" onclick="Formda.app.addCareer()">+ 경력 추가</button>' +
+        '<p class="field-help">근무형태에는 "주 3일 · 4시간"처럼 일한 요일·시간을 적습니다. 경력이 없으면 비워 두세요.</p></div>' +
+      '<div class="form-sec"><h2>보건증·자격</h2>' +
+        '<div class="field"><textarea id="f-etc" rows="2" placeholder="예: 보건증 있음 (2026.10 발급) / 바리스타 2급 (줄을 바꾸면 · 로 이어 한 줄에 표시됩니다)" oninput="Formda.app.onField(\'etc\', this.value)"></textarea></div>' +
+      '</div>' +
+      '<div class="form-sec"><h2>자기소개</h2>' +
+        '<div class="field"><textarea id="f-selfIntro" rows="4" placeholder="3~5줄이면 충분합니다. 성실함을 보여 줄 경험, 출퇴근 거리, 오래 일할 수 있는 이유를 적어 보세요." oninput="Formda.app.onField(\'selfIntro\', this.value)"></textarea></div>' +
         '<div class="field"><label>작성일자</label><input id="f-date" type="date" oninput="Formda.app.onField(\'date\', this.value)"></div>' +
       '</div>';
   }

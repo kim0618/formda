@@ -222,6 +222,7 @@ const HOWTO_INPUT_SLUG = {
   award: '수여 기관과 수상자 이름·상장 문구를 입력합니다.',
   loan: '채권자·채무자 정보와 차용 금액·이자율·변제기일을 입력합니다.',
   mandate: '위임인·수임인 정보와 위임할 내용을 입력합니다.',
+  'alba-resume': '인적사항과 근무 가능 요일·시간, 아르바이트 경력을 입력합니다.',
 };
 const HOWTO_INPUT_TYPE = {
   'business-invoice': '공급자·공급받는자 정보와 품목·수량·단가를 입력합니다.',

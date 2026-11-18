@@ -436,8 +436,43 @@
     var colgroup = widths ? '<colgroup>' + widths.map(function (w) { return '<col style="width:' + w + '%">'; }).join('') + '</colgroup>' : '';
     return '<table class="rs-table">' + colgroup + '<thead>' + thead + '</thead><tbody>' + rows + '</tbody></table>';
   }
+  function renderAlbaResume(state, cfg, opts) {
+    var s = state;
+    var photo = s.photo ? '<img src="' + s.photo + '" alt="사진">' : '<span>사진<br>3 × 4</span>';
+    function v(x) { return esc(x) || '&nbsp;'; }
+    var info = '<table class="rs-info"><tbody>' +
+      '<tr><td class="k">성　명</td><td class="v">' + v(s.name) + '</td></tr>' +
+      '<tr><td class="k">생년월일</td><td class="v">' + v(s.birth) + '</td></tr>' +
+      '<tr><td class="k">연락처</td><td class="v">' + v(s.tel) + '</td></tr>' +
+      '<tr><td class="k">이메일</td><td class="v">' + v(s.email) + '</td></tr>' +
+      '<tr><td class="k">거주지</td><td class="v">' + v(s.addr) + '</td></tr>' +
+      '</tbody></table>';
+    var wish = '<table class="rs-info rs-wish"><colgroup><col style="width:84px"><col><col style="width:84px"><col></colgroup><tbody>' +
+      '<tr><td class="k">지원 업무</td><td class="v" colspan="3">' + v(s.applyPart) + '</td></tr>' +
+      '<tr><td class="k">가능 요일</td><td class="v">' + v(s.availDays) + '</td><td class="k">가능 시간</td><td class="v">' + v(s.availTime) + '</td></tr>' +
+      '<tr><td class="k">시작 가능일</td><td class="v">' + v(s.availStart) + '</td><td class="k">희망 기간</td><td class="v">' + v(s.availPeriod) + '</td></tr>' +
+      '<tr><td class="k">보건증·자격</td><td class="v" colspan="3">' + v(String(s.etc || '').split(/\n+/).filter(Boolean).join(' · ')) + '</td></tr>' +
+      '</tbody></table>';
+    var eduCols = [{ key: 'period', cls: 'c' }, { key: 'school', cls: 'l' }, { key: 'major', cls: 'l' }, { key: 'status', cls: 'c' }];
+    var carCols = [{ key: 'period', cls: 'c' }, { key: 'company', cls: 'l' }, { key: 'role', cls: 'l' }, { key: 'task', cls: 'l' }];
+    var eduMin = opts.single ? 2 : (cfg.maxEdu || 2);
+    var carMin = opts.single ? 3 : (cfg.maxCareer || 4);
+    var inner =
+      '<div class="rs-page rs-alba">' +
+      '<div class="rs-title">' + esc(cfg.docTitle) + '</div>' +
+      '<div class="rs-top"><div class="rs-info-wrap">' + info + '</div><div class="rs-photo">' + photo + '</div></div>' +
+      '<div class="rs-sec">희망 근무 조건·보건증</div>' + wish +
+      '<div class="rs-sec">학력사항</div>' + rsTable(s.edu, eduCols, eduMin, ['기간', '학교명', '전공·학년', '상태'], [22, 32, 30, 16]) +
+      '<div class="rs-sec">아르바이트 경력</div>' + rsTable(s.career, carCols, carMin, ['근무기간', '근무지', '담당업무', '근무형태'], [22, 24, 30, 24]) +
+      '<div class="rs-sec">자기소개</div><div class="rs-etc rs-intro">' + v(s.selfIntro) + '</div>' +
+      '<div class="rs-foot"><span>' + (s.date ? '작성일 : ' + korDate(s.date) : '') + '</span>' +
+        '<span>지원자 : ' + v(s.name) + ' (인)</span></div>' +
+      '</div>';
+    return wrap(inner, opts);
+  }
   function renderResume(state, cfg, opts) {
     opts = opts || {};
+    if (cfg.variant === 'alba') return renderAlbaResume(state, cfg, opts);
     var s = state;
     var photo = s.photo ? '<img src="' + s.photo + '" alt="사진">' : '<span>사진<br>3 × 4</span>';
     var info = '<table class="rs-info"><tbody>' +

@@ -205,6 +205,9 @@
       this.setVal('email', s.email);
       this.setVal('addr', s.addr);
       this.setVal('etc', s.etc);
+      // 알바 이력서 (resume variant 'alba') 필드
+      this.setVal('applyPart', s.applyPart); this.setVal('availDays', s.availDays); this.setVal('availTime', s.availTime);
+      this.setVal('availStart', s.availStart); this.setVal('availPeriod', s.availPeriod); this.setVal('selfIntro', s.selfIntro);
       // 증명·증서 가족 필드 (해당 입력칸 없으면 setVal 자동 무시)
       this.setVal('dept', s.dept);
       this.setVal('position', s.position);
@@ -379,6 +382,7 @@
           edu: [{ period: '', school: '', major: '', status: '' }],
           career: [{ period: '', company: '', role: '', task: '' }],
           etc: '', date: this.today(),
+          applyPart: '', availDays: '', availTime: '', availStart: '', availPeriod: '', selfIntro: '',
         });
         return;
       }
