@@ -537,6 +537,31 @@
           '<p class="field-help">내용증명은 <b>동일한 내용 3부</b>(발신인 보관용·수신인 발송용·우체국 보관용)를 만들어 우체국 창구에서 등기로 발송합니다. 상대방에게 도달한 날짜까지 증명하려면 <b>배달증명</b>을 함께 신청하세요.</p>' +
         '</div>';
     }
+    if (cfg.variant === 'incident') {
+      var L = cfg.labels || {};
+      function ta(id, label, rows, ph, help) {
+        return '<div class="field"><label>' + label + '</label><textarea id="f-' + id + '" rows="' + rows + '" placeholder="' + ph +
+          '" oninput="Formda.app.onField(\'' + id + '\', this.value)"></textarea>' + (help ? '<p class="field-help">' + help + '</p>' : '') + '</div>';
+      }
+      return '' +
+        '<div class="form-sec"><h2>작성자</h2>' +
+          '<div class="row2">' + lf('dept', '소속', '영업1팀') + lf('position', '직위', '사원') + '</div>' +
+          '<div class="row2">' + lf('name', '성명', '홍길동') + lf('tel', '연락처 (선택)', '010-0000-0000') + '</div>' +
+          lf('recipient', '제출 대상', '예: 대표이사 / 영업1팀장 ○○○') +
+          sealField(cfg, '작성자 도장·서명 이미지 (선택)') +
+        '</div>' +
+        '<div class="form-sec"><h2>' + (L.content || '경위') + '</h2>' +
+          '<div class="row2">' + lf('incDate', L.when || '발생 일시', '2026-11-18 09:40') + lf('place', L.place || '발생 장소', '본사 3층 사무실') + '</div>' +
+          ta('content', L.content || '경위', 6, cfg.contentPh || '', cfg.contentHelp) +
+          (cfg.showCause ? ta('cause', L.cause || '원인', 3, cfg.causePh || '', cfg.causeHelp) : '') +
+          (cfg.showAction ? ta('action', L.action || '조치 및 영향', 3, cfg.actionPh || '') : '') +
+          (cfg.showPledge ? ta('pledge', L.pledge || '재발 방지 다짐', 3, cfg.pledgePh || '', cfg.pledgeHelp) : '') +
+          lf('attach', '첨부 (선택)', '예: 거래처 확인 메일 1부') +
+          '<div class="field"><label>맺음 문구 (선택)</label><input id="f-lead" placeholder="비우면 표준 문구가 들어갑니다." oninput="Formda.app.onField(\'lead\', this.value)"></div>' +
+          '<div class="field"><label>작성일자</label><input id="f-date" type="date" oninput="Formda.app.onField(\'date\', this.value)"></div>' +
+          (cfg.formHelp ? '<p class="field-help">' + cfg.formHelp + '</p>' : '') +
+        '</div>';
+    }
     if (cfg.variant === 'travelconsent') {
       return '' +
         '<div class="form-sec"><h2>친권자 (동의인)</h2>' +

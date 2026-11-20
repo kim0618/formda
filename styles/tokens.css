@@ -1305,3 +1305,9 @@ body.fd-modal-open { overflow: hidden; }
   .fd-fab { right: 16px; bottom: 16px; padding: 11px 15px; font-size: 13.5px; }
   body:has(.mobile-bar) .fd-fab { bottom: 86px; }   /* 도구 페이지 하단 다운로드 바 위로 */
 }
+.lg-inc-head .k { width: 14%; text-align: center; letter-spacing: 0; }
+.lg-inc-head .v { width: 36%; word-break: break-all; }
+.lg-incident .lg-title { margin-bottom: 24px; }
+.lg-incident .lg-content { min-height: 44px; margin-bottom: 16px; }
+.lg-incident .lg-decl { margin: 14px 0 10px; }
+.lg-incident .lg-date { margin: 8px 0 14px; }

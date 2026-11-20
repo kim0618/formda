@@ -252,6 +252,9 @@
       this.setVal('agName', s.agName); this.setVal('agId', s.agId); this.setVal('agAddr', s.agAddr); this.setVal('agTel', s.agTel);
       this.setVal('relation', s.relation); this.setVal('content', s.content); this.setVal('attach', s.attach); this.setVal('lead', s.lead);
       this.setVal('prName', s.prName); this.setVal('prId', s.prId); this.setVal('prAddr', s.prAddr); this.setVal('prTel', s.prTel);
+      // 경위 문서 (legal variant 'incident') 필드
+      this.setVal('recipient', s.recipient); this.setVal('incDate', s.incDate); this.setVal('place', s.place);
+      this.setVal('cause', s.cause); this.setVal('action', s.action); this.setVal('pledge', s.pledge);
       // 급여명세서 (payslip) 가족 필드 (해당 입력칸 없으면 setVal 자동 무시)
       this.setVal('bizNo', s.bizNo); this.setVal('ceo', s.ceo);
       this.setVal('empName', s.empName); this.setVal('empDept', s.empDept); this.setVal('empRank', s.empRank);
@@ -407,6 +410,11 @@
             subject: '', amount: 0, content: '', deadline: '', special: '', lead: '', date: this.today(),
             srName: '', srId: '', srAddr: '', srTel: '', rcName: '', rcId: '', rcAddr: '', rcTel: '', sealImg: null,
           });
+        } else if (this.cfg.variant === 'incident') {
+          this.applyState({
+            dept: '', position: '', name: '', tel: '', recipient: '', incDate: '', place: '',
+            content: '', cause: '', action: '', pledge: '', attach: '', lead: '', date: this.today(), sealImg: null,
+          });
         } else if (this.cfg.variant === 'travelconsent') {
           this.applyState({
             parentName: '', relation: '', parentAddr: '', parentTel: '', parentPassport: '',
@@ -522,6 +530,9 @@
       for (var i = 0; i < els.length; i++) {
         if (els[i].scrollHeight > els[i].clientHeight + 2) return true;
       }
+      // 경위 문서(시말서 등)는 칸이 3~4개라 칸별 캡 안에서도 합계가 A4를 넘어 날짜·서명이 잘린다 → 페이지 전체도 검사
+      var pg = document.querySelector('#doc .doc-page');
+      if (pg && pg.querySelector('.lg-incident') && pg.scrollHeight > pg.clientHeight + 2) return true;
       return false;
     },
 

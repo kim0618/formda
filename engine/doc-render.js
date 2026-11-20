@@ -689,6 +689,35 @@
       '<div class="lg-signline">친권자　<span class="lg-sign">' + vOr(s.parentName) + sealHTML(s, cfg) + '</span></div>' +
     '</div>';
   }
+  // 경위 문서 (시말서·경위서·사유서·진술서·반성문) - cfg 플래그로 칸을 켜고 끈다
+  // cfg: showCause(원인) · showAction(조치·영향) · showPledge(재발 방지 다짐) · labels(칸 제목) · decl(맺음 문구)
+  function renderIncident(state, cfg) {
+    var s = state;
+    var L = cfg.labels || {};
+    // 작성자·제출처·발생 일시를 4열 표 하나로 모아 본문(경위·원인·다짐) 공간을 확보한다
+    var head = '<table class="lg-terms lg-inc-head"><tbody>' +
+      '<tr><td class="k">소　속</td><td class="v">' + vOr(s.dept) + '</td><td class="k">직　위</td><td class="v">' + vOr(s.position) + '</td></tr>' +
+      '<tr><td class="k">성　명</td><td class="v">' + vOr(s.name) + '</td><td class="k">연 락 처</td><td class="v">' + vOr(s.tel) + '</td></tr>' +
+      '<tr><td class="k">' + esc(L.when || '발생 일시') + '</td><td class="v">' + lgDate(s.incDate) + '</td><td class="k">' + esc(L.place || '발생 장소') + '</td><td class="v">' + vOr(s.place) + '</td></tr>' +
+      '<tr><td class="k">제 출 처</td><td class="v" colspan="3">' + (s.recipient ? esc(s.recipient) + ' 귀하' : '&nbsp;') + '</td></tr>' +
+      '</tbody></table>';
+    var n = 0;
+    function sec(title, body) { n++; return '<div class="lg-sec">' + n + '. ' + title + '</div>' + body; }
+    function box(v) { return '<div class="lg-content">' + (esc(v) || '&nbsp;') + '</div>'; }
+    return '<div class="lg-page lg-incident">' +
+      '<div class="lg-title">' + esc(cfg.docTitle) + '</div>' +
+      head +
+      sec(L.content || '경위', box(s.content)) +
+      (cfg.showCause ? sec(L.cause || '원인', box(s.cause)) : '') +
+      (cfg.showAction ? sec(L.action || '조치 및 영향', box(s.action)) : '') +
+      // 다짐은 쓰지 않을 권리가 있어(대법원 2009두6605) 비우면 항목째 뺀다
+      (cfg.showPledge && s.pledge ? sec(L.pledge || '재발 방지 다짐', box(s.pledge)) : '') +
+      (s.attach ? '<div class="lg-sec">첨부</div><div class="lg-special">' + esc(s.attach) + '</div>' : '') +
+      '<div class="lg-decl">' + (esc(s.lead) || esc(cfg.decl || '위와 같이 제출합니다.')) + '</div>' +
+      '<div class="lg-date">' + korDate(s.date) + '</div>' +
+      '<div class="lg-signline">작성자　<span class="lg-sign">' + vOr(s.name) + sealHTML(s, cfg) + '</span></div>' +
+    '</div>';
+  }
   function legal(state, cfg, opts) {
     opts = opts || {};
     var inner;
@@ -697,6 +726,7 @@
     else if (cfg.variant === 'agreement') inner = renderAgreement(state, cfg);
     else if (cfg.variant === 'contentproof') inner = renderContentProof(state, cfg);
     else if (cfg.variant === 'travelconsent') inner = renderTravelConsent(state, cfg);
+    else if (cfg.variant === 'incident') inner = renderIncident(state, cfg);
     else inner = renderLoan(state, cfg);
     return wrap(inner, opts);
   }
