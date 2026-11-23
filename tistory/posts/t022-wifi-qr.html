@@ -8,7 +8,7 @@
 <p data-ke-size="size16">S는 와이파이 이름, T는 보안 방식, P는 비밀번호예요. 칸 순서는 상관없고 맨 끝은 세미콜론 두 개(;;)로 닫아요. S는 빠지면 안 되고, 비밀번호 없는 와이파이라면 T:nopass만 두고 P는 빼요.</p>
 <p data-ke-size="size16">&nbsp;</p>
 <p>[[CAPTURE1]]</p>
-<p data-ke-size="size16" style="color:#666">화면에서는 QR 둘레에 흰 테두리가 보이지만, 이건 페이지 배경이에요. 저장한 파일에는 이 여백이 없어요(아래 인쇄 부분).</p>
+<p data-ke-size="size16" style="color:#666">입력칸의 WIFI: 한 줄이 그대로 QR 내용이 돼요. 저장한 PNG에도 둘레 흰 여백이 들어가요.</p>
 <p data-ke-size="size16">&nbsp;</p>
 <h2>T 칸 고르기</h2>
 <p data-ke-size="size16">ZXing 형식에서 T에 쓰는 값은 WPA, WEP, WPA2-EAP, nopass 네 가지예요. WPA2-EAP에는 아이디(I) 같은 칸이 따로 붙어서 아이디까지 넣는 와이파이용이고, 집이나 매장처럼 비밀번호 하나로 접속하는 와이파이라면 T:WPA로 적어요. WEP는 아주 오래된 방식이라 공유기 설정 화면에 WEP라고 나올 때만 써요. 공유기가 WPA3 전용이라면 이 문서에는 WPA3용 값이 없어요. 이때는 WPA로 만들어 인쇄 전에 손님이 쓸 휴대폰으로 한 번 찍어 보는 수밖에 없어요.</p>
@@ -29,10 +29,10 @@
 <p data-ke-size="size16">마지막 H:true는 공유기에서 이름 숨기기를 켜 둔 경우에만 넣어요. 숨기지 않은 와이파이에 붙일 이유는 없어요.</p>
 <p data-ke-size="size16">&nbsp;</p>
 <h2>인쇄할 파일의 흰 여백</h2>
-<p data-ke-size="size16">QR은 둘레에 흰 여백이 있어야 인식이 안정적이에요. <a href="https://formda.kr/tools/qr?utm_source=tistory&amp;utm_medium=blog&amp;utm_campaign=t22">폼다 QR코드 만들기</a>에서 PNG 저장으로 받은 파일(280px, 보통 크기)을 열어 보니 가장자리부터 바로 검은 칸이 시작돼서 여백이 없었어요. 이 파일을 그대로 판독 프로그램(OpenCV)에 넣었을 때는 읽히지 않았고, 둘레에 흰 여백을 10픽셀 정도 두르니 읽혔어요. 문서나 포스터에 넣을 때는 QR 둘레에 흰 여백을 따로 두르고, 색이 있는 종이에 붙인다면 흰 바탕 위에 올려 붙이세요.</p>
+<p data-ke-size="size16">QR은 둘레에 흰 여백이 있어야 인식이 안정적이에요. QR 생성기에 따라 저장 파일 가장자리부터 바로 검은 칸이 시작되는 경우가 있어요. 여백이 전혀 없는 QR 이미지를 판독 프로그램(OpenCV)에 넣어 보니 읽히지 않았고, 둘레에 흰 여백을 10픽셀 정도 두르니 읽혔어요. <a href="https://formda.kr/tools/qr?utm_source=tistory&amp;utm_medium=blog&amp;utm_campaign=t22">폼다 QR코드 만들기</a>는 저장 파일에 흰 여백이 포함돼 있어서 그대로 판독됐어요(11월 23일 확인). 다른 곳에서 만든 QR이라면 가장자리를 먼저 보고, 색이 있는 종이에 붙일 때는 흰 바탕 위에 올려 붙이세요.</p>
 <p data-ke-size="size16">&nbsp;</p>
 <p data-ke-size="size16">비밀번호를 바꾼 날에는 벽의 QR도 같이 새로 뽑아야 해요.</p>
 <p data-ke-size="size16">&nbsp;</p>
 <p data-ke-size="size16">글쓴이 폼다(<a href="https://formda.tistory.com/page/about">블로그 소개</a>). 판독 프로그램으로만 시험했고, 휴대폰 기종별 접속은 확인하지 못했어요.</p>
 <p data-ke-size="size16">&nbsp;</p>
-<p data-ke-size="size16" style="color:#666">기준: ZXing Barcode Contents 문서의 Wi-Fi 형식 · 확인일 2026-11-20</p>
+<p data-ke-size="size16" style="color:#666">기준: ZXing Barcode Contents 문서의 Wi-Fi 형식 · 확인일 2026-11-20 · 폼다 QR 저장 파일 2026-11-23 재확인</p>

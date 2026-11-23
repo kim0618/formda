@@ -23,7 +23,7 @@ for t in "$@"; do
 done
 if [ $MODE = update ]; then
 cat > "$D/prompt.txt" <<P
-You are operating the user's own Tistory blog (https://formda.tistory.com) in their logged-in Chrome. The user asked to REPLACE THE BODY of these already RESERVED posts. Posts:$LIST
+You are operating the user's own Tistory blog (https://formda.tistory.com) in their logged-in Chrome. A NEW empty Chrome window was just opened for this job: do all work in that new window (create your tab group there), never in the user's existing windows. The user asked to REPLACE THE BODY of these already RESERVED posts. Posts:$LIST
 
 For EACH post id tNNN, files are in $WIN (UTF-8; Read them, use exactly): tNNN-meta.txt (POSTNO = Tistory post number, DATE = its reservation, ALT), tNNN-body.html, tNNN-cap.jpg (if body has [[CAPTURE1]]).
 Per post (reuse ONE tab):
@@ -36,7 +36,7 @@ Final answer (English): per post: reservation shown, capture placed+alt, problem
 P
 else
 cat > "$D/prompt.txt" <<P
-You are operating the user's own Tistory blog (https://formda.tistory.com) in their logged-in Chrome. The user explicitly asked you to create these posts as SCHEDULED (reserved) posts. Posts:$LIST
+You are operating the user's own Tistory blog (https://formda.tistory.com) in their logged-in Chrome. A NEW empty Chrome window was just opened for this job: do all work in that new window (create your tab group there), never in the user's existing windows. The user explicitly asked you to create these posts as SCHEDULED (reserved) posts. Posts:$LIST
 
 For EACH post id tNNN, files are in $WIN (UTF-8, Korean; Read them, use text exactly, never rewrite):
 - tNNN-meta.txt : TITLE, CATEGORY, TAGS (comma separated), DATE (KST reservation, e.g. 2026-11-23 08:00), ALT (alt text for the capture image)
@@ -59,4 +59,11 @@ Do not change settings, skin, menu, categories or other posts.
 Final answer (English): per post: post number/URL, reservation date shown, capture placed+alt, thumbnail set, any problem. Note if any body image shows the "검토중" censoring placeholder.
 P
 fi
+cp /home/tjd618/formda/tistory/chrome_windows.ps1 /mnt/c/Users/jinsung/Downloads/claude-chrome/chrome_windows.ps1
+CW='C:\Users\jinsung\Downloads\claude-chrome\chrome_windows.ps1'; SNAP='C:\Users\jinsung\Downloads\claude-chrome\snap.txt'
+(cd /mnt/c/Users/jinsung && powershell.exe -NoProfile -ExecutionPolicy Bypass -File "$CW" snapshot "$SNAP" >/dev/null)
+trap '(cd /mnt/c/Users/jinsung && powershell.exe -NoProfile -ExecutionPolicy Bypass -File "$CW" closemark "$SNAP")' EXIT  # 11/23 사용자: 끝나면 자동화가 연 창 모두 닫기
+powershell.exe -NoProfile -Command "Start-Process chrome.exe -ArgumentList '--new-window','data:text/html,<title>claude-job</title>'" ; sleep 3
+(cd /mnt/c/Users/jinsung && powershell.exe -NoProfile -ExecutionPolicy Bypass -File "$CW" mark "$SNAP" >/dev/null)  # 방금 연 우리 창만 기억
 cd /mnt/c/Users/jinsung && powershell.exe -NoProfile -Command "[Console]::OutputEncoding=[System.Text.Encoding]::UTF8; \$p = Get-Content -Raw -Encoding UTF8 '$WIN\prompt.txt'; \$p | & '$EXE_WIN' --chrome -p --output-format text --max-turns 250 --allowedTools 'mcp__claude-in-chrome__*' 'PowerShell' 'Bash' 'Read'" 2>&1 | grep -v "^Permission allow rule"
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File 'C:\Users\jinsung\Downloads\claude-chrome\close_job_windows.ps1' | tail -1

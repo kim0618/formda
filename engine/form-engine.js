@@ -129,12 +129,14 @@
   // 품목 입력행 (수량/단가 콤마·자릿수 제한은 app 핸들러에서)
   function itemRows(items) {
     var calc = root.Formda.calc;
+    var retQty = !!(root.Formda.app && root.Formda.app.cfg && root.Formda.app.cfg.taxColumns);
     return items.map(function (it, i) {
       var priceVal = it.price ? it.price.toLocaleString('ko-KR') : '';
       return '<tr>' +
         '<td><input value="' + calc.esc(it.name) + '" placeholder="품목명" oninput="Formda.app.onName(' + i + ', this.value)"></td>' +
         '<td><input value="' + calc.esc(it.spec || '') + '" placeholder="규격" oninput="Formda.app.onSpec(' + i + ', this.value)"></td>' +
-        '<td><input inputmode="numeric" value="' + (it.qty || '') + '" oninput="Formda.app.onQty(' + i + ', this)"></td>' +
+        // 거래명세서는 반품 마이너스 수량을 받으므로 숫자 전용 키패드(마이너스 키 없음)를 쓰지 않는다
+        '<td><input inputmode="' + (retQty ? 'text' : 'numeric') + '" value="' + (it.qty || '') + '"' + (retQty ? ' placeholder="반품은 -2"' : '') + ' oninput="Formda.app.onQty(' + i + ', this)"></td>' +
         '<td><input inputmode="numeric" value="' + priceVal + '" placeholder="0" oninput="Formda.app.onPrice(' + i + ', this)"></td>' +
         '<td style="text-align:center"><button class="del" type="button" onclick="Formda.app.delRow(' + i + ')">×</button></td>' +
         '</tr>';
@@ -184,9 +186,9 @@
         '</div>' +
         '<div class="form-sec"><h2>사직 내용</h2>' +
           '<div class="field"><label>사직 사유·문구</label>' +
-            '<textarea id="f-body" rows="4" oninput="Formda.app.onField(\'body\', this.value)"></textarea></div>' +
-          '<div class="field"><label>인수인계 사항</label>' +
-            '<textarea id="f-handover" rows="3" placeholder="담당 업무, 후임자, 인수인계 기간 등" oninput="Formda.app.onField(\'handover\', this.value)"></textarea></div>' +
+            '<textarea id="f-body" rows="4" placeholder="비워 두면 위의 입사일자·소속·퇴직 희망일로 기본 문장을 만들어 넣습니다. 사유를 직접 쓰려면 여기에 적으세요." oninput="Formda.app.onField(\'body\', this.value)"></textarea></div>' +
+          '<div class="field"><label>인수인계 사항 (선택)</label>' +
+            '<textarea id="f-handover" rows="3" placeholder="담당 업무, 후임자, 인수인계 기간 등. 비워 두면 문서에서 이 항목을 뺍니다." oninput="Formda.app.onField(\'handover\', this.value)"></textarea></div>' +
           '<div class="field"><label>작성일자</label><input id="f-date" type="date" oninput="Formda.app.onField(\'date\', this.value)"></div>' +
         '</div>' +
         '<div class="form-sec"><h2>수신·서명</h2>' +
@@ -412,7 +414,7 @@
     var calc = root.Formda.calc;
     return list.map(function (it, i) {
       var tds = fields.map(function (f) {
-        return '<td><input value="' + calc.esc(it[f] || '') + '" oninput="Formda.app.' + handler + '(' + i + ', \'' + f + '\', this.value)"></td>';
+        return '<td><input value="' + calc.esc(it[f] || '') + '" oninput="Formda.app.' + handler + '(' + i + ', \'' + f + '\', this.value, this)"></td>';
       }).join('');
       return '<tr>' + tds + '<td style="text-align:center"><button class="del" type="button" onclick="Formda.app.' +
         (handler === 'onEdu' ? 'delEdu' : 'delCareer') + '(' + i + ')">×</button></td></tr>';

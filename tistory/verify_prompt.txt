@@ -1,4 +1,4 @@
-READ-ONLY task in the user's logged-in Chrome on their own Tistory blog. Do NOT edit, save or publish anything.
+READ-ONLY task in the user's logged-in Chrome on their own Tistory blog. A NEW empty Chrome window was just opened for this job: work only in that new window, never in the user's existing windows. Do NOT edit, save or publish anything.
 For each post number N in POSTNOS:
 1. Open https://formda.tistory.com/N in ONE tab (reuse it), wait for load, scroll to the bottom once so lazy images load, then scroll back.
 2. Run JavaScript that returns a JSON object with:

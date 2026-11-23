@@ -6,6 +6,9 @@
   var MAX_PRICE_DIGITS = 10; // 단가 최대 10자리(약 99억) - 숫자 폭주 방지
   var MAX_QTY = 99999;
 
+  // 음수도 양수와 같은 규칙으로 반올림 (Math.round(-12.5) = -12 비대칭 방지: 반품 행 세액이 정상 행과 맞게)
+  function rnd(n) { return n < 0 ? -Math.round(-n) : Math.round(n); }
+
   function won(n) {
     return Math.round(n).toLocaleString('ko-KR') + ' 원';
   }
@@ -59,10 +62,10 @@
     if (vatMode === '0.1') {
       if (perRow) {
         vat = items.reduce(function (s, it) {
-          return s + Math.round((it.qty || 0) * (it.price || 0) * 0.1);
+          return s + rnd((it.qty || 0) * (it.price || 0) * 0.1);
         }, 0);
       } else {
-        vat = Math.round(gross * 0.1);
+        vat = rnd(gross * 0.1);
       }
       supply = gross;
       total = supply + vat;
@@ -70,7 +73,7 @@
       total = gross;
       if (perRow) {
         supply = items.reduce(function (s, it) {
-          return s + Math.round((it.qty || 0) * (it.price || 0) / 1.1);
+          return s + rnd((it.qty || 0) * (it.price || 0) / 1.1);
         }, 0);
       } else {
         supply = total / 1.1;
@@ -98,6 +101,7 @@
     MAX_QTY: MAX_QTY,
     won: won,
     comma: comma,
+    rnd: rnd,
     cleanInt: cleanInt,
     korAmount: korAmount,
     totals: totals,

@@ -81,8 +81,7 @@ export const guides = [
           '<tr><td>10% 포함</td><td>1,000,000</td><td>909,091</td><td>90,909</td><td><b>1,000,000</b></td></tr>' +
           '<tr><td>면세</td><td>1,000,000</td><td>1,000,000</td><td>0</td><td><b>1,000,000</b></td></tr>' +
           '</tbody></table></div>' +
-          '<div style="margin:22px 0;overflow-x:auto"><svg role="img" width="100%" viewBox="0 0 680 188" xmlns="http://www.w3.org/2000/svg">' +
-          '<title>부가세 별도와 포함의 최종 합계 비교</title>' +
+          '<div style="margin:22px 0;overflow-x:auto"><svg role="img" aria-label="부가세 별도와 포함의 최종 합계 비교" width="100%" viewBox="0 0 680 188" xmlns="http://www.w3.org/2000/svg">' +
           '<rect width="680" height="188" rx="12" fill="#f7f8fa"/>' +
           '<text x="24" y="34" font-size="14" font-weight="800" fill="#111827" font-family="Pretendard,sans-serif">단가 100만원, 부가세 처리에 따른 최종 합계</text>' +
           '<text x="24" y="78" font-size="13" fill="#6b7280" font-family="Pretendard,sans-serif">10% 별도</text>' +
@@ -541,8 +540,7 @@ export const guides = [
         h: '명함 표준 규격 90×50mm와 안전 여백',
         html:
           '<p>국내에서 가장 널리 쓰는 명함 표준 규격은 가로 90mm, 세로 50mm입니다. 지갑이나 명함첩에 들어가는 크기라, 특별한 이유가 없다면 이 규격을 따르는 것이 안전합니다. 인쇄를 맡길 때는 가장자리가 잘릴 수 있으므로 글자와 로고를 테두리에서 최소 3~5mm 안쪽으로 배치해야 합니다.</p>' +
-          '<div style="margin:22px 0;overflow-x:auto"><svg role="img" width="100%" viewBox="0 0 360 230" xmlns="http://www.w3.org/2000/svg">' +
-          '<title>명함 표준 규격 90×50mm와 정보 배치 예시</title>' +
+          '<div style="margin:22px 0;overflow-x:auto"><svg role="img" aria-label="명함 표준 규격 90×50mm와 정보 배치 예시" width="100%" viewBox="0 0 360 230" xmlns="http://www.w3.org/2000/svg">' +
           '<rect width="360" height="230" rx="12" fill="#f7f8fa"/>' +
           '<rect x="30" y="40" width="300" height="150" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>' +
           '<rect x="44" y="54" width="272" height="122" rx="4" fill="none" stroke="#a5b4fc" stroke-width="1" stroke-dasharray="4 4"/>' +
@@ -875,8 +873,7 @@ export const guides = [
         h: '언제 제출해야 하나: 퇴사일 역산',
         html:
           '<p>원하는 퇴사일이 있다면 거기서 거꾸로 계산해 제출일을 잡아야 합니다. 회사 수리를 장담할 수 없으므로, 안전하게 <b>희망 퇴사일 최소 1개월 전</b>에 제출하는 것이 원칙입니다.</p>' +
-          '<div style="margin:22px 0;overflow-x:auto"><svg role="img" width="100%" viewBox="0 0 680 150" xmlns="http://www.w3.org/2000/svg">' +
-          '<title>사직서 제출에서 퇴사 효력까지의 시간 흐름</title>' +
+          '<div style="margin:22px 0;overflow-x:auto"><svg role="img" aria-label="사직서 제출에서 퇴사 효력까지의 시간 흐름" width="100%" viewBox="0 0 680 150" xmlns="http://www.w3.org/2000/svg">' +
           '<rect width="680" height="150" rx="12" fill="#f7f8fa"/>' +
           '<line x1="60" y1="80" x2="620" y2="80" stroke="#cbd5e1" stroke-width="2"/>' +
           '<circle cx="90" cy="80" r="8" fill="#4f46e5"/>' +
@@ -3549,8 +3546,7 @@ export const guides = [
           '<tr><td>배경</td><td>균일한 흰색, 그림자·무늬 없음</td><td>반려 사유 1순위</td></tr>' +
           '<tr><td>촬영 시기</td><td>신청일 전 6개월 이내</td><td>유효기간 지나면 재촬영</td></tr>' +
           '</tbody></table></div>' +
-          '<div style="margin:22px 0;overflow-x:auto"><svg role="img" width="100%" viewBox="0 0 680 280" xmlns="http://www.w3.org/2000/svg">' +
-          '<title>여권사진 치수 요건 (3.5×4.5cm 기준)</title>' +
+          '<div style="margin:22px 0;overflow-x:auto"><svg role="img" aria-label="여권사진 치수 요건 (3.5×4.5cm 기준)" width="100%" viewBox="0 0 680 280" xmlns="http://www.w3.org/2000/svg">' +
           '<rect width="680" height="280" rx="12" fill="#f7f8fa"/>' +
           '<text x="24" y="34" font-size="14" font-weight="800" fill="#111827" font-family="Pretendard,sans-serif">여권사진 치수 요건 (3.5×4.5cm 기준)</text>' +
           '<rect x="140" y="50" width="158" height="203" rx="4" fill="#ffffff" stroke="#4f46e5" stroke-width="3"/>' +
@@ -3793,7 +3789,7 @@ export const guides = [
         html:
           '<p>PDF를 다시 열었을 때 방향이 원래대로 돌아가 있다면, 화면 회전만 하고 파일 자체는 돌리지 않았기 때문입니다. 화면에 똑바로 보이게 만들었으니 다 됐다고 생각하기 쉽지만 실제로는 정반대인 경우가 많습니다. Chrome이나 Firefox의 내장 뷰어, 무료 버전 Adobe Reader의 회전 버튼은 화면에 보여주는 방향만 바꿀 뿐 파일 안에 저장된 방향 값은 건드리지 않습니다.</p>' +
           '<p>그래서 같은 탭에서 보는 동안은 똑바로 보이다가도, 창을 닫았다 다시 열거나 인쇄하거나 다른 사람에게 파일을 보내면 회전 이전 상태로 돌아갑니다. 무료 Adobe Reader 관련 커뮤니티 질문에도 "회전해서 저장했는데 다시 열면 원래대로 돌아온다"는 글이 반복해서 올라오는데, 원인은 대부분 같습니다.</p>' +
-          '<div style="margin:22px 0;overflow-x:auto"><svg role="img" width="100%" viewBox="0 0 680 210" xmlns="http://www.w3.org/2000/svg"><title>화면 회전과 파일 회전 이후 결과가 갈리는 흐름</title><rect width="680" height="210" rx="12" fill="#f7f8fa"/><circle cx="70" cy="105" r="10" fill="#111827"/><text x="70" y="80" font-size="12" font-weight="700" fill="#111827" font-family="Pretendard,sans-serif" text-anchor="middle">PDF 열기</text><line x1="80" y1="105" x2="220" y2="55" stroke="#cbd5e1" stroke-width="2"/><line x1="220" y1="55" x2="560" y2="55" stroke="#cbd5e1" stroke-width="2"/><line x1="80" y1="105" x2="220" y2="155" stroke="#cbd5e1" stroke-width="2"/><line x1="220" y1="155" x2="560" y2="155" stroke="#cbd5e1" stroke-width="2"/><circle cx="220" cy="55" r="7" fill="#a5b4fc"/><text x="220" y="35" font-size="12" font-weight="700" fill="#4f46e5" font-family="Pretendard,sans-serif" text-anchor="middle">화면 회전(보기만)</text><text x="390" y="76" font-size="11" fill="#6b7280" font-family="Pretendard,sans-serif" text-anchor="middle">파일에는 저장되지 않음</text><circle cx="560" cy="55" r="8" fill="#f97316"/><text x="560" y="35" font-size="12" font-weight="700" fill="#c2410c" font-family="Pretendard,sans-serif" text-anchor="middle">다시 열면 원상복귀</text><circle cx="220" cy="155" r="7" fill="#a5b4fc"/><text x="220" y="178" font-size="12" font-weight="700" fill="#4f46e5" font-family="Pretendard,sans-serif" text-anchor="middle">파일 자체 회전</text><text x="390" y="140" font-size="11" fill="#6b7280" font-family="Pretendard,sans-serif" text-anchor="middle">방향 값이 파일에 기록됨</text><circle cx="560" cy="155" r="8" fill="#16a34a"/><text x="560" y="178" font-size="12" font-weight="700" fill="#15803d" font-family="Pretendard,sans-serif" text-anchor="middle">항상 회전된 채로 유지</text></svg></div>',
+          '<div style="margin:22px 0;overflow-x:auto"><svg role="img" aria-label="화면 회전과 파일 회전 이후 결과가 갈리는 흐름" width="100%" viewBox="0 0 680 210" xmlns="http://www.w3.org/2000/svg"><rect width="680" height="210" rx="12" fill="#f7f8fa"/><circle cx="70" cy="105" r="10" fill="#111827"/><text x="70" y="80" font-size="12" font-weight="700" fill="#111827" font-family="Pretendard,sans-serif" text-anchor="middle">PDF 열기</text><line x1="80" y1="105" x2="220" y2="55" stroke="#cbd5e1" stroke-width="2"/><line x1="220" y1="55" x2="560" y2="55" stroke="#cbd5e1" stroke-width="2"/><line x1="80" y1="105" x2="220" y2="155" stroke="#cbd5e1" stroke-width="2"/><line x1="220" y1="155" x2="560" y2="155" stroke="#cbd5e1" stroke-width="2"/><circle cx="220" cy="55" r="7" fill="#a5b4fc"/><text x="220" y="35" font-size="12" font-weight="700" fill="#4f46e5" font-family="Pretendard,sans-serif" text-anchor="middle">화면 회전(보기만)</text><text x="390" y="76" font-size="11" fill="#6b7280" font-family="Pretendard,sans-serif" text-anchor="middle">파일에는 저장되지 않음</text><circle cx="560" cy="55" r="8" fill="#f97316"/><text x="560" y="35" font-size="12" font-weight="700" fill="#c2410c" font-family="Pretendard,sans-serif" text-anchor="middle">다시 열면 원상복귀</text><circle cx="220" cy="155" r="7" fill="#a5b4fc"/><text x="220" y="178" font-size="12" font-weight="700" fill="#4f46e5" font-family="Pretendard,sans-serif" text-anchor="middle">파일 자체 회전</text><text x="390" y="140" font-size="11" fill="#6b7280" font-family="Pretendard,sans-serif" text-anchor="middle">방향 값이 파일에 기록됨</text><circle cx="560" cy="155" r="8" fill="#16a34a"/><text x="560" y="178" font-size="12" font-weight="700" fill="#15803d" font-family="Pretendard,sans-serif" text-anchor="middle">항상 회전된 채로 유지</text></svg></div>',
       },
       {
         h: '화면 회전과 파일 회전, 한눈에 비교',
@@ -4038,8 +4034,7 @@ export const guides = [
         h: '사장님은 알바 이력서를 어떤 순서로 읽을까?',
         html:
           '<p>대부분 근무 가능 시간부터 봅니다. 알바 채용은 "비어 있는 시간대를 채울 사람"을 찾는 일이라, 시간이 맞지 않으면 경력이 좋아도 다음 장으로 넘어갑니다. 시간이 맞으면 그다음에 언제부터 얼마나 오래 일할 수 있는지, 매장까지 얼마나 걸리는지, 비슷한 일을 해 봤는지를 차례로 확인합니다.</p>' +
-          '<div style="margin:22px 0;overflow-x:auto"><svg role="img" width="100%" viewBox="0 0 680 150" xmlns="http://www.w3.org/2000/svg">' +
-          '<title>사장님이 알바 이력서를 읽는 4단계 순서</title>' +
+          '<div style="margin:22px 0;overflow-x:auto"><svg role="img" aria-label="사장님이 알바 이력서를 읽는 4단계 순서" width="100%" viewBox="0 0 680 150" xmlns="http://www.w3.org/2000/svg">' +
           '<rect width="680" height="150" rx="12" fill="#f7f8fa"/>' +
           '<text x="24" y="32" font-size="14" font-weight="800" fill="#111827" font-family="Pretendard,sans-serif">알바 이력서를 읽는 순서 (앞에서 걸리면 뒤는 안 읽힘)</text>' +
           '<rect x="24" y="56" width="140" height="64" rx="10" fill="#d97706"/>' +

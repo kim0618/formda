@@ -35,8 +35,7 @@ publish.sh가 검사기(check_post.py)를 먼저 돌리고 하나라도 실패�
 ### 3. 결과 확인 (직접 본다)
 - **원본 대조**: `./verify.sh <글번호들>` (run_in_background) → 크롬 읽기 전용 추출 후 `verify.py`가 제목·카테고리·날짜·태그·소제목·표/이미지/링크 수·alt·이미지 로딩·UTM·www·대표이미지를 원본과 맞춘다. 문제 0이 될 때까지 `--update`.
 - 출력의 편별 글 번호·예약 시각·본문 이미지 2장(맨 위 대표이미지 alt=제목, 캡처 alt=ALT)·목록 대표이미지 교체 여부.
-- `/mnt/c/Users/jinsung/Downloads/claude-chrome/formda-shots/tNNN-*.jpg`를 Read로 전부 본다: 표 깨짐, 간격, 맨 위 대표이미지·캡처 2장, 흰 바탕 상단, 이미지 "검토중" 표시.
-- 본문 이미지가 "검토중" 자리표시면 기록해 두고, 발행 전날 다시 확인한다(rules §10-5). 계속 남으면 `--update`로 다시 올리고, 그래도 안 되면 사용자에게 보고.
+- `/mnt/c/Users/jinsung/Downloads/claude-chrome/formda-shots/tNNN-*.jpg`를 Read로 전부 본다: 표 깨짐, 간격, 맨 위 대표이미지·캡처 2장, 흰 바탕 상단.
 
 ### 4. 기록·보고
 - `ledger.tsv`: post_no 채우기(새 예약은 행 추가: date, no, post_no, category, title, tool, axis, intro, structure).
@@ -45,7 +44,7 @@ publish.sh가 검사기(check_post.py)를 먼저 돌리고 하나라도 실패�
 
 ## 알아 둘 것 (제이퍼 11/19~20 + 폼다 11/20 겪은 일)
 - 크롬의 티스토리 로그인이 풀리면 예약 글·관리 페이지가 전부 "권한 없음". 시작 전에 로그인부터 확인하고, 풀렸으면 사용자에게 로그인 요청.
-- 새로 올린 본문 이미지는 티스토리 "불법촬영물 검토중" 자리표시가 몇 분~몇 시간 뜬다. 발행 전날 다시 확인.
+- 새로 올린 본문 이미지의 "불법촬영물 검토중" 자리표시는 시간이 지나면 저절로 풀린다. 확인·기록·보고 대상 아님(11/23 사용자).
 - 이미 발행된 글을 `--update`하면 날짜는 건드리지 않고 발행 상태 유지(스크립트 지시에 들어 있음). 발행된 글 수정은 사용자가 시킬 때만.
 - 공개된 글은 로그인 없이 WSL 헤드리스로 직접 확인(PC 1280·휴대폰 390 캡처, 이미지 naturalWidth, 가로 넘침).
 - 스킨 CSS 원본 백업: `C:\Users\jinsung\Downloads\formda-tistory\skin-style-backup-20261120.css`(순정 Odyssey). 지금 스킨 끝에 붙은 우리 CSS는 `~/formda/tistory/skin/white-header.css` 한 블록뿐.

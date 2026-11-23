@@ -9,6 +9,11 @@
   var THUMB_MIN = 9;   // 썸네일 최소 채움 행
 
   function esc(s) { return calc.esc(s); }
+  // 문서 번호: '2026-001' -> '제 2026-001 호'. 사용자가 '제 12 호'·'제12호'·'12호'처럼 이미 적었으면 겹치지 않게 정리
+  function docNoText(v) {
+    var n = String(v == null ? '' : v).trim().replace(/^제\s*/, '').replace(/\s*호$/, '').trim();
+    return n ? '제 ' + n + ' 호' : '';
+  }
   // 수신인 뒤 존칭: 사용자가 이미 '님'·'귀하'·'귀중' 등을 적었으면 자동 존칭을 붙이지 않는다(귀하 중복 방지)
   var HONORIFIC_RE = /(귀하|귀중|님|앞|께|좌하|貴下|貴中)$/;
   function hasHonorific(name) { return HONORIFIC_RE.test(String(name == null ? '' : name).trim()); }
@@ -45,8 +50,8 @@
       '<td class="r">' + (price ? comma(price) : '') + '</td>';
     if (tax) {
       var supply, svat;
-      if (vat === '0.1') { supply = line; svat = Math.round(line * 0.1); }
-      else if (vat === 'incl') { supply = Math.round(line / 1.1); svat = line - supply; }
+      if (vat === '0.1') { supply = line; svat = calc.rnd(line * 0.1); }
+      else if (vat === 'incl') { supply = calc.rnd(line / 1.1); svat = line - supply; }
       else { supply = line; svat = 0; }
       return '<tr>' + common +
         '<td class="r">' + (line ? comma(supply) : '') + '</td>' +
@@ -77,8 +82,9 @@
   function amountBox(t, cfg) {
     return '<div class="qt-amount">' +
       '<div class="k">' + ((cfg && cfg.amountLabel) || '합계금액') + '</div>' +
-      '<div class="v"><b>' + (t.total > 0 ? '一金 ' + calc.korAmount(t.total) + '원整' : '') + '</b>' +
-      '<span>' + (t.total > 0 ? '(₩' + comma(t.total) + ')' : '') + '</span></div>' +
+      // 반품이 더 커서 합계가 마이너스면 (-)를 붙여 적는다 (빈칸이면 금액 없는 문서로 보임)
+      '<div class="v"><b>' + (t.total > 0 ? '一金 ' + calc.korAmount(t.total) + '원整' : (t.total < 0 ? '一金 (-) ' + calc.korAmount(-t.total) + '원整' : '')) + '</b>' +
+      '<span>' + (t.total > 0 ? '(₩' + comma(t.total) + ')' : (t.total < 0 ? '(₩' + comma(t.total) + ')' : '')) + '</span></div>' +
     '</div>';
   }
 
@@ -173,12 +179,14 @@
     // 거래명세서 표준: 미수금 정산란 (전잔액 + 당월 거래액 - 입금액 = 미수 잔액)
     var balance = '';
     if (cfg.balance) {
-      var prev = state.prevBalance || 0, paid = state.paidAmount || 0;
+      // 전잔액·입금액을 비우면 0 대신 빈칸으로 (미수 잔액 계산에는 0으로 넣음)
+      var blank = function (v) { return v === '' || v == null; };
+      var prev = +state.prevBalance || 0, paid = +state.paidAmount || 0;
       var outstanding = prev + t.total - paid;
       balance = '<table class="qt-balance"><tbody><tr>' +
-        '<td class="k">전잔액</td><td class="v">' + comma(prev) + '</td>' +
+        '<td class="k">전잔액</td><td class="v">' + (blank(state.prevBalance) ? '&nbsp;' : comma(prev)) + '</td>' +
         '<td class="k">당월 거래액</td><td class="v">' + comma(t.total) + '</td>' +
-        '<td class="k">입금액</td><td class="v">' + comma(paid) + '</td>' +
+        '<td class="k">입금액</td><td class="v">' + (blank(state.paidAmount) ? '&nbsp;' : comma(paid)) + '</td>' +
         '<td class="k hl">미수 잔액</td><td class="v hl">' + comma(outstanding) + '</td>' +
         '</tr></tbody></table>';
     }
@@ -274,7 +282,7 @@
     if (s.orgAddr) meta.push(esc(s.orgAddr));
     return '<div class="ct-page">' +
       '<div class="ct-top">' +
-        (s.docNo ? '<div class="ct-docno">제 ' + esc(s.docNo) + ' 호</div>' : '') +
+        (String(s.docNo || '').trim() ? '<div class="ct-docno">' + esc(docNoText(s.docNo)) + '</div>' : '') +
         '<div class="ct-title">' + esc(cfg.docTitle) + '</div>' + info +
         '<div class="ct-body">' + (esc(s.body) || cfg.bodyDefault || '위 사람은 당사에 위와 같이 재직하고 있음을 증명합니다.') + '</div>' +
         (s.purpose ? '<div class="ct-purpose">용　도 : ' + esc(s.purpose) + '</div>' : '') +
@@ -289,6 +297,19 @@
       '</div>' +
     '</div>';
   }
+  // 사유 칸을 비워 두면 위 칸(입사일자·소속·퇴직희망일) 값으로 본문을 만든다.
+  // 예시 문장에 박힌 남의 날짜·부서가 문서에 찍히지 않게 하려는 것.
+  function resignationBody(s) {
+    var hire = String(s.hireDate || '').trim(), dept = String(s.dept || '').trim(), last = String(s.lastDay || '').trim();
+    var head = '상기 본인은 ';
+    if (hire && dept) head += hire + ' 입사하여 ' + dept + '에서 근무하여 왔으나, ';
+    else if (hire) head += hire + ' 입사하여 근무하여 왔으나, ';
+    else if (dept) head += dept + '에서 근무하여 왔으나, ';
+    var txt = head + '일신상의 사유로 인하여 부득이 사직하고자 본 사직서를 제출합니다. ';
+    txt += last ? '퇴직 희망일은 ' + last + '이며, 그때까지 담당하던 업무를 후임자에게 차질 없이 인수인계하도록 하겠습니다. '
+                : '퇴직 전까지 담당하던 업무를 후임자에게 차질 없이 인수인계하도록 하겠습니다. ';
+    return txt + '재직 기간 동안 베풀어 주신 배려와 가르침에 깊이 감사드리며, 회사의 무궁한 발전을 진심으로 기원합니다. 아무쪼록 재가하여 주시기 바랍니다.';
+  }
   function renderResignation(state, cfg) {
     var s = state;
     var info = '<table class="ct-info"><tbody>' +
@@ -298,8 +319,9 @@
     return '<div class="ct-page">' +
       '<div class="ct-top">' +
         '<div class="ct-title">' + esc(cfg.docTitle) + '</div>' + info +
-        '<div class="ct-body ct-letter">' + (esc(s.body) || '상기 본인은 일신상의 사유로 인하여 위 퇴직희망일자로 사직하고자 하오니 재가하여 주시기 바랍니다. 퇴직 전까지 담당 업무를 후임자에게 성실히 인수인계할 것을 약속드리며, 그동안 베풀어 주신 배려에 깊이 감사드립니다.') + '</div>' +
-        '<div class="ct-sec">인수인계 사항</div><div class="ct-handover">' + (esc(s.handover) || '&nbsp;') + '</div>' +
+        '<div class="ct-body ct-letter">' + (String(s.body || '').trim() ? esc(s.body) : esc(resignationBody(s))) + '</div>' +
+        // 인수인계 칸이 비면 제목·상자 모두 생략 (인수인계서를 따로 내는 경우 빈 상자가 남지 않게)
+        (String(s.handover || '').trim() ? '<div class="ct-sec">인수인계 사항</div><div class="ct-handover">' + esc(s.handover) + '</div>' : '') +
       '</div>' +
       '<div class="ct-bottom">' +
         '<div class="ct-date">' + korDate(s.date) + '</div>' +
@@ -312,7 +334,7 @@
     var s = state;
     return '<div class="aw-page">' +
       '<div class="aw-top">' +
-        (s.docNo ? '<div class="ct-docno">제 ' + esc(s.docNo) + ' 호</div>' : '') +
+        (String(s.docNo || '').trim() ? '<div class="ct-docno">' + esc(docNoText(s.docNo)) + '</div>' : '') +
         '<div class="aw-title">' + (esc(s.docTitle) || esc(cfg.docTitle)) + '</div>' +
         '<div class="aw-flourish"><span>&#9670;</span></div>' +
       '</div>' +
@@ -420,7 +442,7 @@
       '<div class="nt-page">' +
         '<div class="nt-content">' +
           '<div class="nt-head">' + (esc(s.orgName) || '&nbsp;') + '</div>' +
-          '<div class="nt-meta"><span>' + esc(cfg.docTitle) + '</span><span>' + (s.docNo ? '제 ' + esc(s.docNo) + ' 호' : '') + '</span></div>' +
+          '<div class="nt-meta"><span>' + esc(cfg.docTitle) + '</span><span>' + esc(docNoText(s.docNo)) + '</span></div>' +
           '<div class="nt-title">' + (esc(s.title) || '&nbsp;') + '</div>' +
           '<div class="nt-body">' + (esc(s.body) || '') + '</div>' +
           '<div class="nt-date">' + korDate(s.date) + '</div>' +
@@ -437,8 +459,11 @@
     var rows = '';
     for (var i = 0; i < n; i++) {
       var it = (list || [])[i];
-      rows += '<tr>' + cols.map(function (c) {
-        return '<td class="' + (c.cls || '') + '">' + (it ? (esc(it[c.key]) || '') : '') + '</td>';
+      // 내용 없는 채움 행은 rs-er: 담당업무가 여러 줄이 돼 페이지가 넘치면 app이 아래부터 뺀다
+      rows += '<tr' + (it ? '' : ' class="rs-er"') + '>' + cols.map(function (c) {
+        var val = it ? (esc(it[c.key]) || '') : '';
+        // wrap 열(담당업무)은 줄바꿈해 최대 3줄까지 보여 준다 (한 줄 고정이면 긴 내용이 …로 잘림)
+        return '<td class="' + (c.cls || '') + (c.wrap ? ' w' : '') + '">' + (c.wrap && val ? '<div class="rs-cell">' + val + '</div>' : val) + '</td>';
       }).join('') + '</tr>';
     }
     var thead = '<tr>' + headers.map(function (h) { return '<th>' + h + '</th>'; }).join('') + '</tr>';
@@ -463,7 +488,7 @@
       '<tr><td class="k">보건증·자격</td><td class="v" colspan="3">' + v(String(s.etc || '').split(/\n+/).filter(Boolean).join(' · ')) + '</td></tr>' +
       '</tbody></table>';
     var eduCols = [{ key: 'period', cls: 'c' }, { key: 'school', cls: 'l' }, { key: 'major', cls: 'l' }, { key: 'status', cls: 'c' }];
-    var carCols = [{ key: 'period', cls: 'c' }, { key: 'company', cls: 'l' }, { key: 'role', cls: 'l' }, { key: 'task', cls: 'l' }];
+    var carCols = [{ key: 'period', cls: 'c' }, { key: 'company', cls: 'l' }, { key: 'role', cls: 'l', wrap: true }, { key: 'task', cls: 'l' }];
     var eduMin = opts.single ? 2 : (cfg.maxEdu || 2);
     var carMin = opts.single ? 3 : (cfg.maxCareer || 4);
     var inner =
@@ -492,7 +517,7 @@
       '<tr><td class="k">주　소</td><td class="v">' + (esc(s.addr) || '&nbsp;') + '</td></tr>' +
       '</tbody></table>';
     var eduCols = [{ key: 'period', cls: 'c' }, { key: 'school', cls: 'l' }, { key: 'major', cls: 'l' }, { key: 'status', cls: 'c' }];
-    var carCols = [{ key: 'period', cls: 'c' }, { key: 'company', cls: 'l' }, { key: 'role', cls: 'l' }, { key: 'task', cls: 'l' }];
+    var carCols = [{ key: 'period', cls: 'c' }, { key: 'company', cls: 'l' }, { key: 'role', cls: 'l' }, { key: 'task', cls: 'l', wrap: true }];
     var eduMin = opts.single ? 3 : (cfg.maxEdu || 4);
     var carMin = opts.single ? 4 : (cfg.maxCareer || 5);
     var inner =

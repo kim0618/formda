@@ -435,7 +435,7 @@
         date: this.today(), no: '', from: '', fromReg: '', fromCeo: '', fromBiz: '', fromTel: '', fromAddr: '',
         to: '', toReg: '', toCeo: '', toTel: '', toAddr: '', validity: '',
         deliveryDate: '', deliveryPlace: '', paymentTerms: '',
-        payDue: '', payHolder: '', payAccount: '', prevBalance: 0, paidAmount: 0,
+        payDue: '', payHolder: '', payAccount: '', prevBalance: '', paidAmount: '',
         items: [{ name: '', spec: '', qty: 1, price: 0 }], vat: '0.1', note: '', sealImg: null,
       });
     },
@@ -526,20 +526,21 @@
     },
     // 캡 걸린 자유 텍스트 영역이 max-height를 넘쳤는지
     overflowing: function () {
-      var els = document.querySelectorAll('#doc .nt-body, #doc .aw-body, #doc .ct-letter, #doc .ct-handover, #doc .ct-body, #doc .rs-etc, #doc .qt-note, #doc .lg-content, #doc .lg-special, #doc .ps-note, #doc .ec-note, #doc .ho-note');
+      var els = document.querySelectorAll('#doc .rs-cell, #doc .nt-body, #doc .aw-body, #doc .ct-letter, #doc .ct-handover, #doc .ct-body, #doc .rs-etc, #doc .qt-note, #doc .lg-content, #doc .lg-special, #doc .ps-note, #doc .ec-note, #doc .ho-note');
       for (var i = 0; i < els.length; i++) {
         if (els[i].scrollHeight > els[i].clientHeight + 2) return true;
       }
       // 경위 문서(시말서 등)는 칸이 3~4개라 칸별 캡 안에서도 합계가 A4를 넘어 날짜·서명이 잘린다 → 페이지 전체도 검사
       var pg = document.querySelector('#doc .doc-page');
-      if (pg && pg.querySelector('.lg-incident') && pg.scrollHeight > pg.clientHeight + 2) return true;
+      if (pg && (pg.querySelector('.lg-incident') || pg.querySelector('.rs-page')) && pg.scrollHeight > pg.clientHeight + 2) return true;
       return false;
     },
 
     onMoney: function (id, el) {
       this.markInput();
       var c = F.calc.cleanInt(el.value, F.calc.MAX_PRICE_DIGITS);
-      this.state[id] = c.value;
+      // 정산란(전잔액·입금액)은 비운 칸을 0과 구분해 문서에 빈칸으로 둔다
+      this.state[id] = (!c.digits && (id === 'prevBalance' || id === 'paidAmount')) ? '' : c.value;
       el.value = c.digits ? c.value.toLocaleString('ko-KR') : '';
       this.renderDoc();
     },
@@ -613,7 +614,12 @@
       if (!this.state.career.length) this.state.career.push({ period: '', company: '', role: '', task: '' });
       this.drawCareer(); this.renderDoc();
     },
-    onCareer: function (i, f, v) { this.state.career[i][f] = v; this.renderDoc(); },
+    onCareer: function (i, f, v, el) {
+      var prev = this.state.career[i][f];
+      this.state.career[i][f] = v; this.renderDoc();
+      // 담당업무 칸(최대 3줄)이나 페이지가 넘치면 직전 값으로 되돌린다 (작성자 줄이 잘리지 않게)
+      if (el && this.overflowing()) { this.state.career[i][f] = prev; el.value = prev || ''; this.renderDoc(); }
+    },
     onPhoto: function (input) {
       var file = input.files && input.files[0];
       if (!file) return;
@@ -835,8 +841,11 @@
     onQty: function (i, el) {
       var c = F.calc.cleanInt(el.value, 5);
       var n = Math.min(c.value, F.calc.MAX_QTY);
+      // 거래명세서는 반품을 마이너스 수량(-2)으로 적으므로 앞의 '-'를 살린다
+      var neg = !!this.cfg.taxColumns && /^\s*-/.test(el.value);
+      if (neg && n) n = -n;
       this.state.items[i].qty = n;
-      el.value = c.digits ? String(n) : '';
+      el.value = c.digits ? String(n) : (neg ? '-' : '');
       this.renderDoc();
     },
 
@@ -870,9 +879,20 @@
       this.renderDoc();
     },
 
+    // 이력서: 여러 줄 칸 때문에 A4를 넘치면 빈 채움 행(rs-er)을 뒤에서부터 빼서 맞춘다
+    trimFillerRows: function () {
+      var pg = document.querySelector('#doc .doc-page');
+      if (!pg || !pg.querySelector('.rs-page')) return;
+      while (pg.scrollHeight > pg.clientHeight + 2) {
+        var er = pg.querySelectorAll('.rs-er');
+        if (!er.length) break;
+        er[er.length - 1].parentNode.removeChild(er[er.length - 1]);
+      }
+    },
     renderDoc: function () {
       var html = F.docRender[this.docType](this.state, this.cfg);
       document.getElementById('doc').innerHTML = '<div class="doc-sizer">' + html + '</div>';
+      this.trimFillerRows();
       if (this.cfg.flow) this.paginateFlow();
       this.fitPreview();
     },
@@ -921,8 +941,19 @@
     zoomReset: function () { this.userZoom = 1; this.fitPreview(); },
 
     // ----- 내보내기 -----
-    downloadPDF: function (btn) { this.recordDocNo(); if (F.track) F.track('download_pdf', { doc_type: this.slug || this.docType }); this.trackCreate(); F.exporter.downloadPDF(this.cfg.fileName + (this.state.no ? '_' + this.state.no : ''), btn, this.cfg.pageSize); },
-    downloadPNG: function (btn) { this.recordDocNo(); if (F.track) F.track('download_png', { doc_type: this.slug || this.docType }); this.trackCreate(); F.exporter.downloadPNG(this.cfg.fileName + (this.state.no ? '_' + this.state.no : ''), btn); },
+    // 내려받기 파일 이름. 상장은 여러 명 것을 연달아 받으므로 '상 이름_받는 사람'으로 (예: 우수상_홍길동)
+    dlName: function () {
+      var base = this.cfg.fileName;
+      if (this.cfg.variant === 'award') {
+        var title = String(this.state.docTitle || '').replace(/\s+/g, '') || base;
+        var who = String(this.state.name || '').trim().replace(/\s+/g, '');
+        base = title + (who ? '_' + who : '');
+      }
+      base = base.replace(/[\\\/:*?"<>|]/g, '').trim() || this.cfg.fileName;
+      return base + (this.state.no ? '_' + this.state.no : '');
+    },
+    downloadPDF: function (btn) { this.recordDocNo(); if (F.track) F.track('download_pdf', { doc_type: this.slug || this.docType }); this.trackCreate(); F.exporter.downloadPDF(this.dlName(), btn, this.cfg.pageSize); },
+    downloadPNG: function (btn) { this.recordDocNo(); if (F.track) F.track('download_png', { doc_type: this.slug || this.docType }); this.trackCreate(); F.exporter.downloadPNG(this.dlName(), btn); },
     trackCreate: function () { if (F.trackCreate) F.trackCreate(this.slug || this.docType); },
 
     // ----- 모바일 탭 -----
