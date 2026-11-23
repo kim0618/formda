@@ -58,7 +58,7 @@ def main():
         probs.append("마크다운 ** 남음")
 
     # 문장 끝 반복: 같은 어미(마지막 3글자) 4문장 연속
-    prose = text_of(re.sub(r"<(table|ul|ol)[\s\S]*?</\1>", "", src))  # 표·목록은 문장 끝 검사에서 제외
+    prose = text_of(re.sub(r"<(table|ul|ol|blockquote)[\s\S]*?</\1>", "", src))  # 표·목록·인용(예시 원문)은 문장 끝 검사에서 제외
     sents = [s.strip() for s in re.split(r"(?<=[.?])\s+|\n", prose) if len(s.strip()) > 8]
     run, prev = 1, None
     for s in sents:

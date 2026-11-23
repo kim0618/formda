@@ -1,6 +1,6 @@
 # 표를 휴대폰 폭에 맞게 정리: 글자 14px, 여백 6px, 숫자 칸만 nowrap, 글자 칸은 줄바꿈 허용, 가로 스크롤 감싸기
 import re, sys
-NUM = re.compile(r'^[\d,.%×~\s원배만억년월일개시간kcalgm세살생()+\-:/]+$')
+NUM = re.compile(r'^[\d,.%×~\s원배만억년월일개시간kcalgm세살생자쪽장()+\-:/]+$')
 def cell(m):
     tag, attrs, inner = m.group(1), m.group(2), m.group(3)
     txt = re.sub(r'<[^>]+>', '', inner).strip()
