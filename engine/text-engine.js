@@ -224,6 +224,20 @@
   function romanizeAddress(s) { return romanizeAddressFull(s).main; }
 
   // ---------- 공통 유틸 ----------
+  // PDF 도구 4종(합치기·나누기·워터마크·회전) 공통 라이브러리.
+  // pdf-lib 원판(1.17.1)은 암호화된 PDF를 해독하지 못해, 열기 암호 없이 인쇄·편집만 막은 PDF도 결과가 깨졌다.
+  // @cantoo/pdf-lib는 같은 API에 해독이 들어 있어 이런 파일을 password: '' 로 정상 처리한다(열기 암호 파일은 여전히 거부).
+  var PDFLIB_URL = 'https://cdn.jsdelivr.net/npm/@cantoo/pdf-lib@2.11.1/dist/pdf-lib.min.js';
+  function isPdfFile(f) { return !!f && (f.type === 'application/pdf' || /\.pdf$/i.test(f.name)); }
+  // PDF를 열지 못했을 때 사용자에게 보여 줄 이유
+  function pdfOpenErr(e) {
+    var m = String((e && e.message) || e || '');
+    if (/PASSWORD/.test(m)) return '열기 암호가 걸린 PDF는 열 수 없습니다. 암호를 아는 경우 PDF 뷰어에서 암호를 푼 사본으로 저장한 뒤 다시 올려 주세요.';
+    // 해독 안 된 채 열린 경우(안전장치). 열기 암호 문제가 아니므로 다른 안내
+    if (/UNDECRYPTED/.test(m)) return '암호화된 PDF를 풀지 못했습니다. PDF 뷰어에서 다른 이름으로 저장한 사본을 올려 주세요.';
+    return 'PDF를 열 수 없습니다. 파일이 손상되었거나 PDF가 아닐 수 있습니다.';
+  }
+  var NOT_PDF_MSG = 'PDF 파일만 올릴 수 있습니다. 사진(JPG·PNG)은 "이미지 PDF 변환"(formda.kr/tools/image-to-pdf)에서 PDF로 만든 뒤 사용하세요.';
   function comma(n) { return Number(n).toLocaleString('ko-KR'); }
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
   // ---------- GA4 유틸 전환 측정 ----------
@@ -756,7 +770,7 @@
         if (!pdflibPromise) {
           pdflibPromise = new Promise(function (resolve, reject) {
             var s = document.createElement('script');
-            s.src = 'https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js';
+            s.src = PDFLIB_URL;
             s.async = true;
             s.onload = resolve;
             s.onerror = function () { pdflibPromise = null; reject(new Error('PDF 라이브러리를 불러오지 못했습니다.')); };
@@ -768,24 +782,33 @@
       function sizeStr(b) { return b < 1024 * 1024 ? Math.max(1, Math.round(b / 1024)) + ' KB' : (b / 1024 / 1024).toFixed(1) + ' MB'; }
 
       async function addFiles(fileList) {
-        var arr = Array.prototype.slice.call(fileList).filter(function (f) {
-          return f.type === 'application/pdf' || /\.pdf$/i.test(f.name);
-        });
-        if (!arr.length) return;
+        var all = Array.prototype.slice.call(fileList);
+        var arr = all.filter(isPdfFile);
+        var notPdf = all.length - arr.length;
+        // 사진 등 PDF가 아닌 파일만 골랐을 때 아무 반응이 없던 문제: 이유를 알려 준다
+        if (!arr.length) { if (notPdf) alert(NOT_PDF_MSG); return; }
         try { await ensurePdfLib(); } catch (e) { alert(e.message); return; }
-        var skipped = 0;
+        var skipped = 0, locked = 0, undec = 0;
         for (var i = 0; i < arr.length; i++) {
           try {
             var bytes = await arr[i].arrayBuffer();
-            var doc = await window.PDFLib.PDFDocument.load(bytes, { ignoreEncryption: true });
-            // ignoreEncryption은 열람만 허용할 뿐 실제 복호화는 하지 않아, 암호 걸린 PDF를 그대로 진행하면
-            // 결과물이 조용히 깨진다(0페이지·손상). 여기서 미리 걸러 다른 손상 파일과 동일하게 처리한다.
-            if (doc.isEncrypted) throw new Error('encrypted');
+            var doc = await window.PDFLib.PDFDocument.load(bytes, { ignoreEncryption: true, password: '' });
+            // 인쇄·편집만 막은 PDF는 password: '' 로 해독돼 isEncrypted=false로 열린다.
+            // 열기 암호 PDF는 load가 NEEDS PASSWORD로 실패한다. 아래는 혹시 해독 안 된 채 열린 경우의 안전장치.
+            if (doc.isEncrypted) throw new Error('UNDECRYPTED');
             entries.push({ file: arr[i], name: arr[i].name, size: arr[i].size, pages: doc.getPageCount() });
-          } catch (e) { skipped++; }
+          } catch (e) {
+            var em = String(e && e.message);
+            if (/PASSWORD/.test(em)) locked++; else if (/UNDECRYPTED/.test(em)) undec++; else skipped++;
+          }
         }
         render();
-        if (skipped) alert(skipped + '개 파일은 열 수 없어 제외했습니다. (손상되었거나 암호가 걸린 PDF일 수 있습니다)');
+        var msg = [];
+        if (locked) msg.push(locked + '개는 열기 암호가 걸린 PDF라 제외했습니다. 암호를 푼 사본으로 저장한 뒤 다시 올려 주세요.');
+        if (skipped) msg.push(skipped + '개는 손상되었거나 PDF가 아니어서 제외했습니다.');
+        if (undec) msg.push(undec + '개는 암호화를 풀지 못해 제외했습니다. PDF 뷰어에서 다른 이름으로 저장한 사본을 올려 주세요.');
+        if (notPdf) msg.push(notPdf + '개는 PDF가 아니어서 제외했습니다. 사진은 "이미지 PDF 변환"에서 PDF로 만든 뒤 합치세요.');
+        if (msg.length) alert(msg.join('\n'));
       }
 
       function render() {
@@ -833,7 +856,7 @@
           var out = await PDFLib.PDFDocument.create();
           for (var i = 0; i < entries.length; i++) {
             var bytes = await entries[i].file.arrayBuffer();
-            var src = await PDFLib.PDFDocument.load(bytes, { ignoreEncryption: true });
+            var src = await PDFLib.PDFDocument.load(bytes, { ignoreEncryption: true, password: '' });
             if (src.isEncrypted) throw new Error('암호가 걸린 PDF(' + entries[i].name + ')는 처리할 수 없습니다. 암호를 해제한 뒤 다시 시도해 주세요.');
             var copied = await out.copyPages(src, src.getPageIndices());
             copied.forEach(function (p) { out.addPage(p); });
@@ -906,7 +929,7 @@
           document.head.appendChild(s);
         });
       }
-      function ensurePdfLib() { return loadLib('https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js', 'PDFLib'); }
+      function ensurePdfLib() { return loadLib(PDFLIB_URL, 'PDFLib'); }
       function ensureJsZip() { return loadLib('https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js', 'JSZip'); }
       function sizeStr(b) { return b < 1024 * 1024 ? Math.max(1, Math.round(b / 1024)) + ' KB' : (b / 1024 / 1024).toFixed(1) + ' MB'; }
 
@@ -919,14 +942,15 @@
       }
 
       async function setFile(file) {
-        if (!file || !(file.type === 'application/pdf' || /\.pdf$/i.test(file.name))) return;
+        if (!file) return;
+        if (!isPdfFile(file)) { alert(NOT_PDF_MSG); return; }
         try { await ensurePdfLib(); } catch (e) { alert(e.message); return; }
         try {
           var bytes = await file.arrayBuffer();
-          var doc = await window.PDFLib.PDFDocument.load(bytes, { ignoreEncryption: true });
-          if (doc.isEncrypted) throw new Error('encrypted');
+          var doc = await window.PDFLib.PDFDocument.load(bytes, { ignoreEncryption: true, password: '' });
+          if (doc.isEncrypted) throw new Error('UNDECRYPTED');
           cur = { name: file.name, size: file.size, pages: doc.getPageCount(), bytes: bytes };
-        } catch (e) { alert('PDF를 열 수 없습니다. 손상되었거나 암호가 걸린 파일일 수 있습니다.'); return; }
+        } catch (e) { alert(pdfOpenErr(e)); return; }
         render();
       }
       function render() {
@@ -985,7 +1009,7 @@
         try {
           await ensurePdfLib();
           var PDFLib = window.PDFLib;
-          var src = await PDFLib.PDFDocument.load(cur.bytes, { ignoreEncryption: true });
+          var src = await PDFLib.PDFDocument.load(cur.bytes, { ignoreEncryption: true, password: '' });
           if (src.isEncrypted) throw new Error('암호가 걸린 PDF는 처리할 수 없습니다. 암호를 해제한 뒤 다시 시도해 주세요.');
           if (m === 'range') {
             var out = await PDFLib.PDFDocument.create();
@@ -1220,7 +1244,7 @@
         if (!pdflibPromise) {
           pdflibPromise = new Promise(function (resolve, reject) {
             var s = document.createElement('script');
-            s.src = 'https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js';
+            s.src = PDFLIB_URL;
             s.async = true;
             s.onload = resolve;
             s.onerror = function () { pdflibPromise = null; reject(new Error('PDF 라이브러리를 불러오지 못했습니다.')); };
@@ -1233,14 +1257,15 @@
       function opt(name) { return (host.querySelector('input[name=' + name + ']:checked') || {}).value; }
 
       async function setFile(file) {
-        if (!file || !(file.type === 'application/pdf' || /\.pdf$/i.test(file.name))) return;
+        if (!file) return;
+        if (!isPdfFile(file)) { alert(NOT_PDF_MSG); return; }
         try { await ensurePdfLib(); } catch (e) { alert(e.message); return; }
         try {
           var bytes = await file.arrayBuffer();
-          var doc = await window.PDFLib.PDFDocument.load(bytes, { ignoreEncryption: true });
-          if (doc.isEncrypted) throw new Error('encrypted');
+          var doc = await window.PDFLib.PDFDocument.load(bytes, { ignoreEncryption: true, password: '' });
+          if (doc.isEncrypted) throw new Error('UNDECRYPTED');
           cur = { name: file.name, size: file.size, pages: doc.getPageCount(), bytes: bytes };
-        } catch (e) { alert('PDF를 열 수 없습니다. 손상되었거나 암호가 걸린 파일일 수 있습니다.'); return; }
+        } catch (e) { alert(pdfOpenErr(e)); return; }
         render();
       }
       function render() {
@@ -1307,7 +1332,7 @@
         try {
           await ensurePdfLib();
           var PDFLib = window.PDFLib;
-          var src = await PDFLib.PDFDocument.load(cur.bytes, { ignoreEncryption: true });
+          var src = await PDFLib.PDFDocument.load(cur.bytes, { ignoreEncryption: true, password: '' });
           if (src.isEncrypted) throw new Error('암호가 걸린 PDF는 처리할 수 없습니다. 암호를 해제한 뒤 다시 시도해 주세요.');
           var pos = opt('wmpos') || 'tile';
           var pages = src.getPages();
@@ -1394,7 +1419,7 @@
         if (!pdflibPromise) {
           pdflibPromise = new Promise(function (resolve, reject) {
             var s = document.createElement('script');
-            s.src = 'https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js';
+            s.src = PDFLIB_URL;
             s.async = true;
             s.onload = resolve;
             s.onerror = function () { pdflibPromise = null; reject(new Error('PDF 라이브러리를 불러오지 못했습니다.')); };
@@ -1407,14 +1432,15 @@
       function opt(name) { return (host.querySelector('input[name=' + name + ']:checked') || {}).value; }
 
       async function setFile(file) {
-        if (!file || !(file.type === 'application/pdf' || /\.pdf$/i.test(file.name))) return;
+        if (!file) return;
+        if (!isPdfFile(file)) { alert(NOT_PDF_MSG); return; }
         try { await ensurePdfLib(); } catch (e) { alert(e.message); return; }
         try {
           var bytes = await file.arrayBuffer();
-          var doc = await window.PDFLib.PDFDocument.load(bytes, { ignoreEncryption: true });
-          if (doc.isEncrypted) throw new Error('encrypted');
+          var doc = await window.PDFLib.PDFDocument.load(bytes, { ignoreEncryption: true, password: '' });
+          if (doc.isEncrypted) throw new Error('UNDECRYPTED');
           cur = { name: file.name, size: file.size, pages: doc.getPageCount(), bytes: bytes };
-        } catch (e) { alert('PDF를 열 수 없습니다. 손상되었거나 암호가 걸린 파일일 수 있습니다.'); return; }
+        } catch (e) { alert(pdfOpenErr(e)); return; }
         render();
       }
       function render() {
@@ -1442,7 +1468,7 @@
         try {
           await ensurePdfLib();
           var PDFLib = window.PDFLib;
-          var src = await PDFLib.PDFDocument.load(cur.bytes, { ignoreEncryption: true });
+          var src = await PDFLib.PDFDocument.load(cur.bytes, { ignoreEncryption: true, password: '' });
           if (src.isEncrypted) throw new Error('암호가 걸린 PDF는 처리할 수 없습니다. 암호를 해제한 뒤 다시 시도해 주세요.');
           var delta = +opt('rtangle') || 90;
           var scope = opt('rtscope') || 'all';
