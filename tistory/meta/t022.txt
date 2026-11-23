@@ -1,0 +1,6 @@
+TITLE: 와이파이 QR코드 만들기, 비밀번호만 넣으면 접속 안 돼요
+CATEGORY: 생활 도구
+TAGS: 와이파이 QR코드 만들기, 와이파이 QR, QR코드 만들기, 와이파이 비밀번호 공유, 매장 와이파이, QR코드 무료
+DATE: 2026-11-22 08:00
+ALT: WIFI:S:cafe_guest;T:WPA;P:coffee2026;; 를 넣어 만든 와이파이 QR코드 화면
+POSTNO: 4

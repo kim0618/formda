@@ -9,6 +9,15 @@
   var THUMB_MIN = 9;   // 썸네일 최소 채움 행
 
   function esc(s) { return calc.esc(s); }
+  // 수신인 뒤 존칭: 사용자가 이미 '님'·'귀하'·'귀중' 등을 적었으면 자동 존칭을 붙이지 않는다(귀하 중복 방지)
+  var HONORIFIC_RE = /(귀하|귀중|님|앞|께|좌하|貴下|貴中)$/;
+  function hasHonorific(name) { return HONORIFIC_RE.test(String(name == null ? '' : name).trim()); }
+  function recvHTML(name, suffix, bold) {
+    var n = String(name == null ? '' : name).trim();
+    if (!n) return '&nbsp;' + (suffix ? ' ' + (bold ? '<b>' + esc(suffix) + '</b>' : esc(suffix)) : '');
+    if (!suffix || hasHonorific(n)) return esc(n);
+    return esc(n) + ' ' + (bold ? '<b>' + esc(suffix) + '</b>' : esc(suffix));
+  }
   function comma(n) { return calc.comma(n); }
 
   function sealHTML(state, cfg) {
@@ -93,7 +102,7 @@
     // 견적서 등: 수신("○○ 귀하") + 공급자 박스 1개(업태/종목 포함 6행)
     return titleMeta(state, cfg) +
       '<div class="qt-head">' +
-        '<div class="qt-recv"><div class="qt-recv-name">' + (esc(state.to) || '&nbsp;') + ' <b>' + esc(cfg.recipientSuffix) + '</b></div>' +
+        '<div class="qt-recv"><div class="qt-recv-name">' + recvHTML(state.to, cfg.recipientSuffix, true) + '</div>' +
           '<div class="qt-recv-sub">' + esc(cfg.leadPhrase) + '</div></div>' +
         '<table class="qt-supplier"><tbody>' +
           '<tr><th class="qt-side" rowspan="6">공급자</th><td class="k">등록번호</td><td class="v">' + (esc(state.fromReg) || '&nbsp;') + '</td></tr>' +
@@ -223,7 +232,7 @@
       '<div class="rc-title">' + esc(cfg.docTitle) + '</div>' +
       '<div class="qt-meta"><span>No. ' + (esc(state.no) || '') + '</span>' +
         '<span>' + (state.date ? cfg.dateLabel + ' : ' + esc(state.date) : '') + '</span></div>' +
-      '<div class="rc-recv">' + (esc(state.to) || '&nbsp;') + ' <b>' + esc(cfg.recipientSuffix) + '</b></div>' +
+      '<div class="rc-recv">' + recvHTML(state.to, cfg.recipientSuffix, true) + '</div>' +
       '<div class="rc-amount">' +
         '<div class="rc-amount-kr">일금 ' + (t.total > 0 ? calc.korAmount(t.total) + '원정' : '') + '</div>' +
         '<div class="rc-amount-num">₩ ' + comma(t.total) + '</div></div>' +
@@ -295,7 +304,7 @@
       '<div class="ct-bottom">' +
         '<div class="ct-date">' + korDate(s.date) + '</div>' +
         '<div class="ct-signer">작성자 : ' + (esc(s.name) || '&nbsp;') + sealHTML(s, cfg) + '</div>' +
-        '<div class="ct-recipient">' + (esc(s.recipient) || '&nbsp;') + ' 귀하</div>' +
+        '<div class="ct-recipient">' + recvHTML(s.recipient, '귀하') + '</div>' +
       '</div>' +
     '</div>';
   }
@@ -699,7 +708,7 @@
       '<tr><td class="k">소　속</td><td class="v">' + vOr(s.dept) + '</td><td class="k">직　위</td><td class="v">' + vOr(s.position) + '</td></tr>' +
       '<tr><td class="k">성　명</td><td class="v">' + vOr(s.name) + '</td><td class="k">연 락 처</td><td class="v">' + vOr(s.tel) + '</td></tr>' +
       '<tr><td class="k">' + esc(L.when || '발생 일시') + '</td><td class="v">' + lgDate(s.incDate) + '</td><td class="k">' + esc(L.place || '발생 장소') + '</td><td class="v">' + vOr(s.place) + '</td></tr>' +
-      '<tr><td class="k">제 출 처</td><td class="v" colspan="3">' + (s.recipient ? esc(s.recipient) + ' 귀하' : '&nbsp;') + '</td></tr>' +
+      '<tr><td class="k">제 출 처</td><td class="v" colspan="3">' + (s.recipient ? recvHTML(s.recipient, '귀하') : '&nbsp;') + '</td></tr>' +
       '</tbody></table>';
     var n = 0;
     function sec(title, body) { n++; return '<div class="lg-sec">' + n + '. ' + title + '</div>' + body; }

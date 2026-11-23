@@ -1,0 +1,14 @@
+READ-ONLY task in the user's logged-in Chrome on their own Tistory blog. Do NOT edit, save or publish anything.
+For each post number N in POSTNOS:
+1. Open https://formda.tistory.com/N in ONE tab (reuse it), wait for load, scroll to the bottom once so lazy images load, then scroll back.
+2. Run JavaScript that returns a JSON object with:
+   title (the post title text in the header), category (header category text), date (header date text),
+   tags (array of tag texts under the post), headerBg (computed background-image of the post header element),
+   bodyHtml (innerHTML of the post content area, e.g. .tt_article_useless_p_margin or .contents_style or .article-view, whichever holds the body),
+   imgs (for every img inside the body: src, alt, naturalWidth, naturalHeight, complete),
+   links (every a href inside the body).
+3. Save that JSON exactly (UTF-8) with the Write tool to C:\Users\jinsung\Downloads\claude-chrome\formda-verify\post-N.json
+Then also open https://formda.tistory.com/manage/posts and save the visible list rows (title, status like [예약], date, category) as JSON to C:\Users\jinsung\Downloads\claude-chrome\formda-verify\list.json
+Close every tab you opened.
+The JSON MUST use exactly these keys: title, category, date, tags (array), headings (array of "H2: text"), counts ({table, img, a}), imgs (array of {alt, naturalWidth, complete}), links (array of {url, queryKeys}). Leave a key empty rather than renaming it.
+Final answer (English, short): files written, anything that failed.

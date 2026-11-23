@@ -1,0 +1,9 @@
+/* formda 2026-11-20: 글 상단 띠 없애기 - 흰 바탕·검은 제목 (정보형 블로그 방식). 되돌리기 = 이 블록 삭제 */
+.main:has(.area-view .article-header){padding-top:0!important}
+.area-view .article-header{position:relative!important;left:auto!important;right:auto!important;top:auto!important;bottom:auto!important;margin-left:0!important;width:auto!important;height:auto!important;min-height:0!important;background:#fff!important;background-image:none!important;padding:48px 20px 4px!important}
+.area-view .article-header:before,.area-view .article-header:after{display:none!important}
+.area-view .article-header .inner-header{margin-left:0!important;width:auto!important;max-width:none!important;height:auto!important}
+.area-view .article-header .box-meta{position:static!important;left:auto!important;right:auto!important;top:auto!important;bottom:auto!important;width:auto!important;max-width:none!important}
+.area-view .article-header .category{color:#2563eb!important}
+.area-view .article-header .title-article{color:#111!important;text-shadow:none!important;-webkit-line-clamp:unset!important;display:block!important;overflow:visible!important}
+.area-view .article-header .box-info,.area-view .article-header .box-info *{color:#888!important}

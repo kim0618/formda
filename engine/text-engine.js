@@ -82,6 +82,9 @@
         // 유음화: ㄴ+ㄹ -> ㄹㄹ (신라->silla)
         cur.jongOverride = 'l';
         nxt.choOverride = 'l';
+      } else if (cj === 'l' && nxt.cho === 5) {
+        // ㄹㄹ은 ll (올림->ollim, 달래->dallae)
+        nxt.choOverride = 'l';
       } else if (cj === 'l' && nxt.cho === 2) {
         // 유음화(역방향): ㄹ+ㄴ -> ㄹㄹ (별내->byeollae)
         nxt.choOverride = 'l';
@@ -97,6 +100,7 @@
 
   // ---------- 주소 로마자 변환 (참고용 근사: 국립국어원 표기법 + 도로명 접미사) ----------
   var ADDR_CITY = { '서울': 'Seoul', '부산': 'Busan', '대구': 'Daegu', '인천': 'Incheon', '광주': 'Gwangju', '대전': 'Daejeon', '울산': 'Ulsan', '세종': 'Sejong' };
+  var ADDR_PROV = { '경기': 'Gyeonggi-do', '충북': 'Chungcheongbuk-do', '충남': 'Chungcheongnam-do', '전남': 'Jeollanam-do', '경북': 'Gyeongsangbuk-do', '경남': 'Gyeongsangnam-do' };
   // 긴 접미사 먼저. [한글접미사, 영문, 도시형(접미사 없이 도시명만)]
   var ADDR_SUF = [
     ['특별자치도', '-do'], ['특별자치시', '-si'], ['광역시', '-si', true], ['특별시', '-si', true],
@@ -104,31 +108,120 @@
     ['도', '-do'], ['시', '-si'], ['군', '-gun'], ['구', '-gu'],
     ['읍', '-eup'], ['면', '-myeon'], ['동', '-dong'], ['리', '-ri'], ['가', '-ga'],
   ];
+  // 외래어 도로명: 소리대로 옮기지 않고 원어 표기를 쓰는 대표 사례 (도로명 앞부분 일치)
+  var ADDR_LOAN = [['월드컵', 'World Cup '], ['올림픽', 'Olympic '], ['디지털', 'Digital '], ['테헤란', 'Teheran '], ['센텀', 'Centum '], ['테크노', 'Techno ']];
+  // 도로명 앞부분(로·길 앞) 변환. 접미사와의 경계에서는 음운변화를 넘기지 않는다(종로 -> Jong-ro).
+  function roadBase(base) {
+    for (var i = 0; i < ADDR_LOAN.length; i++) {
+      var k = ADDR_LOAN[i][0];
+      if (base.indexOf(k) === 0) {
+        var rest = base.slice(k.length);
+        return (ADDR_LOAN[i][1] + (rest ? romanizeAddrWord(rest) : '')).trim();
+      }
+    }
+    return cap(romanizeAddrWord(base));
+  }
+  // 도로명 토큰: 테헤란로, 세종대로, 테헤란로10길, 중앙로1275번길, 강남대로94길
+  var ROAD_RE = /^(.+?)(대로|로|길)(?:(\d+)(번길|길))?$/;
+  function roadToken(tok) {
+    var m = tok.match(ROAD_RE);
+    if (!m || /\d/.test(m[1])) return null;
+    var main = roadBase(m[1]) + (m[2] === '대로' ? '-daero' : (m[2] === '로' ? '-ro' : '-gil'));
+    if (m[3]) main += ' ' + m[3] + (m[4] === '번길' ? 'beon-gil' : '-gil');
+    return main;
+  }
+  // 지번주소 'N가'는 숫자 뒤에 한자어 읽기를 붙인다 (을지로2가 -> Euljiro 2(i)-ga, 효자동3가 -> Hyoja-dong 3(sam)-ga)
+  var SINO = ['', 'il', 'i', 'sam', 'sa', 'o', 'yuk', 'chil', 'pal', 'gu'];
+  function sinoNum(n) {
+    n = +n; if (!(n > 0 && n < 100)) return '';
+    var t = (n / 10) | 0, o = n % 10;
+    return (t ? (t > 1 ? SINO[t] : '') + 'sip' : '') + SINO[o];
+  }
   function addrToken(tok) {
     if (/^[0-9][0-9\-]*$/.test(tok)) return { num: true, text: tok };
+    var ug = tok.match(/^지하(\d[\d\-]*)$/);                // 지하 건물번호: 지하53 -> B53
+    if (ug) return { num: true, text: 'B' + ug[1] };
+    var ga = tok.match(/^(.+?)(\d+)가$/);
+    if (ga && sinoNum(ga[2])) {
+      var gb = /동$/.test(ga[1]) && ga[1].length > 1 ? cap(romanizeAddrWord(ga[1].slice(0, -1))) + '-dong' : cap(romanizeAddrWord(ga[1]));
+      return { text: gb + ' ' + ga[2] + '(' + sinoNum(ga[2]) + ')-ga' };
+    }
+    var sub = tok.match(/^(\d+)(번길|길)$/);              // 띄어 쓴 '10길', '1275번길'
+    if (sub) return { sub: true, text: sub[1] + (sub[2] === '번길' ? 'beon-gil' : '-gil') };
     for (var i = 0; i < ADDR_SUF.length; i++) {
       var suf = ADDR_SUF[i][0];
       if (tok.length > suf.length && tok.slice(-suf.length) === suf) {
         var base = tok.slice(0, tok.length - suf.length);
         if (ADDR_SUF[i][2] && ADDR_CITY[base]) return { text: ADDR_CITY[base] };   // 서울특별시 → Seoul
+        if (suf === '대로' || suf === '로' || suf === '길') { var rt = roadToken(tok); if (rt) return { road: true, text: rt }; }
         var baseR = ADDR_CITY[base] || cap(romanizeAddrWord(base));
         return { text: baseR + ADDR_SUF[i][1] };
       }
     }
+    var rt2 = roadToken(tok);
+    if (rt2) return { road: true, text: rt2 };
     if (ADDR_CITY[tok]) return { text: ADDR_CITY[tok] };
+    if (ADDR_PROV[tok]) return { text: ADDR_PROV[tok] };
     return { text: cap(romanizeAddrWord(tok)) };
   }
-  function romanizeAddress(s) {
-    var toks = s.trim().split(/\s+/).filter(Boolean);
-    if (!toks.length) return '';
-    var parts = [];
-    toks.forEach(function (tok) {
-      var r = addrToken(tok);
-      if (r.num && parts.length) parts[parts.length - 1] = r.text + ' ' + parts[parts.length - 1]; // 번호는 도로명 앞으로
-      else parts.push(r.text);
-    });
-    return parts.reverse().join(', ');   // 작은 단위 → 큰 단위 (영문 순서)
+  // 상세주소(동·층·호 등) 한 덩어리 변환. 공식 영문 규칙이 없어 한글 구조를 그대로 옮긴다.
+  function detailToken(tok) {
+    var m;
+    if ((m = tok.match(/^(?:지하|B)(\d+)층?$/i))) return 'B' + m[1] + 'F';
+    if ((m = tok.match(/^(\d+)층$/))) return m[1] + 'F';
+    if ((m = tok.match(/^(\d+)호$/))) return m[1] + '-ho';
+    if ((m = tok.match(/^([0-9A-Za-z]+)동$/))) return m[1] + '-dong';
+    if ((m = tok.match(/^(\d+)(?:번지)?$/))) return m[1];
+    if ((m = tok.match(/^(.+)아파트$/))) return cap(romanizeAddrWord(m[1])) + ' Apt.';
+    if ((m = tok.match(/^(.+)(동|가|리)$/))) return cap(romanizeAddrWord(m[1])) + '-' + { '동': 'dong', '가': 'ga', '리': 'ri' }[m[2]];
+    return cap(romanizeAddrWord(tok));
   }
+  function detailPart(s) {
+    // '지하 1층', '101 동' 같이 띄어 쓴 경우를 붙여서 읽는다
+    var toks = s.replace(/지하\s+(\d)/g, '지하$1').replace(/(\d)\s+(동|층|호)(?![가-힣])/g, '$1$2').split(/\s+/).filter(Boolean);
+    // 동·층·호(숫자 단위)를 앞에, 건물명 등 나머지는 쉼표 뒤에 둔다 (21F, Gangnam ...)
+    var units = [], names = [];
+    toks.forEach(function (t) {
+      var r = detailToken(t);
+      (/^(B?\d+F|[0-9A-Za-z]+-(dong|ho)|\d+)$/.test(r) ? units : names).push(r);
+    });
+    return units.join(' ') + (names.length ? (units.length ? ', ' : '') + names.join(' ') : '');
+  }
+  // 반환: { main, alt } (alt = 동·호를 #101-1001 형태로 줄인 표기, 없으면 '')
+  function romanizeAddressFull(s) {
+    s = String(s || '').replace(/\s+/g, ' ').trim();
+    if (!s) return { main: '', alt: '' };
+    // ① 괄호 안 참고항목(법정동·건물명) 분리
+    var refs = [];
+    s = s.replace(/[(（]([^)）]*)[)）]/g, function (_, x) { refs.push(x.trim()); return ' '; }).replace(/[()（）]/g, ' ');
+    // ② 건물번호 바로 뒤 쉼표 기준: 앞=도로명+건물번호, 뒤=상세주소.
+    //    '서울특별시, 강남구, 테헤란로 152'처럼 단위 사이 쉼표는 구분자로 보지 않는다.
+    s = s.replace(/지하\s+(\d)/g, '지하$1');
+    var bm = s.match(/^(.*?\s(?:지하)?[0-9][0-9\-]*)\s*[,，](.*)$/);
+    var head = (bm ? bm[1] : s).replace(/[,，]/g, ' ').replace(/\s+/g, ' ').trim();
+    var detail = (bm ? bm[2].replace(/[,，]/g, ' ') : '').trim();
+    // 쉼표 없이 '152 2층'처럼 이어 쓴 상세주소도 떼어 낸다
+    var dm = head.match(/^(.*?\s(?:지하)?[0-9][0-9\-]*)\s+((?:지하\s*)?\d+\s*(?:동|층|호)(?:\s.*)?|.*\d+\s*호.*)$/);
+    if (dm) { head = dm[1]; detail = (dm[2] + ' ' + detail).trim(); }
+    var parts = [];
+    head.split(' ').filter(Boolean).forEach(function (tok) {
+      var r = addrToken(tok);
+      var last = parts[parts.length - 1];
+      if (r.sub && last && last.road) last.text += ' ' + r.text;                 // 중앙로 1275번길 -> Jungang-ro 1275beon-gil
+      else if (r.num && last) last.text = r.text + ' ' + last.text;              // 번호는 도로명 앞으로
+      else parts.push(r);
+    });
+    var core = parts.map(function (p) { return p.text; }).reverse().join(', ');
+    var d = detail ? detailPart(detail) : '';
+    var refTxt = refs.filter(Boolean).map(function (x) { return x.split(/[,，\s]+/).filter(Boolean).map(detailToken).join(', '); }).join(', ');
+    function build(det) { return (det ? det + ', ' : '') + core + (refTxt ? ' (' + refTxt + ')' : ''); }
+    var alt = '';
+    var dh = d.match(/^(\S+)-dong (\d+)-ho$/);
+    if (dh) alt = build('#' + dh[1] + '-' + dh[2]);
+    else if (/^\d+-ho$/.test(d)) alt = build('#' + d.replace('-ho', ''));
+    return { main: build(d), alt: alt };
+  }
+  function romanizeAddress(s) { return romanizeAddressFull(s).main; }
 
   // ---------- 공통 유틸 ----------
   function comma(n) { return Number(n).toLocaleString('ko-KR'); }
@@ -228,7 +321,7 @@
               '<div class="tt-field"><label>성</label><input id="ttSur" placeholder="홍" maxlength="2" autocomplete="off"></div>' +
               '<div class="tt-field"><label>이름</label><input id="ttGiv" placeholder="길동" maxlength="6" autocomplete="off"></div>' +
             '</div>' +
-            '<p class="tt-hint">국립국어원 로마자 표기법 기준이며, 성씨는 여권에서 널리 쓰이는 관용 표기를 우선 보여줍니다. 실제 여권 표기는 본인 선택입니다.</p>' +
+            '<p class="tt-hint">국립국어원 로마자 표기법 기준이며, 성씨는 여권에서 널리 쓰이는 관용 표기를 우선 보여줍니다. 여권은 여권법 시행규칙 제2조의2에 따라 한글 성명을 음절 단위로 옮겨 적고, 관용 표기를 쓸 수 있는지는 발급 기관에서 확인해야 합니다.</p>' +
           '</div>' +
           '<div class="tt-side"><div class="tt-out" id="ttOut"></div></div>' +
         '</div>';
@@ -265,7 +358,7 @@
             '<div class="tt-bar"><span class="tt-bar-label">한글 주소 (도로명)</span>' +
               '<div class="tt-actions"><button class="mini-btn" data-act="sample">샘플</button><button class="mini-btn danger" data-act="clear">비우기</button></div></div>' +
             '<textarea id="ttIn" class="tt-input short" placeholder="예: 서울특별시 강남구 테헤란로 152"></textarea>' +
-            '<p class="tt-hint">국립국어원 표기법과 도로명주소 접미사(-ro, -gil, -gu 등)를 적용한 참고용 변환입니다. 상세주소·건물명은 직접 보완하세요.</p>' +
+            '<p class="tt-hint">국립국어원 표기법과 도로명주소 접미사(-ro, -gil, -gu 등)를 적용한 참고용 변환입니다. 쉼표 뒤 동·층·호는 101-dong 1001-ho, 2F처럼 옮기고 괄호 속 동 이름은 끝에 붙입니다. 건물명과 외래어 도로명은 주소정보누리집(juso.go.kr) 영문 검색으로 최종 확인하세요.</p>' +
           '</div>' +
           '<div class="tt-side"><div class="tt-out" id="ttOut"></div></div>' +
         '</div>';
@@ -273,8 +366,8 @@
       function render() {
         var v = ta.value.trim();
         if (!v) { out.innerHTML = '<div class="tt-empty">한글 주소를 입력하면 영문 표기가 나옵니다.</div>'; return; }
-        var eng = romanizeAddress(v.replace(/\n/g, ' '));
-        out.innerHTML = resultRowBig('영문 주소', eng);
+        var r = romanizeAddressFull(v.replace(/\n/g, ' '));
+        out.innerHTML = resultRow('영문 주소', r.main, r.alt ? [r.alt] : []);
         bindCopy(out);
       }
       ta.addEventListener('input', render);
@@ -304,8 +397,10 @@
           '</div>' +
         '</div>';
       var ta = host.querySelector('#ttIn'), out = host.querySelector('#qrOut'), dl = host.querySelector('#qrDl');
+      var qrInst = null;
       function render() {
         out.innerHTML = '';
+        qrInst = null;
         var v = ta.value.trim();
         if (!v) { dl.style.display = 'none'; out.innerHTML = '<div class="tt-empty">URL이나 텍스트를 입력하면 QR코드가 생성됩니다.</div>'; return; }
         if (typeof QRCode === 'undefined') { out.innerHTML = '<div class="tt-empty">QR 생성기를 불러오는 중입니다. 잠시 후 다시 시도하세요.</div>'; return; }
@@ -316,7 +411,7 @@
         // 스캔 시 글자가 깨질 수 있다. 라이브러리를 직접 고칠 수 없으니 사전에 감지해 경고만 표시한다.
         var hasAstral = /[\uD800-\uDBFF][\uDC00-\uDFFF]/.test(v);
         try {
-          new QRCode(out, { text: v, width: size, height: size, colorDark: '#111111', colorLight: '#ffffff', correctLevel: QRCode.CorrectLevel.M });
+          qrInst = new QRCode(out, { text: v, width: size, height: size, colorDark: '#111111', colorLight: '#ffffff', correctLevel: QRCode.CorrectLevel.M });
           dl.style.display = '';
           if (hasAstral) {
             var warn = document.createElement('div');
@@ -335,8 +430,23 @@
       host.querySelector('[data-act=sample]').addEventListener('click', function () { ta.value = sample.text || 'https://formda.kr'; render(); });
       host.querySelector('[data-act=clear]').addEventListener('click', function () { ta.value = ''; render(); ta.focus(); });
       dl.addEventListener('click', function () {
+        // 라이브러리 캔버스는 여백 없이 코드만 그려져 판독기가 못 읽는 경우가 있다.
+        // 표준 권장 여백(quiet zone) 4모듈을 흰색으로 둘러 새 캔버스에 옮겨 저장한다.
         var c = out.querySelector('canvas');
-        var url = c ? c.toDataURL('image/png') : (out.querySelector('img') || {}).src;
+        var url = '';
+        if (c && c.width) {
+          var mods = (qrInst && qrInst._oQRCode && qrInst._oQRCode.getModuleCount) ? qrInst._oQRCode.getModuleCount() : 25;
+          var pad = Math.ceil(c.width / mods * 4);
+          var o = document.createElement('canvas');
+          o.width = c.width + pad * 2; o.height = c.height + pad * 2;
+          var g = o.getContext('2d');
+          g.fillStyle = '#ffffff'; g.fillRect(0, 0, o.width, o.height);
+          g.imageSmoothingEnabled = false;
+          g.drawImage(c, pad, pad);
+          url = o.toDataURL('image/png');
+        } else {
+          url = (out.querySelector('img') || {}).src;
+        }
         if (!url) return;
         var a = document.createElement('a'); a.href = url; a.download = 'qrcode.png';
         trackUtil('download_util', { format: 'png' });
