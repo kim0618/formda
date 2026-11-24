@@ -164,15 +164,41 @@
     if (ADDR_PROV[tok]) return { text: ADDR_PROV[tok] };
     return { text: cap(romanizeAddrWord(tok)) };
   }
+  var BLDG_SUF = [['아파트', 'Apt.'], ['오피스텔', 'Officetel'], ['빌라', 'Villa'], ['맨션', 'Mansion'], ['타워', 'Tower'], ['빌딩', 'Bldg.'], ['하우스', 'House'], ['레지던스', 'Residence'], ['오피스', 'Office'], ['센터', 'Center'], ['파크', 'Park'], ['캐슬', 'Castle'], ['힐스', 'Hills'], ['팰리스', 'Palace'], ['시티', 'City'], ['프라자', 'Plaza'], ['플라자', 'Plaza']];
+  // 건물명 속 외래어(두 글자 이상만: 한 글자는 한국어 이름과 겹친다). 건물 종류 단어도 이름 안에서는 같은 사전으로 읽는다.
+  var BLDG_LOAN = BLDG_SUF.concat([['센트럴', 'Central'], ['센텀', 'Centum'], ['그린', 'Green'], ['디지털', 'Digital'], ['미디어', 'Media'], ['하이츠', 'Heights'], ['월드컵', 'World Cup'], ['올림픽', 'Olympic'], ['테크노', 'Techno'], ['스카이', 'Sky'], ['트윈', 'Twin'], ['리버', 'River'], ['스퀘어', 'Square'], ['밸리', 'Valley']]);
+  // 한글 덩어리 하나를 끝에서부터, 남은 앞부분은 앞에서부터 외래어 사전으로 떼어 낸다.
+  // 행복빌라 -> Haengbok Villa, 동탄역센트럴파크 -> Dongtanyeok Central Park, 디지털미디어시티 -> Digital Media City
+  function bldgHangul(h) {
+    var tail = [], head = [], k, w, hit;
+    do {
+      hit = false;
+      for (k = 0; k < BLDG_LOAN.length; k++) { w = BLDG_LOAN[k][0]; if (h.length >= w.length && h.slice(-w.length) === w) { tail.unshift(BLDG_LOAN[k][1]); h = h.slice(0, -w.length); hit = true; break; } }
+    } while (hit && h);
+    do {
+      hit = false;
+      for (k = 0; k < BLDG_LOAN.length; k++) { w = BLDG_LOAN[k][0]; if (h.length >= w.length && h.indexOf(w) === 0) { head.push(BLDG_LOAN[k][1]); h = h.slice(w.length); hit = true; break; } }
+    } while (hit && h);
+    // 띄어 쓰는 곳은 영어 단어 앞뒤뿐. 나머지(숫자·○○·영문과 붙은 소리 표기)는 예전처럼 붙여 둔다 (e편한세상2차아파트 -> Epyeonhansesang2cha Apt.)
+    return (head.length ? ' ' + head.join(' ') + ' ' + cap(romanizeAddrWord(h)) : romanizeAddrWord(h)) + (tail.length ? ' ' + tail.join(' ') : '');
+  }
+  function bldgName(x) {
+    return cap(x.replace(/[가-힣]+/g, bldgHangul).replace(/\s+/g, ' ').trim());
+  }
   // 상세주소(동·층·호 등) 한 덩어리 변환. 공식 영문 규칙이 없어 한글 구조를 그대로 옮긴다.
   function detailToken(tok) {
     var m;
     if ((m = tok.match(/^(?:지하|B)(\d+)층?$/i))) return 'B' + m[1] + 'F';
     if ((m = tok.match(/^(\d+)층$/))) return m[1] + 'F';
-    if ((m = tok.match(/^(\d+)호$/))) return m[1] + '-ho';
+    if ((m = tok.match(/^(?:지하|B)(\d+)호$/i))) return 'B' + m[1] + '-ho';   // 지하 호수: B01호·지하1호 -> B01-ho, B1-ho
+    if ((m = tok.match(/^([0-9A-Za-z]+)호$/))) return m[1].toUpperCase() + '-ho';
     if ((m = tok.match(/^([0-9A-Za-z]+)동$/))) return m[1] + '-dong';
     if ((m = tok.match(/^(\d+)(?:번지)?$/))) return m[1];
-    if ((m = tok.match(/^(.+)아파트$/))) return cap(romanizeAddrWord(m[1])) + ' Apt.';
+    // 건물 종류로 끝나는 이름은 외래어를 영어 단어로 쓴다 (행복빌라 -> Haengbok Villa, ○○오피스텔 -> ○○ Officetel)
+    for (var b = 0; b < BLDG_SUF.length; b++) {
+      var bs = BLDG_SUF[b][0];
+      if (tok.length >= bs.length && tok.slice(-bs.length) === bs) return bldgName(tok);
+    }
     if ((m = tok.match(/^(.+)(동|가|리)$/))) return cap(romanizeAddrWord(m[1])) + '-' + { '동': 'dong', '가': 'ga', '리': 'ri' }[m[2]];
     return cap(romanizeAddrWord(tok));
   }
@@ -218,7 +244,7 @@
     var alt = '';
     var dh = d.match(/^(\S+)-dong (\d+)-ho$/);
     if (dh) alt = build('#' + dh[1] + '-' + dh[2]);
-    else if (/^\d+-ho$/.test(d)) alt = build('#' + d.replace('-ho', ''));
+    else if (/^[0-9A-Za-z]+-ho$/.test(d)) alt = build('#' + d.replace('-ho', ''));
     return { main: build(d), alt: alt };
   }
   function romanizeAddress(s) { return romanizeAddressFull(s).main; }

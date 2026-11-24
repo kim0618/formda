@@ -34,6 +34,8 @@ for mp in sorted(glob.glob('meta/t*.txt')):
         if 'formda.kr' in l['url'] and 'queryKeys' in l and l.get('queryKeys') != ['utm_source', 'utm_medium', 'utm_campaign']: iss.append(f"UTM 없음 {l['url']}")
         if '://www.formda.kr' in l['url']: iss.append(f"www 붙은 주소(폼다는 www 없이) {l['url']}")
     if c['a'] != len(re.findall(r'<a ', src)): iss.append('링크 수 다름')
+    if meta.get('HOMETOPIC') and j.get('hometopic') is not None and j.get('hometopic', '').replace(' ', '') != meta['HOMETOPIC'].replace(' ', ''): iss.append(f"홈주제 {j.get('hometopic')} / meta {meta['HOMETOPIC']}")
+    if meta.get('HOMETOPIC') and j.get('hometopic') is None: iss.append('홈주제 추출 안 됨')
     print(f"글 {n} ({t}): {'OK' if not iss else '문제 ' + str(len(iss))}")
     for i in iss: print('   ✕', i)
     bad += len(iss)

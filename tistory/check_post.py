@@ -115,6 +115,8 @@ def main():
                 probs.append(f"meta {k} 없음")
         if len(meta.get("TITLE", "")) > 42:
             probs.append(f"제목 {len(meta['TITLE'])}자(공백 포함 42자 이하, 헤더 2줄 넘으면 잘림)")
+        if meta.get("HOMETOPIC") not in ("경영·직장", "생활정보", "경제", "IT 인터넷"):
+            probs.append("meta HOMETOPIC 없음/값 이상(경영·직장·생활정보·경제·IT 인터넷 중 하나, 11/24 홈주제 자동 선택 오류 방지)")
         if "[[CAPTURE1]]" in src and not meta.get("ALT"):
             probs.append("캡처가 있는데 meta ALT 없음")
         if meta.get("DATE") and not re.match(r"\d{4}-\d{2}-\d{2} 08:00$", meta["DATE"]):

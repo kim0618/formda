@@ -8,7 +8,8 @@ For each post number N in POSTNOS:
    imgs (for every img inside the body: src, alt, naturalWidth, naturalHeight, complete),
    links (every a href inside the body).
 3. Save that JSON exactly (UTF-8) with the Write tool to C:\Users\jinsung\Downloads\claude-chrome\formda-verify\post-N.json
+4. Then open https://formda.tistory.com/manage/post/N (editor). Click the publish-layer button (완료) ONLY to read the home topic dropdown value (홈주제) and the reservation date/time, then click cancel (취소) and leave without saving (if a leave-page dialog appears, leave without saving). Never change any field. Add the home topic text to post-N.json as key "hometopic" (rewrite the file).
 Then also open https://formda.tistory.com/manage/posts and save the visible list rows (title, status like [예약], date, category) as JSON to C:\Users\jinsung\Downloads\claude-chrome\formda-verify\list.json
 Close every tab you opened.
-The JSON MUST use exactly these keys: title, category, date, tags (array), headings (array of "H2: text"), counts ({table, img, a}), imgs (array of {alt, naturalWidth, complete}), links (array of {url, queryKeys}). Leave a key empty rather than renaming it.
+The JSON MUST use exactly these keys: title, category, date, tags (array), headings (array of "H2: text"), counts ({table, img, a}), imgs (array of {alt, naturalWidth, complete}), links (array of {url, queryKeys}), hometopic (string). Leave a key empty rather than renaming it.
 Final answer (English, short): files written, anything that failed.

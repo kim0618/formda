@@ -3,4 +3,5 @@ CATEGORY: 생활 도구
 TAGS: 영문이름 변환기, 여권 영문이름, 여권 영문이름 변경, 영문이름 변환, 성씨 영문 표기, 로마자 표기
 DATE: 2026-11-27 08:00
 ALT: 이서윤을 넣어 성 Lee와 다른 표기 Yi·Rhee, 이름 Seoyun이 나온 영문이름 변환 화면
+HOMETOPIC: 생활정보
 POSTNO: 8

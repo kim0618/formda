@@ -9,8 +9,10 @@ D=/mnt/c/Users/jinsung/Downloads/claude-chrome/formda-batch
 EXE="$(ls -d /mnt/c/Users/jinsung/.vscode/extensions/anthropic.claude-code-*-win32-x64 | sort -V | tail -1)/resources/native-binary/claude.exe"
 EXE_WIN="$(wslpath -w "$EXE")"
 rm -rf "$D"; mkdir -p "$D" /mnt/c/Users/jinsung/Downloads/claude-chrome/formda-shots
-rm -f /mnt/c/Users/jinsung/Downloads/claude-chrome/formda-shots/*
+for t in "$@"; do rm -f /mnt/c/Users/jinsung/Downloads/claude-chrome/formda-shots/$t-*; done  # 11/23: 전부 지우면 앞 작업 캡처가 사라짐, 대상 글 것만 지운다
 LIST=""
+# 11/24: 글이 설명하는 도구 동작을 배포 사이트에서 다시 잰다. 도구가 바뀌어 글이 틀렸으면 크롬을 켜지 않는다.
+LD_LIBRARY_PATH=$HOME/.local/emulib node claims.mjs "$@" || { echo "도구 동작이 글과 다름: 원고를 고친 뒤 다시 실행"; exit 1; }
 for t in "$@"; do
   post=$(ls posts/$t-*.html)
   python3 check_post.py "$post" || { echo "검사 실패: $post"; exit 1; }
@@ -27,10 +29,10 @@ You are operating the user's own Tistory blog (https://formda.tistory.com) in th
 
 For EACH post id tNNN, files are in $WIN (UTF-8; Read them, use exactly): tNNN-meta.txt (POSTNO = Tistory post number, DATE = its reservation, ALT), tNNN-body.html, tNNN-cap.jpg (if body has [[CAPTURE1]]).
 Per post (reuse ONE tab):
-1. Open https://formda.tistory.com/manage/post/POSTNO . Set the title field to TITLE from the meta file if it differs. Do not touch category, tags or visibility.
+0. FIRST open https://formda.tistory.com/manage/posts . If it shows a login page, STOP immediately and print the single line LOGIN_REQUIRED.\n1. Open https://formda.tistory.com/manage/post/POSTNO . Set the title field to TITLE from the meta file if it differs. Do not touch category, tags or visibility.
 2. tinymce.activeEditor.setContent(<body html>).
 3. If the body contains a paragraph [[TOPIMG]] (it is the first paragraph): put the cursor there and upload tNNN-thumb.jpg exactly once via the BASIC-mode toolbar photo button so it becomes the first element of the body, delete the marker, set its alt to TITLE. Then if [[CAPTURE1]] exists: cursor in that paragraph, upload tNNN-cap.jpg exactly once via the BASIC-mode toolbar photo button (첨부/사진) file input (not a hidden HTML-mode input), delete the marker, set image alt to ALT. Verify no "[[CAPTURE" or "[[TOPIMG" text remains and the body has exactly 2 images (thumb at top, capture).
-4. 완료 -> if the post is still RESERVED: check 발행일 is 예약 at DATE and 공개 (fix back if changed). If the post is ALREADY PUBLISHED (DATE is in the past / no 예약 shown): keep it published and 공개, do not change its date, and save with the update button. Replace the representative image (대표이미지) with tNNN-thumb.jpg (remove the old one, upload via its file input). Save. Never publish immediately; if the reservation cannot be kept, do not save and report.
+4. 완료 -> if the post is still RESERVED: check 발행일 is 예약 at DATE and 공개 (fix back if changed), and 홈주제 (home topic dropdown) = HOMETOPIC from the meta file. If the post is ALREADY PUBLISHED (DATE is in the past / no 예약 shown): keep it published and 공개, do not change its date, and save with the update button. Replace the representative image (대표이미지) with tNNN-thumb.jpg (remove the old one, upload via its file input). Save. Never publish immediately; if the reservation cannot be kept, do not save and report.
 After all: confirm each shows [예약] DATE on https://formda.tistory.com/manage/posts; open each post page and screenshot top to bottom through the end of the body (save_to_disk true), copy with PowerShell to C:\\Users\\jinsung\\Downloads\\claude-chrome\\formda-shots\\ as tNNN-01.jpg ...; CLOSE every tab you opened.
 Final answer (English): per post: reservation shown, capture placed+alt, problems, any "검토중" placeholder.
 P
@@ -45,12 +47,12 @@ For EACH post id tNNN, files are in $WIN (UTF-8, Korean; Read them, use text exa
 - tNNN-cap.jpg : capture image, only if the body contains a paragraph [[CAPTURE1]]
 
 Per post:
-1. Open https://formda.tistory.com/manage/newpost/ (reuse ONE tab for all posts). If asked to restore a draft, decline.
+0. FIRST open https://formda.tistory.com/manage/posts . If it shows a login page, STOP immediately, create nothing, and print the single line LOGIN_REQUIRED as your final answer.\n1. Open https://formda.tistory.com/manage/newpost/ (reuse ONE tab for all posts). If asked to restore a draft, decline.
 2. Category = CATEGORY, title = TITLE.
 3. tinymce.activeEditor.setContent(<body html>). Then make sure the editor registered it: tinymce.activeEditor.getContent({format:'text'}).length must be over 500; if not, set it again, type one space at the end and delete it, and re-check (an earlier save went out with an EMPTY body).
 4. If the body contains a paragraph [[TOPIMG]] (it is the first paragraph): put the cursor there and upload tNNN-thumb.jpg exactly once via the BASIC-mode toolbar photo button so it becomes the first element of the body, delete the marker, set its alt to TITLE. Then if [[CAPTURE1]] exists: put the cursor in that paragraph, upload tNNN-cap.jpg via the BASIC-mode toolbar photo button (첨부/사진) file input, NOT any hidden HTML/Markdown-mode attach input (that caused duplicate uploads before), so it lands there; upload it exactly once, delete the marker, set the image alt (대체 텍스트) to ALT. Verify no "[[CAPTURE" or "[[TOPIMG" text remains and the body has exactly 2 images (thumb at top, capture).
 5. Tags: the tag box is the input BELOW the editor area (placeholder like "#태그입력"), not inside the body. Before typing, confirm document.activeElement is that tag input and NOT inside the tinymce iframe; type each tag + Enter. Afterwards confirm the body text length did not change (twice before, tags went into the body).
-6. 완료 -> publish layer: 공개, 발행일 = 예약 at DATE. Tistory auto-picks the body capture as 대표이미지: remove it and upload tNNN-thumb.jpg instead (file input). Save with the layer button. Never publish immediately; if reservation cannot be set, save as draft (임시저장) and report.
+6. 완료 -> publish layer: 공개, 발행일 = 예약 at DATE, 홈주제 (home topic dropdown) = HOMETOPIC from the meta file exactly (Tistory auto-picks a wrong one sometimes; always set it). Tistory auto-picks the body capture as 대표이미지: remove it and upload tNNN-thumb.jpg instead (file input). Save with the layer button. Never publish immediately; if reservation cannot be set, save as draft (임시저장) and report.
 After all posts:
 7. On https://formda.tistory.com/manage/posts confirm each shows [예약] with its DATE.
 8. For each post open its page and take screenshots top to bottom through the end of the body (save_to_disk true); copy them with PowerShell to C:\Users\jinsung\Downloads\claude-chrome\formda-shots\ as tNNN-01.jpg, tNNN-02.jpg, ...
