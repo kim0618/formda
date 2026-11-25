@@ -553,12 +553,12 @@
           sealField(cfg, '작성자 도장·서명 이미지 (선택)') +
         '</div>' +
         '<div class="form-sec"><h2>' + (L.content || '경위') + '</h2>' +
-          '<div class="row2">' + lf('incDate', L.when || '발생 일시', '2026-11-18 09:40') + lf('place', L.place || '발생 장소', '본사 3층 사무실') + '</div>' +
+          '<div class="row2">' + lf('incDate', L.when || '발생 일시', cfg.whenPh || '2026-11-18 09:40') + lf('place', L.place || '발생 장소', cfg.placePh || '본사 3층 사무실') + '</div>' +
           ta('content', L.content || '경위', 6, cfg.contentPh || '', cfg.contentHelp) +
           (cfg.showCause ? ta('cause', L.cause || '원인', 3, cfg.causePh || '', cfg.causeHelp) : '') +
           (cfg.showAction ? ta('action', L.action || '조치 및 영향', 3, cfg.actionPh || '') : '') +
           (cfg.showPledge ? ta('pledge', L.pledge || '재발 방지 다짐', 3, cfg.pledgePh || '', cfg.pledgeHelp) : '') +
-          lf('attach', '첨부 (선택)', '예: 거래처 확인 메일 1부') +
+          lf('attach', '첨부 (선택)', cfg.attachPh || '예: 거래처 확인 메일 1부') +
           '<div class="field"><label>맺음 문구 (선택)</label><input id="f-lead" placeholder="비우면 표준 문구가 들어갑니다." oninput="Formda.app.onField(\'lead\', this.value)"></div>' +
           '<div class="field"><label>작성일자</label><input id="f-date" type="date" oninput="Formda.app.onField(\'date\', this.value)"></div>' +
           (cfg.formHelp ? '<p class="field-help">' + cfg.formHelp + '</p>' : '') +

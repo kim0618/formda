@@ -164,7 +164,7 @@ const SAVE_FAQ = [
 // 민감 문서(법률·노무) 안내: 법률 자문이 아님을 명시해 분쟁 리스크를 차단한다.
 // 법률형(차용증·합의서·내용증명·지불각서·위임장·프리랜서계약서) vs 노무형(근로계약서)로 문구 구분.
 const LEGAL_NOTE_LABOR = new Set(['employment-contract']);
-const LEGAL_NOTE_LEGAL = new Set(['loan', 'agreement', 'content-proof', 'payment-pledge', 'mandate', 'freelance-contract', 'apology-letter', 'incident-report']);
+const LEGAL_NOTE_LEGAL = new Set(['loan', 'agreement', 'content-proof', 'payment-pledge', 'mandate', 'freelance-contract', 'apology-letter', 'incident-report', 'reason-statement']);
 function legalNoteHTML(tool) {
   const isLabor = LEGAL_NOTE_LABOR.has(tool.slug);
   const isLegal = LEGAL_NOTE_LEGAL.has(tool.slug);
@@ -225,6 +225,7 @@ const HOWTO_INPUT_SLUG = {
   'alba-resume': '인적사항과 근무 가능 요일·시간, 아르바이트 경력을 입력합니다.',
   'apology-letter': '작성자 정보와 발생 일시·경위·원인, 재발 방지 다짐을 입력합니다.',
   'incident-report': '작성자 정보와 발생 일시·장소, 시간순 경위·원인, 조치 및 결과를 입력합니다.',
+  'reason-statement': '작성자 정보와 해당 일시·구분, 사유와 처리 요청을 입력합니다.',
 };
 const HOWTO_INPUT_TYPE = {
   'business-invoice': '공급자·공급받는자 정보와 품목·수량·단가를 입력합니다.',
