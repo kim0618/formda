@@ -275,7 +275,10 @@
       ctRow('성　명', s.name) + ctRow('생년월일', s.birth) +
       ctRow('주　소', s.addr) +
       ctRow('소　속', s.dept) + ctRow('직　위', s.position) +
-      ctRow('재직기간', s.period) + '</tbody></table>';
+      ctRow('재직기간', s.period) +
+      // 종류별 추가 줄(알바 재직증명서의 근무 형태 등): 채운 것만
+      (cfg.extraRows || []).filter(function (r) { return String(s[r.k] || '').trim(); }).map(function (r) { return ctRow(r.docLabel || r.label, s[r.k]); }).join('') +
+      '</tbody></table>';
     var meta = [];
     if (s.orgReg) meta.push('사업자등록번호 ' + esc(s.orgReg));
     if (s.orgTel) meta.push('전화 ' + esc(s.orgTel));
@@ -291,7 +294,7 @@
         '<div class="ct-date">' + korDate(s.date) + '</div>' +
         '<div class="ct-issuer">' +
           '<div class="ct-org">' + (esc(s.orgName) || '&nbsp;') + '</div>' +
-          '<div class="ct-ceo">대표이사 ' + (esc(s.orgCeo) || '&nbsp;') + sealHTML(s, cfg) + '</div>' +
+          '<div class="ct-ceo">' + (cfg.ceoTitle || '대표이사') + ' ' + (esc(s.orgCeo) || '&nbsp;') + sealHTML(s, cfg) + '</div>' +
           '<div class="ct-meta">' + meta.join('　·　') + '</div>' +
         '</div>' +
       '</div>' +
@@ -299,13 +302,13 @@
   }
   // 사유 칸을 비워 두면 위 칸(입사일자·소속·퇴직희망일) 값으로 본문을 만든다.
   // 예시 문장에 박힌 남의 날짜·부서가 문서에 찍히지 않게 하려는 것.
-  function resignationBody(s) {
+  function resignationBody(s, cfg) {
     var hire = String(s.hireDate || '').trim(), dept = String(s.dept || '').trim(), last = String(s.lastDay || '').trim();
     var head = '상기 본인은 ';
     if (hire && dept) head += hire + ' 입사하여 ' + dept + '에서 근무하여 왔으나, ';
     else if (hire) head += hire + ' 입사하여 근무하여 왔으나, ';
     else if (dept) head += dept + '에서 근무하여 왔으나, ';
-    var txt = head + '일신상의 사유로 인하여 부득이 사직하고자 본 사직서를 제출합니다. ';
+    var txt = head + ((cfg && cfg.reasonPhrase) || '일신상의 사유로 인하여 부득이 사직하고자') + ' 본 사직서를 제출합니다. ';
     txt += last ? '퇴직 희망일은 ' + last + '이며, 그때까지 담당하던 업무를 후임자에게 차질 없이 인수인계하도록 하겠습니다. '
                 : '퇴직 전까지 담당하던 업무를 후임자에게 차질 없이 인수인계하도록 하겠습니다. ';
     return txt + '재직 기간 동안 베풀어 주신 배려와 가르침에 깊이 감사드리며, 회사의 무궁한 발전을 진심으로 기원합니다. 아무쪼록 재가하여 주시기 바랍니다.';
@@ -319,7 +322,7 @@
     return '<div class="ct-page">' +
       '<div class="ct-top">' +
         '<div class="ct-title">' + esc(cfg.docTitle) + '</div>' + info +
-        '<div class="ct-body ct-letter">' + (String(s.body || '').trim() ? esc(s.body) : esc(resignationBody(s))) + '</div>' +
+        '<div class="ct-body ct-letter">' + (String(s.body || '').trim() ? esc(s.body) : esc(resignationBody(s, cfg))) + '</div>' +
         // 인수인계 칸이 비면 제목·상자 모두 생략 (인수인계서를 따로 내는 경우 빈 상자가 남지 않게)
         (String(s.handover || '').trim() ? '<div class="ct-sec">인수인계 사항</div><div class="ct-handover">' + esc(s.handover) + '</div>' : '') +
       '</div>' +
@@ -330,33 +333,95 @@
       '</div>' +
     '</div>';
   }
+  // ----- 상장 계열 (11/26 실사용 조사 반영) -----
+  // 실제 상장 배치: 제○호 → 제목 → [왼쪽 등급 | 오른쪽 소속·성명] → 본문 → 날짜 → 기관·직위·성명·직인.
+  // 테두리는 단순 선 3종 + 없음(금박 상장용지에 글자만 인쇄). 없음일 때 위치(mm)·안쪽 여백(mm) 조정.
+  var AW_STYLES = ['gold', 'classic', 'geo', 'phoenix', 'cloud', 'flower', 'double', 'corner', 'line', 'none'];
+  // 그림 테두리(A4 배경 이미지, 11/26 사용자 제공 그림에서 선정): 금장·클래식 장식·기하학·봉황·전통 구름·꽃 넝쿨. 색 선택은 나중
+  var AW_IMG = { gold: 1, classic: 1, geo: 1, phoenix: 1, cloud: 1, flower: 1 };
+  var MM = 794 / 210;   // A4 1mm = 3.78px
+  function awCornerImg() {
+    var svg = '<svg xmlns="http://www.w3.org/2000/svg" width="46" height="46" viewBox="0 0 46 46"><g fill="none" stroke="#a87a26" stroke-width="1.6">' +
+      '<path d="M2 44V2h42"/><path d="M9 44V9h35"/><path d="M16 30V16h14v8h-6v-2"/></g></svg>';
+    var src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
+    return ['tl', 'tr', 'bl', 'br'].map(function (c) { return '<img class="aw-corner aw-c-' + c + '" alt="" width="46" height="46" src="' + src + '">'; }).join('');
+  }
+  function awRows(s, cfg) {
+    var rows = (cfg.extraRows || []).filter(function (r) { return String(s[r.k] || '').trim(); });
+    if (!rows.length) return '';
+    return '<div class="aw-rows">' + rows.map(function (r) {
+      return '<div><span class="k">' + esc(r.docLabel || r.label) + '</span><span class="v">' + esc(String(s[r.k]).trim()) + '</span></div>';
+    }).join('') + '</div>';
+  }
+  // 금장: 제목이 월계수 사이(약 290px)에 들어가도록 글자 수에 맞춰 크기·자간 조정
+  function awTitleFit(st, t) {
+    if (!AW_IMG[st]) return '';
+    var n = String(t || '').replace(/\s+/g, '').length;
+    var wide = st !== 'gold';   // 월계수 없는 테두리는 제목 자리가 넓다(약 420px)
+    var fs = n <= 2 ? 84 : n === 3 ? (wide ? 78 : 64) : n === 4 ? (wide ? 66 : 52) : n === 5 ? (wide ? 56 : 44) : (wide ? 46 : 36);
+    var ls = n <= 2 ? 40 : n === 3 ? (wide ? 30 : 18) : n === 4 ? (wide ? 16 : 8) : (wide ? 8 : 4);
+    return ' style="font-size:' + fs + 'px;letter-spacing:' + ls + 'px;margin-right:-' + ls + 'px"';
+  }
+  function awNum(v, lo, hi) { var n = parseFloat(v); if (!isFinite(n)) return 0; return Math.max(lo, Math.min(hi, n)); }
   function renderAward(state, cfg) {
     var s = state;
-    return '<div class="aw-page">' +
-      '<div class="aw-top">' +
-        (String(s.docNo || '').trim() ? '<div class="ct-docno">' + esc(docNoText(s.docNo)) + '</div>' : '') +
-        '<div class="aw-title">' + (esc(s.docTitle) || esc(cfg.docTitle)) + '</div>' +
-        '<div class="aw-flourish"><span>&#9670;</span></div>' +
-      '</div>' +
-      '<div class="aw-mid">' +
-        '<div class="aw-recipient">' +
-          (s.recipientSub ? '<div class="aw-sub">' + esc(s.recipientSub) + '</div>' : '') +
-          '<div class="aw-name">' + (esc(s.name) || '&nbsp;') + '</div>' +
+    var st = AW_STYLES.indexOf(s.awStyle) >= 0 ? s.awStyle : 'gold';
+    if (AW_IMG[st] && s.awOrient === 'land') st = 'double';   // 그림 테두리는 세로 전용
+    var font = { myeongjo: 1, gungseo: 1, gothic: 1 }[s.awFont] ? s.awFont : (cfg.awFont || 'myeongjo');
+    var title = String(s.docTitle || '').trim() ? esc(s.docTitle) : esc(cfg.docTitle);
+    var grade = cfg.showGrade === false ? '' : String(s.grade || '').trim();
+    var inStyle = '';
+    if (st === 'none') {
+      var ox = awNum(s.awOffX, -30, 30), oy = awNum(s.awOffY, -30, 30), ins = awNum(s.awInset, 0, 40);
+      inStyle = ' style="transform:translate(' + (ox * MM).toFixed(1) + 'px,' + (oy * MM).toFixed(1) + 'px);padding:' + (64 + ins * MM).toFixed(1) + 'px ' + (56 + ins * MM).toFixed(1) + 'px"';
+    }
+    var who = grade
+      ? '<div class="aw-who aw-split"><div class="aw-grade">' + esc(grade) + '</div>' +
+          '<div class="aw-person">' + (s.recipientSub ? '<div class="aw-sub">' + esc(s.recipientSub) + '</div>' : '') +
+          '<div class="aw-pname"><span class="k">성명</span><span class="aw-name">' + (esc(s.name) || '&nbsp;') + '</span></div></div></div>'
+      : '<div class="aw-who">' + (s.recipientSub ? '<div class="aw-sub">' + esc(s.recipientSub) + '</div>' : '') +
+          '<div class="aw-name">' + (esc(s.name) || '&nbsp;') + '</div></div>';
+    return '<div class="aw-page aw-s-' + st + (AW_IMG[st] ? ' aw-s-img' : '') + ' aw-f-' + font + '">' +
+      '<span class="aw-frame aw-fr1"></span>' +
+      (st === 'corner' ? awCornerImg() : '') +
+      '<div class="aw-in"' + inStyle + '>' +
+        (String(s.docNo || '').trim() ? '<div class="aw-no">' + esc(docNoText(s.docNo)) + '</div>' : '') +
+        '<div class="aw-title"' + awTitleFit(st, s.docTitle || cfg.docTitle) + '>' + (AW_IMG[st] ? esc(String(s.docTitle || cfg.docTitle || '').replace(/\s+/g, '')) : title) + '</div>' +
+        who +
+        awRows(s, cfg) +
+        '<div class="aw-body">' + (esc(s.body) || esc(cfg.bodyDefault) || '위 사람은 평소 맡은 바 직무에 성실하고 그 성과가 우수하여 다른 이의 모범이 되므로, 그 공로를 기리어 이 상장을 수여합니다.') + '</div>' +
+        '<div class="aw-bottom">' +
+          '<div class="aw-date">' + korDate(s.date) + '</div>' +
+          '<div class="aw-org">' + (esc(s.orgName) || '&nbsp;') + '</div>' +
+          '<div class="aw-ceo">' + (esc(s.orgTitle) || '대표이사') + '　<span class="aw-ceo-name">' + (esc(s.orgCeo) || '&nbsp;') + '</span>' + sealHTML(s, cfg) + '</div>' +
         '</div>' +
-        '<div class="aw-body">' + (esc(s.body) || '위 사람은 평소 맡은 바 직무에 성실하고 그 성과가 우수하여 다른 이의 모범이 되므로, 그 공로를 기리어 이 상장을 수여합니다.') + '</div>' +
-      '</div>' +
-      '<div class="aw-bottom">' +
-        '<div class="aw-date">' + korDate(s.date) + '</div>' +
-        '<div class="aw-issuer"><div class="aw-org">' + (esc(s.orgName) || '&nbsp;') + '</div>' +
-          '<div class="aw-ceo">' + (esc(s.orgTitle) || '대표이사') + '　' + (esc(s.orgCeo) || '&nbsp;') + sealHTML(s, cfg) + '</div></div>' +
       '</div>' +
     '</div>';
+  }
+  // 여러 명 한 번에: '이름 / 소속 / 등급' 한 줄에 한 명 (소속·등급 생략 가능), 최대 60명
+  function awBatch(state) {
+    return String(state.batch || '').split('\n').map(function (l) { return l.trim(); }).filter(Boolean).slice(0, 60).map(function (l) {
+      var p = l.split(/\s*[\/,]\s*/);
+      return { name: p[0] || '', sub: p[1] || '', grade: p[2] || '' };
+    }).filter(function (r) { return r.name; });
   }
   function certificate(state, cfg, opts) {
     opts = opts || {};
     var inner;
     if (cfg.variant === 'resignation') inner = renderResignation(state, cfg);
-    else if (cfg.variant === 'award') inner = renderAward(state, cfg);
+    else if (cfg.variant === 'award') {
+      var land = state.awOrient === 'land' ? 'aw-land' : (AW_IMG[state.awStyle || 'gold'] ? 'aw-img-' + (state.awStyle || 'gold') : '');
+      // 금장: 왕관·월계수·모서리 문양 테두리 이미지를 A4 페이지 배경으로(저장용 html2canvas가 배경 이미지는 정확히 그림)
+      var list = opts.single ? [] : awBatch(state);
+      if (list.length) {
+        // 한 사람에 한 장: 이름·소속·등급만 바꿔 여러 페이지 → PDF는 페이지별, PNG는 이어 붙임
+        return '<div class="doc-pages">' + list.map(function (r) {
+          var one = Object.assign({}, state, { name: r.name, recipientSub: r.sub || state.recipientSub, grade: r.grade || state.grade });
+          return pageEl(renderAward(one, cfg), land);
+        }).join('') + '</div>';
+      }
+      return wrap(renderAward(state, cfg), opts, land);
+    }
     else inner = renderEmployment(state, cfg);
     return wrap(inner, opts);
   }
@@ -570,7 +635,7 @@
       '<div class="lg-parties">' + creditor + debtor + '</div>' +
       '<div class="lg-amount"><div class="lg-amount-kr">일금 ' + (amount > 0 ? calc.korAmount(amount) + '원정' : '&nbsp;') + '</div>' +
         '<div class="lg-amount-num">₩ ' + comma(amount) + '</div></div>' +
-      '<div class="lg-body">' + (esc(s.body) || '위 채무자는 위 금액을 채권자로부터 틀림없이 차용하고 영수하였으며, 아래에 정한 바에 따라 원리금을 변제할 것을 확약합니다.') + '</div>' +
+      '<div class="lg-body">' + (esc(s.body) || '위 채무자는 위 금액을 채권자로부터 틀림없이 차용하고 영수하였으며, 아래에 정한 바에 따라 ' + (String(s.rate == null ? '' : s.rate).trim() === '' ? '원금' : '원리금') + '을 변제할 것을 확약합니다.') + '</div>' +
       '<table class="lg-terms"><tbody>' + lgRows(terms) + '</tbody></table>' +
       (s.special ? '<div class="lg-sec">특약사항</div><div class="lg-special">' + esc(s.special) + '</div>' : '') +
       '<div class="lg-date">' + korDate(s.date) + '</div>' +
@@ -583,14 +648,15 @@
   function renderMandate(state, cfg) {
     var s = state;
     // 표준 순서: 위임인(본인) → 수임인(대리인) → 위임내용 → 선언문 → 날짜 → 위임인 서명
-    var principal = lgParty('위임인 (본인)', [
-      ['성　명', vOr(s.prName)], ['주민등록번호', vOr(s.prId)],
-      ['주　소', vOr(s.prAddr)], ['연　락　처', vOr(s.prTel)],
+    var PL = cfg.prLabels || {};   // 법인 위임장 등 종류별 위임인 칸 이름
+    var principal = lgParty(cfg.prHead || '위임인 (본인)', [
+      [PL.name || '성　명', vOr(s.prName)], [PL.id || '주민등록번호', vOr(s.prId)],
+      [PL.addr || '주　소', vOr(s.prAddr)], [PL.tel || '연　락　처', vOr(s.prTel)],
     ]);
     var agent = lgParty('수임인 (대리인)', [
       ['성　명', vOr(s.agName)], ['주민등록번호', vOr(s.agId)],
       ['주　소', vOr(s.agAddr)], ['연　락　처', vOr(s.agTel)],
-      ['위임인과의 관계', vOr(s.relation)],
+      [cfg.relLabel || '위임인과의 관계', vOr(s.relation)],
     ]);
     var extra = [];
     if (s.period) extra.push(['위 임 기 간', esc(s.period)]);
@@ -639,11 +705,11 @@
   // 합의서·각서 - 당사자(갑·을)가 합의 내용을 정하고 이행을 확약
   function renderAgreement(state, cfg) {
     var s = state;
-    var pA = lgParty('갑 (당사자 1)', [
+    var pA = lgParty(cfg.partyA || '갑 (당사자 1)', [
       ['성　명', vOr(s.prName)], ['주민등록번호', vOr(s.prId)],
       ['주　소', vOr(s.prAddr)], ['연　락　처', vOr(s.prTel)],
     ]);
-    var pB = lgParty('을 (당사자 2)', [
+    var pB = lgParty(cfg.partyB || '을 (당사자 2)', [
       ['성　명', vOr(s.agName)], ['주민등록번호', vOr(s.agId)],
       ['주　소', vOr(s.agAddr)], ['연　락　처', vOr(s.agTel)],
     ]);

@@ -1,4 +1,5 @@
 // 공통 셸 (head / header+nav / footer) - 모든 페이지 공통
+import { av } from './asset-version.mjs';
 import { site, categories } from '../data/registry.js';
 import { config, publicConfig } from '../data/config.js';
 
@@ -9,7 +10,7 @@ const TRUST_PAGES = [
   { href: '/pages/contact.html', label: '문의' },
 ];
 
-export function head({ title, description, canonical, keywords, robots, ogType, publishedTime, modifiedTime }) {
+export function head({ title, description, canonical, keywords, robots, ogType, publishedTime, modifiedTime, extraHead }) {
   const type = ogType || 'website';
   // Cloudflare Pages는 /foo.html을 /foo로 308 리다이렉트하는 게 기본 동작이라(끌 수 없음),
   // 캐노니컬·og:url은 실제 최종 서빙 URL(확장자 없는 형태)과 일치시킨다.
@@ -43,8 +44,8 @@ ${config.NAVER_SITE_VERIFICATION ? `<meta name="naver-site-verification" content
 <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png" />
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
 <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin />
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard-dynamic-subset.css" />
-<link rel="stylesheet" href="/styles/tokens.css" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard-dynamic-subset.css" />${extraHead ? '\n' + extraHead : ''}
+<link rel="stylesheet" href="${av('/styles/tokens.css')}" />
 ${analytics()}${adsense()}<script>window.FORMDA_CFG=${JSON.stringify(publicConfig())};</script>
 </head>
 <body>`;
@@ -78,8 +79,8 @@ export function footer() {
     <div class="footer-copy">© ${site.name} · ${site.tagline}</div>
   </div>
 </footer>
-<script src="/engine/track.js" defer></script>
-<script src="/engine/search.js" defer></script>
+<script src="${av('/engine/track.js')}" defer></script>
+<script src="${av('/engine/search.js')}" defer></script>
 </body>
 </html>`;
 }

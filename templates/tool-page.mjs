@@ -1,4 +1,5 @@
 // 도구 페이지 템플릿 (좌 입력 / 우 A4 미리보기 + 프리렌더 본문)
+import { av } from './asset-version.mjs';
 import { head, header, footer, trustBadge, steps, orgNode } from './shell.mjs';
 import { site, categoryBySlug, toolsBySlug } from '../data/registry.js';
 import { guidesByTool } from '../data/guides.js';
@@ -56,13 +57,22 @@ export function toolPage(tool) {
     docType: tool.docType,
     doc: tool.doc,
     sample: tool.sample,
+    ...(tool.kinds ? { kinds: tool.kinds.map(k => ({ id: k.id, doc: k.doc, sample: k.sample })) } : {}),
   };
+  // 종류 선택 버튼(같은 URL 안). 첫 번째가 기본, ?kind=id 로 미리 선택
+  const kindBar = tool.kinds
+    ? `<div class="kind-bar no-print" id="kindBar"><div class="kind-h">${tool.kindsLabel || '종류 고르기'}</div><div class="kind-list">${
+        tool.kinds.map((k, i) => `<button type="button" data-kind="${k.id}" class="${i === 0 ? 'on' : ''}" aria-pressed="${i === 0}" onclick="Formda.app.setKind('${k.id}')">${k.label}</button>`).join('')
+      }</div></div>`
+    : '';
 
   return `${head({
     title: tool.seoTitle,
     description: tool.seoDescription,
     canonical,
     keywords: (tool.keywords || []).join(', '),
+    // 문서 전용 웹폰트(상장 명조·궁서풍): 사용자 PC 글꼴과 상관없이 미리보기·저장 모양을 같게
+    extraHead: tool.docFonts ? `<link rel="preconnect" href="https://fonts.googleapis.com" /><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin /><link rel="stylesheet" href="https://fonts.googleapis.com/css2?${tool.docFonts}&display=swap" />` : '',
   })}
 ${header(tool.category)}
 
@@ -89,6 +99,8 @@ ${header(tool.category)}
           <button class="mini-btn danger" type="button" onclick="Formda.app.clearAll()">전체 비우기</button>
         </div>
       </div>
+      ${kindBar}
+      ${tool.doc && tool.doc.variant === 'award' ? '<div class="design-strip no-print" id="designHost"></div>' : ''}
       <div class="form-scroll"><div id="formPanel"><!-- 입력폼: 엔진이 렌더 --></div></div>
     </section>
 
@@ -127,12 +139,12 @@ ${header(tool.category)}
 ${footer()}
 
 <script>window.FORMDA_TOOL = ${JSON.stringify(toolConfig)};</script>
-<script src="/engine/calc.js"></script>
-<script src="/engine/doc-render.js"></script>
-<script src="/engine/form-engine.js"></script>
-<script src="/engine/export.js"></script>
-<script src="/engine/app.js"></script>
-<script src="/engine/pay.js" defer></script>
+<script src="${av('/engine/calc.js')}"></script>
+<script src="${av('/engine/doc-render.js')}"></script>
+<script src="${av('/engine/form-engine.js')}"></script>
+<script src="${av('/engine/export.js')}"></script>
+<script src="${av('/engine/app.js')}"></script>
+<script src="${av('/engine/pay.js')}" defer></script>
 ${jsonLd(tool)}
 `;
 }
@@ -219,7 +231,7 @@ function relatedHTML(tool) {
 const HOWTO_INPUT_SLUG = {
   employment: '회사·근로자 정보와 재직 사항을 입력합니다.',
   resignation: '소속·직위와 퇴직 사유·퇴직 예정일을 입력합니다.',
-  award: '수여 기관과 수상자 이름·상장 문구를 입력합니다.',
+  award: '종류와 테두리를 고르고, 받는 사람·문구와 주는 곳을 입력합니다.',
   loan: '채권자·채무자 정보와 차용 금액·이자율·변제기일을 입력합니다.',
   mandate: '위임인·수임인 정보와 위임할 내용을 입력합니다.',
   'alba-resume': '인적사항과 근무 가능 요일·시간, 아르바이트 경력을 입력합니다.',

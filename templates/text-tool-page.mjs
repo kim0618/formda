@@ -1,4 +1,5 @@
 // 텍스트 유틸 도구 페이지 (A4·PDF 없는 유틸 레이아웃 + 프리렌더 본문)
+import { av } from './asset-version.mjs';
 import { head, header, footer, trustBadge } from './shell.mjs';
 import { svg } from './icons.mjs';
 import { site, categoryBySlug, toolsBySlug } from '../data/registry.js';
@@ -29,7 +30,7 @@ ${footer()}
 
 ${tool.kind === 'qr' ? '<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>' : ''}
 <script>window.FORMDA_TEXT_TOOL = ${JSON.stringify(cfg)};</script>
-<script src="/engine/text-engine.js"></script>
+<script src="${av('/engine/text-engine.js')}"></script>
 ${jsonLd(tool)}
 `;
 }

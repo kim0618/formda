@@ -149,6 +149,31 @@
       (type ? ' type="' + type + '"' : '') + (ph ? ' placeholder="' + ph + '"' : '') +
       ' oninput="Formda.app.onField(\'' + id + '\', this.value)"></div>';
   }
+  // 상장 테두리 썸네일 줄: 종류 선택 바로 아래(입력 칸 위)에 한 줄. 편집 화면이 창 높이 고정이라 미리보기 아래에 두면 미리보기가 1/3 줄어듦(11/26 측정)
+  var AW_THUMBS = [['gold', '금장'], ['classic', '클래식'], ['geo', '기하학'], ['phoenix', '봉황'], ['cloud', '전통 구름'], ['flower', '꽃 넝쿨'], ['double', '심플'], ['none', '없음·상장용지']];
+  function awardThumbs() {
+    return '<div class="kind-h">테두리</div><div class="aw-thumbs">' + AW_THUMBS.map(function (x) {
+      return '<button type="button" class="aw-thumb" data-aw="awStyle" data-v="' + x[0] + '" onclick="Formda.app.onAw(\'awStyle\', \'' + x[0] + '\')" title="' + x[1] + '">' +
+        '<img src="/assets/award/thumb-' + x[0] + '.jpg" alt="" width="36" height="51"><span>' + x[1] + '</span></button>';
+    }).join('') + '</div>';
+  }
+  // 서체·방향·상장용지 위치: 자주 안 바꾸는 설정이라 입력 칸 맨 아래
+  function awardOptions() {
+    var chip = function (key, val, label) {
+      return '<button type="button" data-aw="' + key + '" data-v="' + val + '" onclick="Formda.app.onAw(\'' + key + '\', \'' + val + '\')">' + label + '</button>';
+    };
+    var num = function (key, label, ph) {
+      return '<div class="field"><label>' + label + '</label><input id="f-' + key + '" type="number" step="0.5" inputmode="decimal" placeholder="' + ph + '" oninput="Formda.app.onAwNum(\'' + key + '\', this.value)"></div>';
+    };
+    return '<div class="form-sec"><h2>모양 설정</h2>' +
+      '<div class="aw-paper" id="awPaper" style="display:none">' +
+        '<p class="field-help" style="margin:0 0 8px">금박 테두리가 이미 찍힌 <b>상장용지</b>에 글자만 인쇄합니다. 먼저 <b>일반 종이에 시험 인쇄</b>해 상장용지와 겹쳐 보고, 글자가 테두리에 걸리면 아래 값을 조정하세요. 인쇄할 때 배율은 <b>실제 크기(100%)</b>로 두세요.</p>' +
+        '<div class="row3">' + num('awOffY', '위아래 (mm)', '0, 아래로 +') + num('awOffX', '좌우 (mm)', '0, 오른쪽 +') + num('awInset', '안쪽 여백 (mm)', '0') + '</div>' +
+      '</div>' +
+      '<div class="row2"><div class="field"><label>서체</label><div class="aw-chips small">' + chip('awFont', 'myeongjo', '명조') + chip('awFont', 'gungseo', '궁서') + chip('awFont', 'gothic', '고딕') + '</div></div>' +
+      '<div class="field"><label>방향</label><div class="aw-chips small">' + chip('awOrient', 'port', '세로') + chip('awOrient', 'land', '가로') + '</div><p class="field-help">그림 테두리는 세로 전용이라 가로로 하면 심플 이중선이 됩니다.</p></div></div>' +
+    '</div>';
+  }
   function certificateForm(cfg) {
     var sealBlock = cfg.showSeal
       ? '<div class="field"><label>도장·서명 이미지 (선택)</label><div class="seal-upload">' +
@@ -158,24 +183,51 @@
           '<div class="seal-name" id="sealName"></div></div>'
       : '';
     if (cfg.variant === 'award') {
+      // 상장 계열: 종류(cfg)마다 라벨·예시·추가 칸이 바뀐다. 디자인은 단순 테두리 3종 + 없음(상장용지 인쇄)
+      var L = cfg.labels || {};
+      var esc = function (t) { return String(t == null ? '' : t).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;'); };
+      var titleWord = String(cfg.docTitle || '상장').replace(/\s+/g, '');
+      var extra = (cfg.extraRows || []).map(function (r) { return lf(r.k, esc(r.label), esc(r.ph || ''), r.type); }).join('');
+      var chip = function (key, val, label) {
+        return '<button type="button" data-aw="' + key + '" data-v="' + val + '" onclick="Formda.app.onAw(\'' + key + '\', \'' + val + '\')">' + label + '</button>';
+      };
+      var num = function (key, label, ph) {
+        return '<div class="field"><label>' + label + '</label><input id="f-' + key + '" type="number" step="0.5" inputmode="decimal" placeholder="' + ph + '" oninput="Formda.app.onAwNum(\'' + key + '\', this.value)"></div>';
+      };
+      var gradeChips = (cfg.grades || []).map(function (g) { return '<button type="button" onclick="Formda.app.awGrade(\'' + g + '\')">' + g + '</button>'; }).join('');
+      var phrases = (cfg.phrases || []).map(function (ph, k) { return '<button type="button" onclick="Formda.app.awPhrase(' + k + ')">' + esc(ph.label) + '</button>'; }).join('');
       return '' +
-        '<div class="form-sec"><h2>수상자</h2>' +
-          lf('recipientSub', '소속·직위', '경영지원팀 과장') +
+        '<div class="form-sec"><h2>' + (L.who || '받는 사람') + '</h2>' +
+          (cfg.showGrade === false ? '' :
+            '<div class="field"><label>등급·상 이름 (선택)</label><input id="f-grade" placeholder="예: 우수상" oninput="Formda.app.onField(\'grade\', this.value)">' +
+            (gradeChips ? '<div class="aw-chips small" style="margin-top:8px">' + gradeChips + '</div>' : '') +
+            '<p class="field-help">넣으면 실제 상장처럼 <b>왼쪽에 등급, 오른쪽에 소속·성명</b>이 놓입니다. 비우면 이름이 가운데로 갑니다.</p></div>') +
+          lf('recipientSub', '소속 (선택)', esc(cfg.subPh || '예: 경영지원팀 과장 / 6학년 3반')) +
           lf('name', '성명', '홍길동') +
+          extra +
+          '<div class="field"><label>여러 명 한 번에 (선택)</label>' +
+            (cfg.showGrade === false
+              ? '<textarea id="f-batch" rows="3" placeholder="한 줄에 한 명씩\n홍길동\n김영희 / ' + esc(cfg.batchSubEg || '영업2팀 대리') + '" oninput="Formda.app.onField(\'batch\', this.value)"></textarea>' +
+                '<p class="field-help">한 줄에 한 명씩 <b>이름 / 소속</b> 순서로 적습니다(소속은 생략 가능, 생략하면 위 칸 값). 적은 사람 수만큼 한 장씩 만들어져 <b>PDF 한 파일</b>로 저장됩니다. 최대 60명.</p></div>'
+              : '<textarea id="f-batch" rows="3" placeholder="한 줄에 한 명씩\n홍길동\n김영희 / 6학년 2반 / 최우수상" oninput="Formda.app.onField(\'batch\', this.value)"></textarea>' +
+                '<p class="field-help">한 줄에 한 명씩 <b>이름 / 소속 / 등급</b> 순서로 적습니다(소속·등급은 생략 가능, 생략하면 위 칸 값). 적은 사람 수만큼 한 장씩 만들어져 <b>PDF 한 파일</b>로 저장됩니다. 최대 60명.</p></div>') +
         '</div>' +
-        '<div class="form-sec"><h2>수여 내용</h2>' +
+        '<div class="form-sec"><h2>' + (L.what || '내용') + '</h2>' +
           '<div class="field"><label>제목</label>' +
-            '<input id="f-docTitle" placeholder="상장" oninput="Formda.app.onField(\'docTitle\', this.value)">' +
-            '<p class="field-help">표창장·감사장·공로상 등으로 바꾸려면 이 칸에 직접 입력하세요. 비우면 "상장"으로 표시됩니다.</p></div>' +
-          '<div class="field"><label>수여 문구·공적</label>' +
-            '<textarea id="f-body" rows="6" placeholder="위 사람은 ~하여 그 공이 크므로 이 상장을 수여합니다." oninput="Formda.app.onField(\'body\', this.value)"></textarea></div>' +
-          '<div class="row2">' + lf('docNo', '상장 번호 (선택)', '2026-001') + lf('date', '수여일자', '', 'date') + '</div>' +
+            '<input id="f-docTitle" placeholder="' + esc(titleWord) + '" oninput="Formda.app.onField(\'docTitle\', this.value)">' +
+            '<p class="field-help">' + (cfg.titleHelp || ('비우면 "' + esc(titleWord) + '"으로 표시됩니다.')) + '</p></div>' +
+          '<div class="field"><label>' + (L.body || '본문 문구') + '</label>' +
+            (phrases ? '<div class="aw-chips small" style="margin-bottom:8px">' + phrases + '</div>' : '') +
+            '<textarea id="f-body" rows="5" placeholder="' + esc(cfg.bodyPh || '위 사람은 ~하여 그 공이 크므로 이 상장을 수여합니다.') + '" oninput="Formda.app.onField(\'body\', this.value)"></textarea>' +
+            (cfg.bodyHelp ? '<p class="field-help">' + cfg.bodyHelp + '</p>' : '<p class="field-help">위 버튼을 누르면 예시 문구가 들어갑니다. ○○ 부분을 실제 내용으로 바꾸세요.</p>') + '</div>' +
+          '<div class="row2">' + lf('docNo', (L.no || '번호') + ' (선택)', '2026-001') + lf('date', L.date || '날짜', '', 'date') + '</div>' +
         '</div>' +
-        '<div class="form-sec"><h2>수여기관</h2>' +
-          lf('orgName', '기관·회사명', '폼다 주식회사') +
-          '<div class="row2">' + lf('orgTitle', '직위', '대표이사') + lf('orgCeo', '성명', '김폼다') + '</div>' +
+        '<div class="form-sec"><h2>' + (L.org || '주는 곳') + '</h2>' +
+          lf('orgName', '기관·단체명', '폼다 주식회사 / ○○초등학교') +
+          '<div class="row2">' + lf('orgTitle', '직위', '대표이사 / 교장') + lf('orgCeo', '성명', '김폼다') + '</div>' +
           sealBlock +
-        '</div>';
+        '</div>' +
+        awardOptions();
     }
     if (cfg.variant === 'resignation') {
       return '' +
@@ -186,7 +238,8 @@
         '</div>' +
         '<div class="form-sec"><h2>사직 내용</h2>' +
           '<div class="field"><label>사직 사유·문구</label>' +
-            '<textarea id="f-body" rows="4" placeholder="비워 두면 위의 입사일자·소속·퇴직 희망일로 기본 문장을 만들어 넣습니다. 사유를 직접 쓰려면 여기에 적으세요." oninput="Formda.app.onField(\'body\', this.value)"></textarea></div>' +
+            '<textarea id="f-body" rows="4" placeholder="비워 두면 위의 입사일자·소속·퇴직 희망일로 기본 문장을 만들어 넣습니다. 사유를 직접 쓰려면 여기에 적으세요." oninput="Formda.app.onField(\'body\', this.value)"></textarea>' +
+            (cfg.bodyHelp ? '<p class="field-help">' + cfg.bodyHelp + '</p>' : '') + '</div>' +
           '<div class="field"><label>인수인계 사항 (선택)</label>' +
             '<textarea id="f-handover" rows="3" placeholder="담당 업무, 후임자, 인수인계 기간 등. 비워 두면 문서에서 이 항목을 뺍니다." oninput="Formda.app.onField(\'handover\', this.value)"></textarea></div>' +
           '<div class="field"><label>작성일자</label><input id="f-date" type="date" oninput="Formda.app.onField(\'date\', this.value)"></div>' +
@@ -202,10 +255,12 @@
         lf('addr', '주소') +
         '<div class="row2">' + lf('dept', '소속·부서') + lf('position', '직위') + '</div>' +
         lf('period', '재직기간', '2018년 3월 1일 ~ 현재') +
+        (cfg.extraRows || []).map(function (r) { return lf(r.k, r.label, r.ph || ''); }).join('') +
       '</div>' +
       '<div class="form-sec"><h2>증명 내용</h2>' +
         '<div class="field"><label>증명 문구</label>' +
-          '<textarea id="f-body" rows="4" oninput="Formda.app.onField(\'body\', this.value)"></textarea></div>' +
+          '<textarea id="f-body" rows="4" oninput="Formda.app.onField(\'body\', this.value)"></textarea>' +
+          (cfg.bodyHelp ? '<p class="field-help">' + cfg.bodyHelp + '</p>' : '') + '</div>' +
         '<div class="row2">' + lf('purpose', '용도', '관공서 제출용') + lf('date', '발급일자', '', 'date') + '</div>' +
         lf('docNo', '발급번호 (선택)', '예: 2026-001') +
       '</div>' +
@@ -463,12 +518,12 @@
     }
     if (cfg.variant === 'agreement') {
       return '' +
-        '<div class="form-sec"><h2>갑 (당사자 1)</h2>' +
+        '<div class="form-sec"><h2>' + (cfg.partyA || '갑 (당사자 1)') + '</h2>' +
           '<div class="row2">' + lf('prName', '성명', '홍길동') + lf('prId', '주민등록번호 (선택)', '600101-1******') + '</div>' +
           lf('prAddr', '주소', '서울시 ...') +
           lf('prTel', '연락처', '010-0000-0000') +
         '</div>' +
-        '<div class="form-sec"><h2>을 (당사자 2)</h2>' +
+        '<div class="form-sec"><h2>' + (cfg.partyB || '을 (당사자 2)') + '</h2>' +
           '<div class="row2">' + lf('agName', '성명', '김철수') + lf('agId', '주민등록번호 (선택)', '900101-1******') + '</div>' +
           lf('agAddr', '주소', '서울시 ...') +
           lf('agTel', '연락처', '010-0000-0000') +
@@ -476,8 +531,8 @@
         '</div>' +
         '<div class="form-sec"><h2>합의 내용</h2>' +
           '<div class="field"><label>합의·각서 내용</label>' +
-            '<textarea id="f-content" rows="6" placeholder="1항에 사건을 먼저 특정하세요(일시·장소·내용). 예)\n1. 을은 2026년 5월 1일 발생한 ○○ 건에 대하여 갑에게 금 300만원을 2026년 8월 31일까지 지급한다.\n2. 갑은 위 금액을 지급받고 본 건 손해배상(민사)에 관하여 이의를 제기하지 아니한다." oninput="Formda.app.onField(\'content\', this.value)"></textarea>' +
-            '<p class="field-help"><b>사건(일시·장소·내용)을 먼저 특정</b>하고, 금액·기한·위반 시 조치를 조항별로 적으세요. <b>형사 사건 합의</b>라면 형사처벌 감경을 원할 때 "<b>처벌을 원하지 않는다(처벌불원)</b>"를 별도 조항으로 명확히 적어야 합니다(민사 이의 포기만으로는 형사 효과가 없습니다).</p></div>' +
+            '<textarea id="f-content" rows="6" placeholder="' + (cfg.contentPh || '1항에 사건을 먼저 특정하세요(일시·장소·내용). 예)\n1. 을은 2026년 5월 1일 발생한 ○○ 건에 대하여 갑에게 금 300만원을 2026년 8월 31일까지 지급한다.\n2. 갑은 위 금액을 지급받고 본 건 손해배상(민사)에 관하여 이의를 제기하지 아니한다.') + '" oninput="Formda.app.onField(\'content\', this.value)"></textarea>' +
+            '<p class="field-help">' + (cfg.contentHelp || '<b>사건(일시·장소·내용)을 먼저 특정</b>하고, 금액·기한·위반 시 조치를 조항별로 적으세요. <b>형사 사건 합의</b>라면 형사처벌 감경을 원할 때 "<b>처벌을 원하지 않는다(처벌불원)</b>"를 별도 조항으로 명확히 적어야 합니다(민사 이의 포기만으로는 형사 효과가 없습니다).') + '</p></div>' +
           '<div class="field"><label>맺음 문구 (선택)</label>' +
             '<input id="f-lead" placeholder="비우면 표준 문구가 들어갑니다." oninput="Formda.app.onField(\'lead\', this.value)"></div>' +
           '<div class="field"><label>특약사항 (선택)</label>' +
@@ -488,24 +543,24 @@
     }
     if (cfg.variant === 'mandate') {
       return '' +
-        '<div class="form-sec"><h2>위임인 (본인)</h2>' +
-          '<div class="row2">' + lf('prName', '성명', '홍길동') + lf('prId', '주민등록번호', '600101-1******') + '</div>' +
-          lf('prAddr', '주소', '서울시 ...') +
+        '<div class="form-sec"><h2>' + (cfg.prHead || '위임인 (본인)') + '</h2>' +
+          '<div class="row2">' + lf('prName', (cfg.prForm || {}).name || '성명', (cfg.prForm || {}).namePh || '홍길동') + lf('prId', (cfg.prForm || {}).id || '주민등록번호', (cfg.prForm || {}).idPh || '600101-1******') + '</div>' +
+          lf('prAddr', (cfg.prForm || {}).addr || '주소', '서울시 ...') +
           lf('prTel', '연락처', '010-0000-0000') +
         '</div>' +
         '<div class="form-sec"><h2>수임인 (대리인)</h2>' +
           '<div class="row2">' + lf('agName', '성명', '김대리') + lf('agId', '주민등록번호', '900101-1******') + '</div>' +
           lf('agAddr', '주소', '서울시 강남구 ...') +
-          '<div class="row2">' + lf('agTel', '연락처', '010-0000-0000') + lf('relation', '위임인과의 관계', '본인의 자녀') + '</div>' +
+          '<div class="row2">' + lf('agTel', '연락처', '010-0000-0000') + lf('relation', cfg.relLabel || '위임인과의 관계', cfg.relPh || '본인의 자녀') + '</div>' +
         '</div>' +
         '<div class="form-sec"><h2>위임 내용</h2>' +
           '<div class="field"><label>위임할 사항</label>' +
-            '<textarea id="f-content" rows="5" placeholder="예) ○○구청에서 본인의 주민등록등본·초본 발급 및 수령에 관한 일체의 권한" oninput="Formda.app.onField(\'content\', this.value)"></textarea>' +
-            '<p class="field-help">위임 사항을 구체적으로 적을수록 처리 기관에서 인정받기 쉽습니다.</p></div>' +
+            '<textarea id="f-content" rows="5" placeholder="' + (cfg.contentPh || '예) ○○구청에서 본인의 주민등록등본·초본 발급 및 수령에 관한 일체의 권한') + '" oninput="Formda.app.onField(\'content\', this.value)"></textarea>' +
+            '<p class="field-help">' + (cfg.contentHelp || '위임 사항을 구체적으로 적을수록 처리 기관에서 인정받기 쉽습니다.') + '</p></div>' +
           '<div class="row2">' + lf('period', '위임 기간 (선택)', '2026-07-01 ~ 2026-07-31') + lf('attach', '첨부서류 (선택)', '인감증명서 1부') + '</div>' +
           lf('date', '작성일자', '', 'date') +
           sealField(cfg, '위임인 인감·도장 (선택)') +
-          '<p class="field-help">관공서·금융·부동산 제출 시 인감도장 날인 + <b>인감증명서(3개월 이내) 별도 첨부</b>가 필요합니다.</p>' +
+          '<p class="field-help">' + (cfg.mandateHelp || '관공서·금융·부동산 제출 시 인감도장 날인 + <b>인감증명서(3개월 이내) 별도 첨부</b>가 필요합니다.') + '</p>' +
         '</div>';
     }
     if (cfg.variant === 'contentproof') {
@@ -611,12 +666,13 @@
         '<div class="field"><label>차용 금액 (원)</label>' +
           '<input id="f-amount" inputmode="numeric" placeholder="3,000,000" oninput="Formda.app.onMoney(\'amount\', this)">' +
           '<p class="field-help">금액은 미리보기에서 한글 정자(일금 ○○○원정)로 자동 변환됩니다.</p></div>' +
-        '<div class="row2">' + lf('rate', '이자율 (연 %)', '5') + lf('dueDate', '변제기일', '2027-06-30') + '</div>' +
-        '<div class="row2">' + lf('repayMethod', '변제 방법', '만기 일시 상환') + lf('delayRate', '지연손해금 (연 %, 선택)', '12') + '</div>' +
+        '<div class="row2">' + lf('rate', cfg.rateLabel || '이자율 (연 %)', cfg.ratePh == null ? '5' : cfg.ratePh) + lf('dueDate', '변제기일', '2027-06-30') + '</div>' +
+        (cfg.rateHelp ? '<p class="field-help">' + cfg.rateHelp + '</p>' : '') +
+        '<div class="row2">' + lf('repayMethod', '변제 방법', cfg.repayPh || '만기 일시 상환') + lf('delayRate', '지연손해금 (연 %, 선택)', '12') + '</div>' +
         '<div class="field"><label>특약사항 (선택)</label>' +
-          '<textarea id="f-special" rows="3" placeholder="예) 이자는 매월 말일에 지급한다. 변제기일 도래 전이라도 채무자가 ..." oninput="Formda.app.onField(\'special\', this.value)"></textarea></div>' +
+          '<textarea id="f-special" rows="3" placeholder="' + (cfg.specialPh || '예) 이자는 매월 말일에 지급한다. 변제기일 도래 전이라도 채무자가 ...') + '" oninput="Formda.app.onField(\'special\', this.value)"></textarea></div>' +
         '<div class="field"><label>작성일자</label><input id="f-date" type="date" oninput="Formda.app.onField(\'date\', this.value)"></div>' +
-        '<p class="field-help">이자율은 <b>이자제한법상 연 20%</b>를 넘을 수 없습니다. 강제집행력이 필요하면 공증을 권장합니다.</p>' +
+        '<p class="field-help">' + (cfg.loanHelp || '이자율은 <b>이자제한법상 연 20%</b>를 넘을 수 없습니다. 강제집행력이 필요하면 공증을 권장합니다.') + '</p>' +
       '</div>';
   }
 
@@ -861,6 +917,7 @@
   root.Formda.formEngine = {
     'business-invoice': businessInvoiceForm,
     'legal': legalForm,
+    awardThumbs: awardThumbs,
     'payslip': payslipForm,
     'contract': contractForm,
     'expense': expenseForm,

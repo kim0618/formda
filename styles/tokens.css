@@ -469,24 +469,82 @@ body.fd-premium .doc-url { display: none; }
 .rs-alba .rs-sec { margin-top: 12px; }
 .rs-wish td.v { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-/* ===== 상장·표창장 (certificate variant award) ===== */
-.aw-page { position: relative; min-height: 1011px; border: 2.5px solid #b45309;
-  box-shadow: inset 0 0 0 6px #fff, inset 0 0 0 8px #c9962f;
-  display: flex; flex-direction: column; padding: 64px 56px; text-align: center;
-  background: radial-gradient(circle at 50% 8%, rgba(180,83,9,.05), transparent 55%); }
-.aw-page .ct-docno { position: absolute; top: 28px; right: 32px; }
-.aw-title { font-family: 'Nanum Myeongjo', 'Batang', 'AppleMyungjo', serif; font-size: 56px; font-weight: 800; letter-spacing: 26px; color: #1a1a1a; margin-top: 64px; }
-.aw-flourish { display: flex; align-items: center; justify-content: center; width: 210px; margin: 16px auto 0; color: #b45309; }
-.aw-flourish::before, .aw-flourish::after { content: ''; flex: 1; height: 1.5px; background: linear-gradient(90deg, transparent, #c9962f, transparent); }
-.aw-flourish span { margin: 0 12px; font-size: 13px; }
-.aw-mid { margin-top: 60px; display: flex; flex-direction: column; gap: 30px; }
-.aw-sub { font-size: 16px; color: #555; margin-bottom: 12px; letter-spacing: 1px; }
-.aw-name { font-family: 'Nanum Myeongjo', 'Batang', 'AppleMyungjo', serif; font-size: 38px; font-weight: 700; letter-spacing: 14px; color: #111; }
-.aw-body { font-size: 18px; line-height: 2.2; width: 82%; max-height: 380px; overflow: hidden; margin: 0 auto; color: #222; white-space: pre-wrap; overflow-wrap: break-word; }
-.aw-bottom { margin-top: auto; }   /* 수여기관 하단 고정 (제목은 상단 고정, 공적만 가운데서 일정선까지) */
-.aw-date { font-size: 17px; letter-spacing: 2px; margin-bottom: 28px; }
-.aw-org { font-size: 21px; font-weight: 700; }
-.aw-ceo { font-size: 18px; margin-top: 10px; }
+/* ===== 상장 계열 (certificate variant award) - 실제 상장 배치 · 단순 테두리 3종 + 없음 (11/26 실사용 조사) ===== */
+.aw-page { --aw-font: 'Nanum Myeongjo', 'Batang', serif; position: relative; min-height: 1011px; display: flex; flex-direction: column; color: #1a1a1a; background: #fff; }
+.aw-f-myeongjo { --aw-font: 'Nanum Myeongjo', 'Batang', 'AppleMyungjo', serif; }
+.aw-f-gungseo { --aw-font: 'Gungsuh', 'GungSeo', '궁서', '궁서체', 'Song Myung', 'Nanum Myeongjo', serif; }
+.aw-f-gothic { --aw-font: 'Pretendard', 'Malgun Gothic', sans-serif; }
+.aw-in { position: relative; z-index: 1; flex: 1; display: flex; flex-direction: column; padding: 64px 56px; text-align: center; }
+.aw-no { position: absolute; top: 34px; left: 40px; font-size: 14px; color: #333; letter-spacing: .5px; }
+.aw-title { font-family: var(--aw-font); font-size: 58px; font-weight: 800; letter-spacing: 30px; margin-right: -30px; margin-top: 70px; }
+.aw-f-gungseo .aw-title, .aw-f-gungseo .aw-grade, .aw-f-gungseo .aw-name { font-weight: 400; }
+.aw-who { margin-top: 64px; }
+.aw-sub { font-size: 17px; color: #444; margin-bottom: 10px; letter-spacing: 1px; }
+.aw-name { font-family: var(--aw-font); font-size: 36px; font-weight: 700; letter-spacing: 12px; margin-right: -12px; }
+/* 실제 상장 형태: 왼쪽 등급, 오른쪽 소속·성명 */
+.aw-split { display: flex; justify-content: space-between; align-items: flex-end; padding: 0 18px; text-align: left; }
+.aw-grade { font-family: var(--aw-font); font-size: 30px; font-weight: 700; letter-spacing: 4px; }
+.aw-person { text-align: right; }
+.aw-pname { display: flex; align-items: baseline; gap: 14px; justify-content: flex-end; }
+.aw-pname .k { font-size: 17px; color: #444; letter-spacing: 6px; }
+.aw-split .aw-name { font-size: 30px; letter-spacing: 8px; margin-right: -8px; }
+.aw-rows { display: inline-flex; flex-direction: column; gap: 8px; margin: 26px auto 0; align-self: center; font-family: var(--aw-font); font-size: 18px; color: #222; text-align: left; }
+.aw-rows > div { display: flex; gap: 14px; }
+.aw-rows .k { min-width: 84px; color: #555; text-align: justify; text-align-last: justify; }
+.aw-rows .v { font-weight: 700; }
+.aw-body { text-wrap: balance; font-family: var(--aw-font); font-size: 20px; line-height: 2.2; margin: 44px auto 0; width: 88%; max-height: 400px; overflow: hidden; color: #1a1a1a; white-space: pre-wrap; overflow-wrap: break-word; word-break: keep-all; text-align: left; text-indent: 1em; }
+.aw-f-gothic .aw-body { font-size: 19px; }
+.aw-bottom { margin-top: auto; }
+.aw-date { font-size: 19px; letter-spacing: 3px; margin-bottom: 34px; font-family: var(--aw-font); }
+.aw-org { font-family: var(--aw-font); font-size: 26px; font-weight: 700; letter-spacing: 3px; }
+.aw-ceo { font-family: var(--aw-font); font-size: 21px; margin-top: 12px; letter-spacing: 2px; }
+.aw-frame { position: absolute; display: none; pointer-events: none; z-index: 0; }
+.aw-corner { position: absolute; z-index: 0; }
+.aw-c-tl { top: 10px; left: 10px; } .aw-c-tr { top: 10px; right: 10px; transform: scaleX(-1); }
+.aw-c-bl { bottom: 10px; left: 10px; transform: scaleY(-1); } .aw-c-br { bottom: 10px; right: 10px; transform: scale(-1, -1); }
+/* 금장(기본): 테두리 이미지(assets/award/gold-frame.jpg)를 A4 전체에 깔고, 원본 그림의 글자 자리(좌표 환산)에 맞춰 배치 */
+.doc-page.aw-img-gold { background: #fff url(/assets/award/gold-frame.jpg) 0 0 / 100% 100% no-repeat; }
+.doc-page.aw-img-classic { background: #fff url(/assets/award/classic-frame.jpg) 0 0 / 100% 100% no-repeat; }
+.doc-page.aw-img-geo { background: #fff url(/assets/award/geo-frame.jpg) 0 0 / 100% 100% no-repeat; }
+.doc-page.aw-img-phoenix { background: #fff url(/assets/award/phoenix-frame.jpg) 0 0 / 100% 100% no-repeat; }
+.doc-page.aw-img-cloud { background: #fff url(/assets/award/cloud-frame.png) 0 0 / 100% 100% no-repeat; }
+.doc-page.aw-img-flower { background: #fff url(/assets/award/flower-frame.jpg) 0 0 / 100% 100% no-repeat; }
+.aw-s-img { color: #1c2541; background: transparent; }
+.aw-s-img .aw-in { padding: 0 64px 106px; }
+.aw-s-img .aw-no { left: auto; right: 72px; top: 30px; font-size: 15px; color: #1c2541; }
+.aw-s-img .aw-title { margin-top: 108px; font-size: 84px; font-weight: 800; letter-spacing: 40px; margin-right: -40px; color: #1c2541; line-height: 100px; }
+.aw-s-img .aw-who { margin-top: 80px; }
+.aw-s-img .aw-sub { font-size: 18px; color: #333; margin-bottom: 12px; line-height: 22px; }
+.aw-s-img .aw-name { font-size: 48px; font-weight: 800; letter-spacing: 26px; margin-right: -26px; line-height: 56px; color: #1c2541; }
+.aw-s-img .aw-split { width: 440px; margin-left: auto; margin-right: auto; padding: 0; }
+.aw-s-img .aw-split .aw-name { font-size: 38px; letter-spacing: 12px; margin-right: -12px; }
+.aw-s-img .aw-grade { font-size: 32px; color: #1c2541; }
+.aw-s-img .aw-rows { margin-top: 52px; }
+.aw-s-img .aw-body { margin-top: 58px; width: 100%; font-size: 23px; line-height: 1.85; text-align: center; text-indent: 0; max-height: 250px; color: #111; }
+.aw-s-img .aw-rows + .aw-body { margin-top: 26px; }
+.aw-s-img .aw-date { font-size: 21px; margin-bottom: 38px; }
+.aw-s-img .aw-org { font-size: 31px; font-weight: 800; color: #1c2541; }
+.aw-s-img .aw-ceo { font-size: 23px; margin-top: 30px; }
+.aw-s-img .aw-ceo .aw-ceo-name { font-weight: 800; letter-spacing: 10px; }
+/* 테두리 1: 둥근 금색 이중선 (가장 흔한 형태) */
+.aw-s-double { border: 2.5px solid #b8862b; border-radius: 16px; }
+.aw-s-double .aw-fr1 { display: block; inset: 6px; border: 1px solid #c9a24a; border-radius: 11px; }
+/* 테두리 2: 금색 이중선 + 모서리 꺾쇠 */
+.aw-s-corner { border: 2px solid #a87a26; }
+.aw-s-corner .aw-fr1 { display: block; inset: 6px; border: 1px solid #a87a26; }
+/* 테두리 3: 단정한 검정 이중선 (공문서형) */
+.aw-s-line { border: 3px solid #222; }
+.aw-s-line .aw-fr1 { display: block; inset: 5px; border: 1px solid #222; }
+/* 없음: 금박 상장용지에 글자만 인쇄 */
+.aw-s-none { border: 0; }
+/* 가로(A4 가로 1123×794) */
+.doc-page.aw-land { width: 1123px; height: 794px; }
+.aw-land .aw-page { min-height: 682px; }
+.aw-land .aw-in { padding: 40px 80px; }
+.aw-land .aw-title { margin-top: 30px; font-size: 54px; }
+.aw-land .aw-who { margin-top: 34px; }
+.aw-land .aw-body { margin-top: 26px; line-height: 2; max-height: 200px; width: 84%; }
+.aw-land .aw-date { margin-bottom: 18px; }
 
 /* ===== 텍스트 유틸 도구 (A4 아님) ===== */
 /* ===== 급여명세서 (payslip) ===== */
@@ -785,7 +843,7 @@ body.fd-premium .doc-url { display: none; }
 .article-sources a { color: var(--point); text-decoration: underline; }
 .tbl-scroll { overflow-x: auto; margin: 18px 0; }
 .g-table { width: 100%; border-collapse: collapse; font-size: 14px; }
-.g-table th, .g-table td { border: 1px solid var(--line); padding: 10px 12px; text-align: left; vertical-align: top; }
+.g-table th, .g-table td { border: 1px solid var(--line); padding: 10px 12px; text-align: left; vertical-align: top; word-break: keep-all; }   /* 한글 단어 중간 줄바꿈 방지(임명/장) */
 .g-table thead th { background: color-mix(in srgb, var(--accent, var(--point)) 9%, #fff); font-weight: 700; color: var(--ink); white-space: nowrap; }
 .g-table td b { color: var(--accent, var(--point)); }
 .g-faq-block { margin-top: 8px; }
@@ -906,7 +964,7 @@ body.fd-premium .doc-url { display: none; }
   background: #fff; border: 1px solid var(--line); border-radius: 999px; padding: 8px 14px; box-shadow: 0 8px 20px rgba(15, 23, 42, .12); }
 @media (max-width: 900px) { .hero-chip { left: 50%; transform: translateX(-50%); } }
 @media (max-width: 900px) {
-  .hero-in { grid-template-columns: 1fr; gap: 32px; padding: 44px 20px 40px; text-align: center; }
+  .hero-in { grid-template-columns: minmax(0, 1fr); gap: 32px; padding: 44px 20px 40px; text-align: center; }
   .hero-copy p { margin: 0 auto; } .hero-cta, .badges { justify-content: center; }
   .hero-copy h1 { font-size: 28px; }
 }
@@ -1313,3 +1371,43 @@ body.fd-modal-open { overflow: hidden; }
 .lg-incident .lg-content { min-height: 44px; margin-bottom: 16px; }
 .lg-incident .lg-decl { margin: 14px 0 10px; }
 .lg-incident .lg-date { margin: 8px 0 14px; }
+
+/* ---------- 도구 종류 선택 (같은 URL 안 종류 바꾸기, ?kind=) ---------- */
+.kind-bar { padding: 12px 16px 4px; border-bottom: 1px solid var(--line); }
+.kind-bar .kind-h { font-size: 12.5px; color: var(--gray); font-weight: 600; margin-bottom: 8px; }
+.kind-bar .kind-list { display: flex; flex-wrap: wrap; gap: 6px; padding-bottom: 8px; }
+.kind-bar button { font: inherit; font-size: 13.5px; font-weight: 600; padding: 6px 12px; border-radius: 999px;
+  border: 1px solid var(--line); background: var(--white); color: var(--ink); cursor: pointer; }
+.kind-bar button:hover { border-color: var(--point); color: var(--point); }
+.kind-bar button.on { background: var(--point); border-color: var(--point); color: #fff; }
+/* 상장 디자인 선택 칩 (입력 폼) */
+.aw-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.aw-chips button { font: inherit; font-size: 13px; font-weight: 600; padding: 6px 11px; border-radius: 9px; border: 1px solid var(--line);
+  background: #fff; color: var(--ink); cursor: pointer; display: inline-flex; align-items: center; gap: 6px; }
+.aw-chips button:hover { border-color: var(--point); }
+.aw-chips button.on { border-color: var(--point); box-shadow: 0 0 0 1.5px var(--point) inset; color: var(--point); }
+.aw-chips .sw { width: 14px; height: 18px; border-radius: 3px; display: inline-block; }
+.aw-chips.small button { font-size: 12.5px; padding: 5px 10px; font-weight: 500; }
+.aw-paper { margin-top: 10px; padding: 12px 14px; border: 1px dashed var(--line); border-radius: 10px; background: #fafbff; }
+.aw-paper .row3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.aw-paper input { width: 100%; }
+/* 그림 테두리별 겹침 보정: 번호 위치·본문 폭 (11/26 실제 저장본 확인) */
+.aw-s-phoenix .aw-no { left: 0; right: 0; text-align: center; top: 46px; }
+.aw-s-phoenix .aw-body { width: 88%; }
+.aw-s-flower .aw-no { right: 74px; top: 76px; }
+.aw-s-flower .aw-body { width: 82%; }
+.aw-s-cloud .aw-no { right: 70px; top: 100px; }   /* 위쪽 구름 꼬리와 겹치지 않게 구름 아래로(윈도우 크롬 측정 1.2mm → 수정) */
+.aw-s-cloud .aw-in { padding-bottom: 142px; }   /* 서명 줄과 아래 구름 간격 4.4mm → 약 10mm */
+
+/* 상장 테두리 썸네일 줄 (종류 선택 바로 아래, 한 줄) */
+.design-strip { padding: 4px 16px 10px; border-bottom: 1px solid var(--line); }
+.design-strip .kind-h { font-size: 12.5px; color: var(--gray); font-weight: 600; margin-bottom: 6px; }
+.aw-thumbs { display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); gap: 5px; }
+.aw-thumb { font: inherit; display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 4px 1px 4px; border: 1px solid var(--line); border-radius: 8px; background: #fff; cursor: pointer; min-width: 0; }
+.aw-thumb img { width: 36px; height: 51px; display: block; box-shadow: 0 1px 3px rgba(15,23,42,.14); }
+.aw-thumb span { font-size: 10.5px; font-weight: 600; color: var(--ink); line-height: 1.2; text-align: center; letter-spacing: -.4px; word-break: keep-all; }
+.aw-thumb:hover { border-color: var(--point); }
+.aw-thumb.on { border-color: var(--point); box-shadow: 0 0 0 1.5px var(--point) inset; }
+.aw-thumb.on span { color: var(--point); }
+@media (max-width: 480px) { .aw-thumbs { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; } .aw-thumb img { width: 44px; height: 62px; } .aw-thumb span { font-size: 11.5px; } }
+.aw-s-phoenix .aw-in { padding-bottom: 132px; }   /* 아래 꽃 장식과 서명 줄 간격(윈도우 크롬 확인 11/26) */

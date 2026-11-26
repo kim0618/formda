@@ -1,5 +1,6 @@
 // 카테고리 허브 = 문서 선택 허브
 // 사용 가능 도구는 균일한 그리드 카드(확장 대비), 준비중은 작게(리스트), 선택 가이드 + FAQ로 깊이.
+import { av } from './asset-version.mjs';
 import { head, header, footer } from './shell.mjs';
 import { svg } from './icons.mjs';
 import { site, tools } from '../data/registry.js';
@@ -128,7 +129,7 @@ ${header(cat.slug)}
   ${catGuide}
 </main>
 
-<script src="/engine/thumb.js?v=2"></script>
+<script src="${av('/engine/thumb.js')}"></script>
 <script type="application/ld+json">${JSON.stringify(faqLd)}</script>
 <script type="application/ld+json">${JSON.stringify({ '@context': 'https://schema.org', '@type': 'BreadcrumbList', itemListElement: [{ '@type': 'ListItem', position: 1, name: '홈', item: site.domain + '/' }, { '@type': 'ListItem', position: 2, name: cat.label }] })}</script>
 ${footer()}

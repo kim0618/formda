@@ -1,5 +1,6 @@
 // 홈 - 결과물(A4)이 주인공인 도구형 랜딩.
 // 히어로 좌우 2단 → 대표 도구(견적서 크게) → 3단계 → 왜 폼다 → 카테고리(텍스트형)
+import { av } from './asset-version.mjs';
 import { head, header, footer } from './shell.mjs';
 import { svg } from './icons.mjs';
 import { site, categories, tools, categoryBySlug, toolsBySlug } from '../data/registry.js';
@@ -90,8 +91,8 @@ ${header('')}
   </section>
 </main>
 
-<script src="/engine/thumb.js?v=2"></script>
-<script src="/engine/reveal.js"></script>
+<script src="${av('/engine/thumb.js')}"></script>
+<script src="${av('/engine/reveal.js')}"></script>
 <script type="application/ld+json">${JSON.stringify({ '@context': 'https://schema.org', '@type': 'WebSite', '@id': site.domain + '/#website', name: site.name, url: site.domain + '/', inLanguage: 'ko', description: site.description, publisher: { '@id': site.domain + '/#org' }, potentialAction: { '@type': 'SearchAction', target: { '@type': 'EntryPoint', urlTemplate: site.domain + '/?q={search_term_string}' }, 'query-input': 'required name=search_term_string' } })}</script>
 <script type="application/ld+json">${JSON.stringify({ '@context': 'https://schema.org', '@type': 'Organization', '@id': site.domain + '/#org', name: site.name, alternateName: 'formda', url: site.domain + '/', logo: { '@type': 'ImageObject', url: site.domain + '/assets/logo.png', width: 380, height: 200 }, description: site.description, foundingDate: '2026', contactPoint: { '@type': 'ContactPoint', email: 'jptcalc@naver.com', contactType: 'customer support', availableLanguage: 'Korean' } })}</script>
 ${footer()}

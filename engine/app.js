@@ -13,16 +13,29 @@
     init: function (tool) {
       this.docType = tool.docType;
       this.slug = tool.slug || tool.docType;
-      this.cfg = tool.doc;
+      // 종류(kinds): 같은 URL 안에서 양식 종류를 고른다. ?kind=id 링크로 미리 선택(블로그·가이드 연결용)
+      this.baseDoc = tool.doc;
+      this.baseSample = tool.sample;
+      this.kinds = (tool.kinds && tool.kinds.length) ? tool.kinds : null;
+      var kind = null;
+      if (this.kinds) {
+        var q = null;
+        try { q = new URLSearchParams(window.location.search).get('kind'); } catch (e) {}
+        kind = this.kindOf(q);
+        this.kind = kind.id;
+        this.markKindBar();
+      }
+      this.cfg = this.kindCfg(kind);
       // 데스크톱 A4 기본 130%. 모바일·가로형(명함)은 폭에 맞게 100%(아니면 폭을 넘어 잘림)
       // 기본 배율 100% = 미리보기 폭을 꽉 채움(회색 여백 최소화). 세로가 길면 스크롤.
       this.userZoom = 1;
       this.MAX_ITEMS = (tool.doc && tool.doc.maxItems) || 14;   // 무료: 문서별 한 페이지 분량
-      this.sampleState = this.resolveSample(tool.sample); // 원본 샘플 보관 (샘플 불러오기용)
+      this.sampleState = this.resolveSample(this.kindSample(kind)); // 원본 샘플 보관 (샘플 불러오기용)
 
       // 입력폼 주입 (한 번만)
       var formHost = document.getElementById('formPanel');
       formHost.innerHTML = F.formEngine[this.docType](this.cfg);
+      this.mountDesign();
 
       this.applyState(JSON.parse(JSON.stringify(this.sampleState)));
       // 반복 사용: 저장된 내 회사 정보 자동 적용 + 문서번호 자동증가
@@ -40,6 +53,83 @@
       if (document.fonts && document.fonts.ready) {
         document.fonts.ready.then(function () { self.fitPreview(true); });
       }
+    },
+
+    // ----- 종류(kinds) -----
+    kindOf: function (id) {
+      var ks = this.kinds || [];
+      for (var i = 0; i < ks.length; i++) if (ks[i].id === id) return ks[i];
+      return ks[0] || null;
+    },
+    kindCfg: function (kind) {
+      var c = JSON.parse(JSON.stringify(this.baseDoc || {}));
+      if (kind && kind.doc) for (var k in kind.doc) c[k] = kind.doc[k];
+      return c;
+    },
+    kindSample: function (kind) {
+      var s = JSON.parse(JSON.stringify(this.baseSample || {}));
+      if (kind && kind.sample) for (var k in kind.sample) s[k] = kind.sample[k];
+      return s;
+    },
+    markKindBar: function () {
+      var self = this;
+      var btns = document.querySelectorAll('#kindBar [data-kind]');
+      for (var i = 0; i < btns.length; i++) {
+        var on = btns[i].getAttribute('data-kind') === self.kind;
+        btns[i].classList.toggle('on', on);
+        btns[i].setAttribute('aria-pressed', on ? 'true' : 'false');
+      }
+    },
+    // ----- 상장 모양 영역: 데스크톱은 미리보기 아래, 모바일(≤980)은 입력 칸 맨 아래 -----
+    mountDesign: function () {
+      var host = document.getElementById('designHost');
+      if (host && !host.innerHTML && F.formEngine.awardThumbs) host.innerHTML = F.formEngine.awardThumbs();
+    },
+    placeDesign: function () {},
+    // ----- 상장 모양 칩 -----
+    onAw: function (key, val) { this.markInput(); this.state[key] = val; this.syncAwChips(); this.renderDoc(); this.fitPreview(true); },
+    onAwNum: function (key, v) { this.state[key] = v; this.renderDoc(); },
+    syncAwChips: function () {
+      var st = this.state || {};
+      var cur = { awStyle: st.awStyle || 'gold', awFont: st.awFont || (this.cfg && this.cfg.awFont) || 'myeongjo', awOrient: st.awOrient || 'port' };
+      var btns = document.querySelectorAll('[data-aw]');
+      for (var i = 0; i < btns.length; i++) btns[i].classList.toggle('on', cur[btns[i].getAttribute('data-aw')] === btns[i].getAttribute('data-v'));
+      var pp = document.getElementById('awPaper'); if (pp) pp.style.display = cur.awStyle === 'none' ? '' : 'none';
+      var self = this;
+      ['awOffX', 'awOffY', 'awInset', 'grade', 'batch'].forEach(function (k) { var el = document.getElementById('f-' + k); if (el) el.value = st[k] == null ? '' : st[k]; });
+    },
+    awGrade: function (g) { this.markInput(); this.state.grade = g; this.setVal('grade', g); this.renderDoc(); },
+    awPhrase: function (k) {
+      var ph = (this.cfg.phrases || [])[k]; if (!ph) return;
+      this.markInput(); this.state.body = ph.text; this.setVal('body', ph.text); this.renderDoc();
+    },
+    // 종류 바꾸기: 입력칸을 새 종류로 다시 그리고 그 종류 예시를 채운다.
+    // 사용자가 이미 바꿔 적은 공통 칸(이름·기관 등, cfg.kindKeep)은 그대로 옮긴다.
+    setKind: function (id) {
+      if (!this.kinds) return;
+      var kind = this.kindOf(id);
+      if (kind.id === this.kind) return;
+      var cur = this.state || {}, oldSample = this.sampleState || {};
+      this.kind = kind.id;
+      this.cfg = this.kindCfg(kind);
+      this.sampleState = this.resolveSample(this.kindSample(kind));
+      document.getElementById('formPanel').innerHTML = F.formEngine[this.docType](this.cfg);
+      this.mountDesign();
+      var next = JSON.parse(JSON.stringify(this.sampleState));
+      (this.cfg.kindKeep || []).forEach(function (k) {
+        if (cur[k] !== undefined && JSON.stringify(cur[k]) !== JSON.stringify(oldSample[k])) next[k] = cur[k];
+      });
+      next.sealImg = cur.sealImg || null;
+      this.applyState(next);
+      var nm = document.getElementById('sealName');
+      if (nm && next.sealImg) nm.textContent = '도장 적용됨';
+      this.markKindBar();
+      try {
+        var u = new URL(window.location.href);
+        if (kind.id === this.kinds[0].id) u.searchParams.delete('kind'); else u.searchParams.set('kind', kind.id);
+        window.history.replaceState(null, '', u.pathname + u.search + u.hash);
+      } catch (e) {}
+      if (F.track) F.track('select_kind', { doc_type: this.slug || this.docType, kind: kind.id });
     },
 
     resolveSample: function (sample) {
@@ -227,6 +317,8 @@
       this.setVal('handover', s.handover);
       this.setVal('recipientSub', s.recipientSub);
       this.setVal('orgTitle', s.orgTitle);
+      // 종류별 추가 칸 (상장 종류의 임기·과정명 등). 종류를 바꿀 때 이전 값이 남지 않게 빈 값도 넣는다
+      (this.cfg.extraRows || []).forEach(function (r) { var el = document.getElementById('f-' + r.k); if (el) el.value = s[r.k] == null ? '' : s[r.k]; });
       this.setVal('title', s.title);
       this.setVal('sender', s.sender);
       this.setVal('reply', s.reply);
@@ -291,12 +383,18 @@
       this.drawRows();
       this.drawEdu();
       this.drawCareer();
+      if (this.cfg && this.cfg.variant === 'award') this.syncAwChips();
       this.renderDoc();
     },
 
     loadSample: function () {
       if (F.track) F.track('load_sample', { doc_type: this.slug || this.docType });
-      this.applyState(JSON.parse(JSON.stringify(this.sampleState)));
+      var next = JSON.parse(JSON.stringify(this.sampleState));
+      // 상장 계열: 지금 고른 종류의 예시로 채우되, 사용자가 고른 모양(테두리·서체·방향)은 유지
+      if (this.cfg && this.cfg.variant === 'award' && this.state) {
+        ['awStyle', 'awFont', 'awOrient'].forEach(function (k) { if (this.state[k]) next[k] = this.state[k]; }, this);
+      }
+      this.applyState(next);
     },
 
     // 첫 실입력 1회만 계측 (전환 퍼널: 방문 → 입력 시작 → 다운로드)
@@ -334,6 +432,9 @@
           docNo: '', date: this.today(), orgName: '', orgCeo: '', orgReg: '', orgTel: '', orgAddr: '',
           hireDate: '', lastDay: '', recipient: '', handover: '',
           recipientSub: '', orgTitle: '', docTitle: '', sealImg: null,
+          aRole: '', aTerm: '', aCourse: '', aPeriod: '', aHours: '', aBirth: '', workType: '', grade: '', batch: '',
+          // 상장 계열: 비워도 모양(테두리·서체·방향)은 유지
+          awStyle: (this.state || {}).awStyle || (this.sampleState || {}).awStyle, awFont: (this.state || {}).awFont, awOrient: (this.state || {}).awOrient,
         });
         return;
       }
@@ -946,13 +1047,14 @@
       var base = this.cfg.fileName;
       if (this.cfg.variant === 'award') {
         var title = String(this.state.docTitle || '').replace(/\s+/g, '') || base;
-        var who = String(this.state.name || '').trim().replace(/\s+/g, '');
+        var n = String(this.state.batch || '').split('\n').filter(function (l) { return l.trim(); }).length;
+        var who = n ? Math.min(n, 60) + '명' : String(this.state.name || '').trim().replace(/\s+/g, '');
         base = title + (who ? '_' + who : '');
       }
       base = base.replace(/[\\\/:*?"<>|]/g, '').trim() || this.cfg.fileName;
       return base + (this.state.no ? '_' + this.state.no : '');
     },
-    downloadPDF: function (btn) { this.recordDocNo(); if (F.track) F.track('download_pdf', { doc_type: this.slug || this.docType }); this.trackCreate(); F.exporter.downloadPDF(this.dlName(), btn, this.cfg.pageSize); },
+    downloadPDF: function (btn) { this.recordDocNo(); if (F.track) F.track('download_pdf', { doc_type: this.slug || this.docType }); this.trackCreate(); F.exporter.downloadPDF(this.dlName(), btn, (this.cfg.variant === 'award' && this.state.awOrient === 'land') ? [297, 210] : this.cfg.pageSize); },
     downloadPNG: function (btn) { this.recordDocNo(); if (F.track) F.track('download_png', { doc_type: this.slug || this.docType }); this.trackCreate(); F.exporter.downloadPNG(this.dlName(), btn); },
     trackCreate: function () { if (F.trackCreate) F.trackCreate(this.slug || this.docType); },
 
@@ -978,6 +1080,7 @@
           // 모바일 초기/데스크톱→모바일 전환: 둘 다 보이는 상태면 입력 탭만 (둘 다 뜨는 버그 방지)
           self.showPane('input');
         }
+        self.placeDesign();
         self.fitPreview(true);
       }
       window.addEventListener('resize', sync);
