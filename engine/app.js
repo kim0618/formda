@@ -135,6 +135,10 @@
     resolveSample: function (sample) {
       var s = JSON.parse(JSON.stringify(sample || {}));
       if (s.date === 'today') s.date = new Date().toISOString().slice(0, 10);
+      // 예시 날짜가 작성일보다 앞서지 않게: firstMonth 'next'=다음 달, 'today+Nm'=N개월 뒤 말일
+      var nowD = new Date();
+      if (s.firstMonth === 'next') { var nx = new Date(nowD.getFullYear(), nowD.getMonth() + 1, 1); s.firstMonth = nx.getFullYear() + '-' + String(nx.getMonth() + 1).padStart(2, '0'); }
+      Object.keys(s).forEach(function (k) { var mm = /^today\+(\d+)m$/.exec(String(s[k])); if (mm) { var dd = new Date(nowD.getFullYear(), nowD.getMonth() + 1 + parseInt(mm[1], 10), 0); s[k] = dd.getFullYear() + '-' + String(dd.getMonth() + 1).padStart(2, '0') + '-' + String(dd.getDate()).padStart(2, '0'); } });
       if (this.docType === 'cover-letter') {
         if (!s.items || !s.items.length) s.items = [{ heading: '', body: '' }];
       } else if (this.docType === 'career') {
@@ -335,6 +339,8 @@
       this.setMoney('amount', s.amount);
       this.setVal('rate', s.rate);
       this.setVal('dueDate', s.dueDate);
+      var ld = document.getElementById('f-loanDate'); if (ld) ld.value = s.loanDate || '';
+      if (this.cfg && this.cfg.variant === 'loan') this.syncLoan();
       this.setVal('repayMethod', s.repayMethod);
       this.setVal('delayRate', s.delayRate);
       this.setVal('debtReason', s.debtReason);
@@ -627,7 +633,7 @@
     },
     // 캡 걸린 자유 텍스트 영역이 max-height를 넘쳤는지
     overflowing: function () {
-      var els = document.querySelectorAll('#doc .rs-cell, #doc .nt-body, #doc .aw-body, #doc .ct-letter, #doc .ct-handover, #doc .ct-body, #doc .rs-etc, #doc .qt-note, #doc .lg-content, #doc .lg-special, #doc .ps-note, #doc .ec-note, #doc .ho-note');
+      var els = document.querySelectorAll('#doc .rs-cell, #doc .nt-body, #doc .aw-body, #doc .ct-letter, #doc .ct-handover, #doc .ct-body, #doc .rs-etc, #doc .qt-note, #doc .lg-content, #doc .lg-special, #doc .lg-clauses, #doc .ps-note, #doc .ec-note, #doc .ho-note');
       for (var i = 0; i < els.length; i++) {
         if (els[i].scrollHeight > els[i].clientHeight + 2) return true;
       }
@@ -990,7 +996,73 @@
         er[er.length - 1].parentNode.removeChild(er[er.length - 1]);
       }
     },
+    // 차용증 추가 조항(기한이익상실 기본 켜짐, 연대보증인)
+    onLoanOpt: function (k) {
+      this.markInput(); var st = this.state;
+      if (k === 'accel') st.accel = (st.accel === false || st.accel === 'off') ? true : false;
+      else if (k === 'sched') st.sched = (st.sched === false || st.sched === 'off') ? true : false;
+      else st.hasGuar = !(st.hasGuar === true || st.hasGuar === 'on');
+      this.syncLoan(); this.renderDoc(); if (k === 'sched') this.fitPreview(true);
+    },
+    // 차용증 갚는 방식(한 번에 / 매달 나눠): 칩 표시·나눠 갚기 칸 열기·변제기일 칸 숨기기
+    onLoanRepay: function (t) { this.markInput(); this.state.repayType = t; this.syncLoan(); this.renderDoc(); this.fitPreview(true); },
+    syncLoan: function () {
+      var box = document.getElementById('loanMonthly'); if (!box) return;
+      var st = this.state || {}, mon = st.repayType === 'monthly';
+      var bs = document.querySelectorAll('.loan-type [data-lt]');
+      for (var i = 0; i < bs.length; i++) bs[i].classList.toggle('on', bs[i].getAttribute('data-lt') === (mon ? 'monthly' : 'lump'));
+      box.style.display = mon ? '' : 'none';
+      var due = document.getElementById('f-dueDate'); if (due && due.parentNode) due.parentNode.style.display = mon ? 'none' : '';
+      var set = function (id, v) { var el = document.getElementById(id); if (el) el.value = v == null ? '' : v; };
+      set('f-firstMonth', st.firstMonth); set('f-payDay', st.payDay || 'end'); set('f-payCount', st.payCount);
+      set('f-intPay', st.intPay || 'end');
+      var rsv = String(st.rate == null ? '' : st.rate).trim(), hasInt = parseFloat(rsv) > 0;
+      var ipf = document.getElementById('loanIntPay'); if (ipf) ipf.style.display = (!mon && hasInt) ? '' : 'none';
+      var accelOn = !(st.accel === false || st.accel === 'off'), guarOn = st.hasGuar === true || st.hasGuar === 'on';
+      var ob = document.querySelectorAll('.loan-opt [data-lo]');
+      var schedOn = !(st.sched === false || st.sched === 'off');
+      for (var j = 0; j < ob.length; j++) {
+        var lo = ob[j].getAttribute('data-lo');
+        ob[j].classList.toggle('on', lo === 'accel' ? accelOn : lo === 'sched' ? schedOn : guarOn);
+        if (lo === 'sched') ob[j].style.display = mon ? '' : 'none';   // 나눠 갚기일 때만 보임
+      }
+      var gb = document.getElementById('loanGuar'); if (gb) gb.style.display = guarOn ? '' : 'none';
+      set('f-gtName', st.gtName); set('f-gtId', st.gtId); set('f-gtAddr', st.gtAddr); set('f-gtTel', st.gtTel); set('f-gtUntil', st.gtUntil);
+      var gm = document.getElementById('f-gtMax'); if (gm) gm.value = st.gtMax ? Number(st.gtMax).toLocaleString('ko-KR') : '';
+    },
+    // 가족 간 차용 증여세 기준 미리 보기(문서에는 안 찍힘). 상증법 41조의4①2호·시행령 31조의4②(기준 1천만원)·
+    // 시행규칙 10조의5 → 법인세법 시행규칙 43조②(적정 이자율 연 4.6%), 11/26 원문 확인
+    updateGiftCheck: function () {
+      var box = document.getElementById('giftCheck'); if (!box) return;
+      var won = function (n) { n = Math.floor(n); var e = Math.floor(n / 100000000), m = Math.floor((n % 100000000) / 10000), r = n % 10000, out = [];
+        if (e) out.push(e + '억'); if (m) out.push(m.toLocaleString('ko-KR') + '만'); if (r && !e) out.push(r.toLocaleString('ko-KR'));
+        return (out.join(' ') || '0') + '원'; };
+      var amt = Number(this.state.amount) || 0;
+      var rs = String(this.state.rate == null ? '' : this.state.rate).trim(); var r = rs === '' ? 0 : parseFloat(rs);
+      if (!amt) { box.innerHTML = '<b>증여세 기준 미리 보기</b><p>차용 금액을 넣으면 가족 간 이자 기준에 걸리는지 바로 계산해 드립니다.</p>'; return; }
+      if (!isFinite(r) || r < 0) { box.innerHTML = '<b>증여세 기준 미리 보기</b><p>이자율을 숫자로 넣어 주세요.</p>'; return; }
+      var FAIR = 4.6, LIMIT = 10000000;
+      // 매달 나눠 갚으면 원금이 줄어 실제 이자도 줄어든다 → 상환 일정표 첫 1년(1~12회) 이자 합을 실제 이자로 본다
+      var sched = (this.state.repayType === 'monthly' && F.docRender.loanScheduleOf) ? F.docRender.loanScheduleOf(this.state) : null;
+      var fair = Math.floor(amt * 46 / 1000);   // 4.6%를 정수로 계산(부동소수 오차 방지)
+      var real = sched ? sched.rows.slice(0, 12).reduce(function (t, x) { return t + x.interest; }, 0) : Math.floor(Math.round(amt * r * 1000) / 100000);
+      var gap = Math.max(0, fair - real), ok = gap < LIMIT;
+      var line = '1년 적정 이자 ' + won(fair) + '(연 4.6%) − 실제 이자 ' + won(real) + (sched ? '(일정표 첫 1년 합, 연 ' : '(연 ') + (rs === '' ? '0' : rs) + '%) = 차액 <b>' + won(gap) + '</b>';
+      var cap = (!sched && r < FAIR) ? LIMIT / ((FAIR - r) / 100) : Infinity;
+      var verdict = gap <= 0
+        ? '이자율이 연 4.6% 이상이라 이자 차이로 생기는 증여 문제는 없습니다.'
+        : ok ? '1년 차액이 1,000만원보다 적어, 이자를 적게 받는 부분은 증여로 보지 않는 범위입니다.'
+             : '1년 차액이 1,000만원 이상이라, 차액 ' + won(gap) + '을 매년 증여받은 것으로 볼 수 있습니다. 이자율을 올리거나 빌리는 금액을 줄이는 것을 검토하세요.';
+      box.className = 'gift-check ' + (ok ? 'ok' : 'warn');
+      box.innerHTML = '<b>증여세 기준 미리 보기</b>' +
+        '<p class="gc-calc">' + line + '</p><p class="gc-verdict">' + verdict + '</p>' +
+        (isFinite(cap) ? '<p class="gc-cap">이 이자율이면 원금 약 <b>' + won(Math.floor(cap / 10000) * 10000) + '</b>까지 기준 안입니다.</p>' : '') +
+        (r > 20 ? '<p class="gc-verdict" style="color:#b91c1c">연 20%를 넘는 이자는 이자제한법상 넘는 부분이 무효입니다.</p>' : '') +
+        '<ul class="gc-notes"><li>1년 안에 여러 번 빌리면 합쳐서 계산합니다.</li><li>이자 기준과 별개로, 원금을 실제로 갚지 않으면 원금 자체를 증여로 볼 수 있습니다.</li><li>참고용 계산입니다. 큰 금액은 세무사와 확인하세요.</li></ul>';
+    },
     renderDoc: function () {
+      if (this.cfg && this.cfg.giftCheck) this.updateGiftCheck();
+      if (this.cfg && this.cfg.variant === 'loan') { var ipf = document.getElementById('loanIntPay'); if (ipf) { var rv = String(this.state.rate == null ? '' : this.state.rate).trim(); ipf.style.display = (this.state.repayType !== 'monthly' && parseFloat(rv) > 0) ? '' : 'none'; } }
       var html = F.docRender[this.docType](this.state, this.cfg);
       document.getElementById('doc').innerHTML = '<div class="doc-sizer">' + html + '</div>';
       this.trimFillerRows();

@@ -612,16 +612,102 @@
   function vOr(v) { return esc(v) || '&nbsp;'; }
   // YYYY-MM-DD면 한글 날짜로, 아니면 그대로 (변제기일은 "만기 시" 등 자유 입력도 허용)
   function lgDate(v) { return /^\d{4}-\d{2}-\d{2}$/.test(v) ? korDate(v) : vOr(v); }
+  // 차용증(11/26 조항식): 당사자·금액 → 제1조 차용금 → 제2조 이자 → 제3조 변제기일과 방법 → (지연손해금) → (특약) → 맺음 → 날짜·서명
+  // 조항 번호는 들어간 조항만 차례로 매긴다. jakup·쓰다·빈칸폼 등 2026년 차용증 도구 기본 형식과 생활법령 작성례 순서를 따름.
+  // 매달 나눠 갚기(원금균등): 매회 같은 원금 + 남은 원금에 대한 그달 이자(연이율/12). 원 단위 버림, 남는 원금은 마지막 회차에.
+  function loanSchedule(s) {
+    if (s.repayType !== 'monthly') return null;
+    var amt = Math.floor(Number(s.amount) || 0), n = Math.max(0, Math.min(600, parseInt(s.payCount, 10) || 0));
+    var m = /^(\d{4})-(\d{2})$/.exec(String(s.firstMonth || ''));
+    if (!amt || !n || !m) return null;
+    var rs = String(s.rate == null ? '' : s.rate).trim(), r = rs === '' ? 0 : Math.max(0, parseFloat(rs) || 0);
+    var y0 = +m[1], mo0 = +m[2] - 1, day = String(s.payDay || 'end');
+    var base = Math.floor(amt / n), bal = amt, rows = [], tp = 0, ti = 0;
+    for (var k = 0; k < n; k++) {
+      var y = y0 + Math.floor((mo0 + k) / 12), mo = (mo0 + k) % 12;
+      var last = new Date(y, mo + 1, 0).getDate(), d = day === 'end' ? last : Math.min(parseInt(day, 10) || last, last);
+      var interest = Math.floor(bal * r / 100 / 12);
+      var prin = k === n - 1 ? bal : base;
+      bal -= prin; tp += prin; ti += interest;
+      rows.push({ no: k + 1, date: y + '. ' + (mo + 1) + '. ' + d + '.', iso: y + '-' + String(mo + 1).padStart(2, '0') + '-' + String(d).padStart(2, '0'), prin: prin, interest: interest, left: bal });
+    }
+    return { rows: rows, n: n, base: base, lastPrin: rows[n - 1].prin, totalPrin: tp, totalInt: ti, hasInt: r > 0, dayText: day === 'end' ? '말일' : (parseInt(day, 10) + '일') };
+  }
+  function loanSchedulePages(s, sc) {
+    // 한 장 30줄, 합계 줄·안내가 붙는 마지막 장은 28줄 이하가 되게 나눈다(A4 넘침 방지)
+    // 장 수는 최소로, 줄은 장마다 고르게(60회 → 20·20·20). 마지막 장(합계 줄)이 28줄을 넘지 않을 때까지 장을 늘린다
+    var N = sc.rows.length, k = 1;
+    while (Math.ceil(N / k) > 30 || Math.floor(N / k) > 28) k++;
+    var chunks = [], i0 = 0, base = Math.floor(N / k), extra = N % k;
+    for (var c = 0; c < k; c++) { var size = base + (c < extra ? 1 : 0); chunks.push(sc.rows.slice(i0, i0 + size)); i0 += size; }
+    var pages = [], total = chunks.length;
+    for (var p = 0; p < total; p++) {
+      var chunk = chunks[p];
+      var body = chunk.map(function (r) {
+        return '<tr><td>' + r.no + '</td><td>' + r.date + '</td><td class="n">' + comma(r.prin) + '</td>' +
+          (sc.hasInt ? '<td class="n">' + comma(r.interest) + '</td><td class="n">' + comma(r.prin + r.interest) + '</td>' : '') +
+          '<td class="n">' + comma(r.left) + '</td></tr>';
+      }).join('');
+      var foot = p === total - 1 ? '<tr class="sum"><td colspan="2">합계</td><td class="n">' + comma(sc.totalPrin) + '</td>' +
+        (sc.hasInt ? '<td class="n">' + comma(sc.totalInt) + '</td><td class="n">' + comma(sc.totalPrin + sc.totalInt) + '</td>' : '') + '<td></td></tr>' : '';
+      pages.push('<div class="lg-page lg-sched">' +
+        '<div class="lg-sched-title">붙임: 상환 일정표' + (total > 1 ? ' <span>(' + (p + 1) + '/' + total + ')</span>' : '') + '</div>' +
+        '<div class="lg-sched-meta">채권자 ' + vOr(s.crName) + ' · 채무자 ' + vOr(s.dbName) + ' · 원금 ' + comma(Number(s.amount) || 0) + '원' +
+          (sc.hasInt ? ' · 이자 연 ' + esc(s.rate) + '%' : ' · 무이자') + ' · 매월 ' + sc.dayText + ' · ' + sc.n + '회</div>' +
+        '<table class="lg-sched-tbl"><thead><tr><th>회차</th><th>상환일</th><th>원금</th>' + (sc.hasInt ? '<th>이자</th><th>합계</th>' : '') + '<th>남은 원금</th></tr></thead>' +
+        '<tbody>' + body + foot + '</tbody></table>' +
+        (sc.hasInt ? '<div class="lg-sched-note">이자는 남은 원금에 연 ' + esc(s.rate) + '%를 12로 나눈 비율을 곱해 원 단위 아래를 버렸습니다.</div>' : '') +
+      '</div>');
+    }
+    return pages;
+  }
+  function schedAttached(s) { return !(s.sched === false || s.sched === 'off'); }
   function renderLoan(state, cfg) {
     var s = state;
     var amount = Number(s.amount) || 0;
-    var terms = [
-      ['이　자　율', s.rate ? '연 ' + esc(s.rate) + ' %' : '없음 (무이자)'],
-      ['변 제 기 일', lgDate(s.dueDate)],
-      ['변 제 방 법', vOr(s.repayMethod)],
-    ];
-    if (s.delayRate) terms.push(['지연손해금', '연 ' + esc(s.delayRate) + ' %']);
-    // 표준 순서: 채권자·채무자 정보(상단) → 차용금액 → 본문(영수) → 조건 → 특약 → 날짜 → 서명(양 당사자)
+    var rsv = String(s.rate == null ? '' : s.rate).trim();
+    var noRate = rsv === '' || !(parseFloat(rsv) > 0);   // 빈칸·0은 무이자로 처리(조항·일정표 일치)
+    var blankDate = '　　　　년　　월　　일';
+    var due = s.dueDate ? lgDate(s.dueDate) : blankDate;
+    var lent = s.loanDate ? lgDate(s.loanDate) : (s.date ? korDate(s.date) : blankDate);
+    var cl = [];
+    cl.push(['차용금', '채무자는 채권자로부터 위 금액을 ' + lent + '에 빌렸으며, 이를 틀림없이 받았다.']);
+    var sc = loanSchedule(s);
+    var att = sc && schedAttached(s);   // 상환 일정표를 뒷장으로 붙이는지(끄면 본문 1장만)
+    if (sc) {
+      var lastRow = sc.rows[sc.n - 1];
+      cl.push(['이자', noRate ? '이 차용금에는 이자를 붙이지 않는다.' : '이자는 연 ' + esc(s.rate) + '%로 하며, 채무자는 매회 상환일에 그때까지 남은 원금에 대한 그달 이자를 원금과 함께 지급한다.']);
+      cl.push(['변제기일과 방법', '① 채무자는 원금을 ' + (function (f) { return f[0] + '년 ' + (+f[1]) + '월'; })(sc.rows[0].iso.split('-')) + '부터 매월 ' + sc.dayText + '에 ' + sc.n + '회로 나누어 매회 ' + comma(sc.base) + '원씩' +
+        (sc.lastPrin !== sc.base ? '(마지막 회차는 ' + comma(sc.lastPrin) + '원)' : '') + ' 갚는다. 마지막 상환일(변제기일)은 ' + korDate(lastRow.iso) + '이다.' +
+        (att ? '<br>② 회차별 상환일과 금액은 붙임 상환 일정표와 같다.' : '') +
+        (String(s.repayMethod || '').trim() ? '<br>' + (att ? '③' : '②') + ' 갚는 방법: ' + esc(s.repayMethod) : '')]);
+    } else {
+      var ip = String(s.intPay || 'end'), ipMonthly = !noRate && ip !== 'maturity';
+      cl.push(['이자', noRate ? '이 차용금에는 이자를 붙이지 않는다.'
+        : '이자는 연 ' + esc(s.rate) + '%로 하며, ' + (ipMonthly ? '채무자는 매월 ' + (ip === 'end' ? '말일' : (parseInt(ip, 10) + '일')) + '에 그달 이자를 채권자에게 지급한다.' : '원금을 갚을 때 함께 지급한다.')]);
+      cl.push(['변제기일과 방법', '① 채무자는 ' + (noRate || ipMonthly ? '원금을' : '원금과 이자를') + ' ' + due + '까지 채권자에게 갚는다.' +
+        (String(s.repayMethod || '').trim() ? '<br>② 갚는 방법: ' + esc(s.repayMethod) : '')]);
+    }
+    if (String(s.delayRate || '').trim()) cl.push(['지연손해금', sc
+      ? '채무자가 각 회차 상환일에 갚지 않으면 그다음 날부터 다 갚는 날까지 밀린 금액에 연 ' + esc(s.delayRate) + '%의 지연손해금을 더하여 지급한다. 기한의 이익을 잃은 때에는 남은 원금 전부에 대하여 같다.'
+      : '채무자가 변제기일까지 갚지 않으면 그다음 날부터 다 갚는 날까지 남은 원금에 연 ' + esc(s.delayRate) + '%의 지연손해금을 더하여 지급한다.']);
+    if (s.accel !== false && s.accel !== 'off') {
+      var items = [];
+      var monthlyInt = !noRate && (sc || String(s.intPay || 'end') !== 'maturity');
+      if (sc || monthlyInt) items.push((sc && monthlyInt ? '이자 또는 분할 상환금을' : sc ? '분할 상환금을' : '이자를') + ' 2회 이상 연속하여 지급하지 않은 때');
+      items.push('다른 채권자로부터 압류·가압류를 받거나 파산·회생 절차 개시를 신청한 때');
+      cl.push(['기한의 이익 상실', '채무자에게 다음 사유가 생기면 채권자의 청구에 따라 변제기일 전이라도 남은 ' + (noRate ? '원금을' : '원금과 이자를') + ' 한꺼번에 갚아야 한다.' +
+        items.map(function (t, k) { return '<br>' + (k + 1) + '. ' + t; }).join('')]);
+    }
+    var guar = s.hasGuar === true || s.hasGuar === 'on';
+    if (guar) {
+      var gmax = Number(s.gtMax) || 0;
+      cl.push(['연대보증', '① 연대보증인은 이 차용증에 따른 채무자의 채무에 대하여 채무자와 연대하여 보증하며, 보증채무의 최고액은 ' +
+        (gmax > 0 ? '금 ' + calc.korAmount(gmax) + '원정(₩' + comma(gmax) + ')' : '금 　　　　　　원정') + '으로 한다.' +
+        (s.gtUntil ? '<br>② 보증기간은 ' + lgDate(s.gtUntil) + '까지로 한다.' : '') +
+        '<br>' + (s.gtUntil ? '③' : '②') + ' 채권자는 채무자가 원금이나 이자를 3개월 이상 갚지 않거나, 채무자가 기한에 갚을 수 없음을 미리 안 때에는 지체 없이 연대보증인에게 그 사실을 알린다.']);
+    }
+    if (String(s.special || '').trim()) cl.push(['특약', '<span class="lg-cl-pre">' + esc(s.special) + '</span>']);
     var creditor = lgParty('채권자 (빌려준 사람)', [
       ['성　명', vOr(s.crName)], ['주민등록번호', vOr(s.crId)],
       ['주　소', vOr(s.crAddr)], ['연　락　처', vOr(s.crTel)],
@@ -630,18 +716,22 @@
       ['성　명', vOr(s.dbName)], ['주민등록번호', vOr(s.dbId)],
       ['주　소', vOr(s.dbAddr)], ['연　락　처', vOr(s.dbTel)],
     ]);
-    return '<div class="lg-page">' +
+    return '<div class="lg-page' + (guar ? ' lg-compact' : '') + '">' +
       '<div class="lg-title">' + esc(cfg.docTitle) + '</div>' +
       '<div class="lg-parties">' + creditor + debtor + '</div>' +
+      (guar ? '<div class="lg-parties lg-guar">' + lgParty('연대보증인', [['성　명', vOr(s.gtName)], ['주민등록번호', vOr(s.gtId)]]) +
+        lgParty('&nbsp;', [['주　소', vOr(s.gtAddr)], ['연　락　처', vOr(s.gtTel)]]) + '</div>' : '') +
       '<div class="lg-amount"><div class="lg-amount-kr">일금 ' + (amount > 0 ? calc.korAmount(amount) + '원정' : '&nbsp;') + '</div>' +
         '<div class="lg-amount-num">₩ ' + comma(amount) + '</div></div>' +
-      '<div class="lg-body">' + (esc(s.body) || '위 채무자는 위 금액을 채권자로부터 틀림없이 차용하고 영수하였으며, 아래에 정한 바에 따라 ' + (String(s.rate == null ? '' : s.rate).trim() === '' ? '원금' : '원리금') + '을 변제할 것을 확약합니다.') + '</div>' +
-      '<table class="lg-terms"><tbody>' + lgRows(terms) + '</tbody></table>' +
-      (s.special ? '<div class="lg-sec">특약사항</div><div class="lg-special">' + esc(s.special) + '</div>' : '') +
+      '<div class="lg-clauses' + (guar ? ' lg-cl-tight' : '') + '">' + cl.map(function (c, k) {
+        return '<div class="lg-cl"><span class="lg-cl-h">제' + (k + 1) + '조(' + c[0] + ')</span> ' + c[1] + '</div>';
+      }).join('') + '</div>' +
+      '<div class="lg-body lg-close">위 내용을 증명하기 위하여 이 차용증 ' + (guar ? '3부를 작성하고 채권자·채무자·연대보증인이' : '2부를 작성하고 채권자와 채무자가') + ' 서명·날인한 뒤 각 1부씩 보관한다.</div>' +
       '<div class="lg-date">' + korDate(s.date) + '</div>' +
       '<div class="lg-signrow">' +
         '<span class="lg-signcell">채권자　<span class="lg-sign">' + vOr(s.crName) + '<span class="qt-seal">(인)</span></span></span>' +
         '<span class="lg-signcell">채무자　<span class="lg-sign">' + vOr(s.dbName) + sealHTML(s, cfg) + '</span></span>' +
+        (guar ? '<span class="lg-signcell">연대보증인　<span class="lg-sign">' + vOr(s.gtName) + '<span class="qt-seal">(인)</span></span></span>' : '') +
       '</div>' +
     '</div>';
   }
@@ -827,7 +917,11 @@
     else if (cfg.variant === 'contentproof') inner = renderContentProof(state, cfg);
     else if (cfg.variant === 'travelconsent') inner = renderTravelConsent(state, cfg);
     else if (cfg.variant === 'incident') inner = renderIncident(state, cfg);
-    else inner = renderLoan(state, cfg);
+    else {
+      inner = renderLoan(state, cfg);
+      var sc = (opts.single || !schedAttached(state)) ? null : loanSchedule(state);
+      if (sc) return '<div class="doc-pages">' + [inner].concat(loanSchedulePages(state, sc)).map(function (h) { return pageEl(h); }).join('') + '</div>';
+    }
     return wrap(inner, opts);
   }
 
@@ -1114,6 +1208,7 @@
   }
 
   root.Formda.docRender = {
+    loanScheduleOf: loanSchedule,   // 증여세 미리 보기에서 일정표 첫 1년 이자 합 계산용
     'business-invoice': businessInvoice,
     'resume': renderResume,
     'certificate': certificate,

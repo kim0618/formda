@@ -422,6 +422,12 @@ body.fd-premium .doc-url { display: none; }
 .lg-amount-num { font-size: 16px; color: #444; margin-top: 8px; }
 .lg-body, .lg-lead { font-size: 14.5px; line-height: 1.95; color: #1f2430; margin: 0 0 20px; word-break: keep-all; }
 .lg-terms { width: 100%; border-collapse: collapse; font-size: 13.5px; margin: 0 0 20px; }
+/* 차용증 조항식(11/26) */
+.lg-clauses { font-size: 14px; line-height: 1.85; color: #1f2430; margin: 4px 0 18px; max-height: 470px; overflow: hidden; word-break: keep-all; }
+.lg-cl { margin: 0 0 9px; padding-left: 0; }
+.lg-cl-h { font-weight: 700; color: #111; margin-right: 2px; }
+.lg-cl-pre { white-space: pre-wrap; }
+.lg-close { margin-top: 2px; }
 .lg-terms td { border: 1px solid #c6cad1; padding: 10px 14px; }
 .lg-terms .k { background: #f5f6f8; font-weight: 600; width: 26%; color: #555; white-space: nowrap; letter-spacing: 1px; }
 .lg-sec { font-size: 14px; font-weight: 700; color: #111; border-left: 3px solid var(--accent, #6366f1); padding-left: 10px; margin: 4px 0 12px; }
@@ -1411,3 +1417,49 @@ body.fd-modal-open { overflow: hidden; }
 .aw-thumb.on span { color: var(--point); }
 @media (max-width: 480px) { .aw-thumbs { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; } .aw-thumb img { width: 44px; height: 62px; } .aw-thumb span { font-size: 11.5px; } }
 .aw-s-phoenix .aw-in { padding-bottom: 132px; }   /* 아래 꽃 장식과 서명 줄 간격(윈도우 크롬 확인 11/26) */
+
+/* 가족 간 차용 증여세 기준 미리 보기(입력 칸, 인쇄 안 됨) */
+.gift-check { margin: 2px 0 14px; padding: 12px 14px; border-radius: 10px; border: 1px solid var(--line); background: #f8fafc; font-size: 13px; line-height: 1.6; color: var(--ink); }
+.gift-check > b { display: block; font-size: 13.5px; margin-bottom: 4px; }
+.gift-check p { margin: 2px 0; }
+.gift-check.ok { border-color: #bbe5c8; background: #f2fbf5; }
+.gift-check.ok .gc-verdict { color: #15803d; font-weight: 600; }
+.gift-check.warn { border-color: #f5c2a8; background: #fff6f0; }
+.gift-check.warn .gc-verdict { color: #c2410c; font-weight: 600; }
+.gift-check .gc-notes { margin: 6px 0 0; padding-left: 16px; color: var(--gray); font-size: 12px; }
+
+/* 차용증 상환 일정표(붙임 장) */
+.lg-sched-title { font-size: 20px; font-weight: 800; letter-spacing: 2px; margin: 4px 0 8px; }
+.lg-sched-title span { font-size: 14px; font-weight: 600; color: #666; letter-spacing: 0; }
+.lg-sched-meta { font-size: 12.5px; color: #444; margin-bottom: 12px; }
+.lg-sched-tbl { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+.lg-sched-tbl th, .lg-sched-tbl td { border: 1px solid #c6cad1; padding: 4px 8px; height: 27px; text-align: center; }
+.lg-sched-tbl th { background: #f5f6f8; font-weight: 700; }
+.lg-sched-tbl td.n { text-align: right; font-variant-numeric: tabular-nums; }
+.lg-sched-tbl tr.sum td { font-weight: 700; background: #fafbfc; }
+.lg-sched-note { font-size: 11.5px; color: #666; margin-top: 8px; }
+.loan-m { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.loan-m select, .loan-m input { width: 100%; }
+
+/* 차용증 연대보증인 표·조항 간격 */
+.lg-guar { margin-top: -6px; }
+.lg-guar .lg-party-h, .lg-guar h4 { min-height: 1em; }
+.lg-cl-tight .lg-cl { margin-bottom: 6px; }
+.lg-cl-tight { line-height: 1.75; }
+
+/* 연대보증인이 있으면 한 장에 들어가도록 촘촘하게 */
+.lg-compact .lg-title { font-size: 28px; margin: 0 0 14px; }
+.lg-compact .lg-party-t { margin-bottom: 4px; }
+.lg-compact .lg-ptbl td { padding: 5px 10px; }
+.lg-compact .lg-parties { margin-bottom: 10px; }
+.lg-compact .lg-guar { margin-top: 0; }
+.lg-compact .lg-amount { padding: 11px 18px; margin: 0 0 12px; }
+.lg-compact .lg-amount-kr { font-size: 22px; min-height: 26px; }
+.lg-compact .lg-amount-num { font-size: 14.5px; margin-top: 4px; }
+.lg-compact .lg-clauses { font-size: 13.5px; line-height: 1.7; margin-bottom: 12px; max-height: 520px; }
+.lg-compact .lg-cl { margin-bottom: 5px; }
+.lg-compact .lg-close { margin-bottom: 10px; }
+.lg-compact .lg-date { margin: 6px 0 12px; }
+.lg-compact .lg-title { font-size: 26px; margin: 0 0 10px; }
+.lg-compact .lg-amount { padding: 9px 18px; }
+.lg-compact .lg-clauses { line-height: 1.65; }

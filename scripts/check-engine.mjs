@@ -40,6 +40,8 @@ eq('한글금액 3,630,000', calc.korAmount(3630000), '삼백육십삼만');
 eq('한글금액 0', calc.korAmount(0), '영');
 eq('한글금액 1억2천', calc.korAmount(120000000), '일억이천만');
 eq('한글금액 10001', calc.korAmount(10001), '일만일');
+eq('한글금액 1천만', calc.korAmount(10000000), '일천만');
+eq('한글금액 111,110,000', calc.korAmount(111110000), '일억일천일백일십일만');
 
 eq('won 포맷', calc.won(3630000), '3,630,000 원');
 eq('cleanInt 자릿수제한', calc.cleanInt('12,345,678,901,234', 10).value, 1234567890);

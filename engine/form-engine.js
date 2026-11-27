@@ -666,9 +666,39 @@
         '<div class="field"><label>차용 금액 (원)</label>' +
           '<input id="f-amount" inputmode="numeric" placeholder="3,000,000" oninput="Formda.app.onMoney(\'amount\', this)">' +
           '<p class="field-help">금액은 미리보기에서 한글 정자(일금 ○○○원정)로 자동 변환됩니다.</p></div>' +
+        '<div class="field"><label>빌린 날 (돈을 건넨 날, 선택)</label><input id="f-loanDate" type="date" oninput="Formda.app.onField(\'loanDate\', this.value)">' +
+          '<p class="field-help">비우면 작성일로 적힙니다. ' + (cfg.loanDateHelp || '실제로 돈을 보낸 날과 같게 적어 두면 나중에 이체 기록과 맞춰 보기 쉽습니다.') + '</p></div>' +
+        '<div class="field"><label>갚는 방식</label><div class="aw-chips small loan-type">' +
+          '<button type="button" data-lt="lump" onclick="Formda.app.onLoanRepay(\'lump\')">한 번에 갚기</button>' +
+          '<button type="button" data-lt="monthly" onclick="Formda.app.onLoanRepay(\'monthly\')">매달 나눠 갚기</button></div></div>' +
+        '<div id="loanMonthly" style="display:none">' +
+          '<div class="row3 loan-m">' +
+            '<div class="field"><label>첫 상환 달</label><input id="f-firstMonth" type="month" oninput="Formda.app.onField(\'firstMonth\', this.value)"></div>' +
+            '<div class="field"><label>매월 상환일</label><select id="f-payDay" onchange="Formda.app.onField(\'payDay\', this.value)">' + '<option value="end">말일</option>' + Array.from({ length: 28 }, function (_, i) { return '<option value="' + (i + 1) + '">' + (i + 1) + '일</option>'; }).join('') + '</select></div>' +
+            '<div class="field"><label>상환 횟수</label><input id="f-payCount" type="number" min="1" max="600" inputmode="numeric" placeholder="예: 60" oninput="Formda.app.onField(\'payCount\', this.value)"></div>' +
+          '</div>' +
+          '<p class="field-help">매달 같은 원금을 갚고, 이자는 남은 원금에 붙습니다. 변제기일은 마지막 회차로 자동으로 정해집니다. 회차별 금액은 아래 추가 조항의 <b>상환 일정표 붙이기</b>를 켜 두면 둘째 장부터 붙고, 끄면 본문 한 장만 나옵니다. 두 장 이상이면 장과 장 사이에 도장을 걸쳐 찍어(간인) 두세요.</p>' +
+        '</div>' +
         '<div class="row2">' + lf('rate', cfg.rateLabel || '이자율 (연 %)', cfg.ratePh == null ? '5' : cfg.ratePh) + lf('dueDate', '변제기일', '2027-06-30') + '</div>' +
         (cfg.rateHelp ? '<p class="field-help">' + cfg.rateHelp + '</p>' : '') +
+        '<div class="field" id="loanIntPay" style="display:none"><label>이자 내는 날</label><select id="f-intPay" onchange="Formda.app.onField(\'intPay\', this.value)">' +
+          '<option value="end">매월 말일</option>' + Array.from({ length: 28 }, function (_, i) { return '<option value="' + (i + 1) + '">매월 ' + (i + 1) + '일</option>'; }).join('') + '<option value="maturity">원금 갚을 때 한꺼번에</option></select>' +
+          '<p class="field-help">이자를 언제 낼지 정해 두어야 이자가 밀렸을 때(기한이익상실) 판단할 수 있습니다.</p></div>' +
+        (cfg.giftCheck ? '<div class="gift-check" id="giftCheck" aria-live="polite"></div>' : '') +
         '<div class="row2">' + lf('repayMethod', '변제 방법', cfg.repayPh || '만기 일시 상환') + lf('delayRate', '지연손해금 (연 %, 선택)', '12') + '</div>' +
+        '<div class="field"><label>추가 조항</label><div class="aw-chips small loan-opt">' +
+          '<button type="button" data-lo="accel" onclick="Formda.app.onLoanOpt(\'accel\')">기한이익상실 조항</button>' +
+          '<button type="button" data-lo="hasGuar" onclick="Formda.app.onLoanOpt(\'hasGuar\')">연대보증인 넣기</button>' +
+          '<button type="button" data-lo="sched" onclick="Formda.app.onLoanOpt(\'sched\')">상환 일정표 붙이기</button></div>' +
+          '<p class="field-help"><b>기한이익상실</b>: 이자·분할금을 2회 연속 안 내거나 압류·파산 등이 생기면 남은 돈을 한꺼번에 갚게 하는 조항입니다.</p></div>' +
+        '<div id="loanGuar" style="display:none">' +
+          '<div class="row2">' + lf('gtName', '연대보증인 성명', '박보증') + lf('gtId', '주민등록번호', '700101-1******') + '</div>' +
+          lf('gtAddr', '주소', '서울시 ...') +
+          '<div class="row2">' + lf('gtTel', '연락처', '010-0000-0000') +
+            '<div class="field"><label>보증 최고액 (원, 필수)</label><input id="f-gtMax" inputmode="numeric" placeholder="예: 원금 + 이자 여유분" oninput="Formda.app.onMoney(\'gtMax\', this)"></div></div>' +
+          '<div class="field"><label>보증기간 (선택)</label><input id="f-gtUntil" type="date" oninput="Formda.app.onField(\'gtUntil\', this.value)">' +
+            '<p class="field-help">개인 간 채무를 보증할 때는 <b>보증 최고액을 서면에 적어야</b> 하고(보증인 보호를 위한 특별법 제4조), 보증기간을 정하지 않으면 <b>3년</b>으로 봅니다(제7조). 상환이 3년보다 길면 보증기간을 <b>마지막 상환일 이후</b>로 적으세요. 보증은 보증인이 <b>종이에 직접 서명하거나 도장을 찍어야</b> 효력이 있습니다(민법 제428조의2, 전자 서명만으로는 무효).</p></div>' +
+        '</div>' +
         '<div class="field"><label>특약사항 (선택)</label>' +
           '<textarea id="f-special" rows="3" placeholder="' + (cfg.specialPh || '예) 이자는 매월 말일에 지급한다. 변제기일 도래 전이라도 채무자가 ...') + '" oninput="Formda.app.onField(\'special\', this.value)"></textarea></div>' +
         '<div class="field"><label>작성일자</label><input id="f-date" type="date" oninput="Formda.app.onField(\'date\', this.value)"></div>' +
