@@ -1,0 +1,202 @@
+{
+ "category/business.html": [
+  "2026-11-27",
+  "65134777ae64"
+ ],
+ "category/job.html": [
+  "2026-11-25",
+  "209ffb9cb317"
+ ],
+ "category/life.html": [
+  "2026-11-27",
+  "944b5d659e0a"
+ ],
+ "category/text.html": [
+  "2026-11-23",
+  "e31aea5dfce4"
+ ],
+ "index.html": [
+  "2026-11-25",
+  "65ebdc480252"
+ ],
+ "pages/about.html": [
+  "2026-08-25",
+  "6362f97f8679"
+ ],
+ "pages/contact.html": [
+  "2026-08-25",
+  "8cbc91bdf7cc"
+ ],
+ "pages/privacy.html": [
+  "2026-08-25",
+  "22074a8c37aa"
+ ],
+ "pages/terms.html": [
+  "2026-08-25",
+  "476b18a77b84"
+ ],
+ "tools/address-roman.html": [
+  "2026-11-23",
+  "a7f01a2ba815"
+ ],
+ "tools/agreement.html": [
+  "2026-11-26",
+  "d746cc245485"
+ ],
+ "tools/alba-resume.html": [
+  "2026-11-18",
+  "fb1e9ba923df"
+ ],
+ "tools/apology-letter.html": [
+  "2026-11-20",
+  "b77ccfc1aa60"
+ ],
+ "tools/award.html": [
+  "2026-11-26",
+  "1f9295e5605b"
+ ],
+ "tools/business-card.html": [
+  "2026-08-25",
+  "c88ec56eb077"
+ ],
+ "tools/career-certificate.html": [
+  "2026-08-25",
+  "ab64ce720a2e"
+ ],
+ "tools/career.html": [
+  "2026-08-25",
+  "498e84131bed"
+ ],
+ "tools/char-count.html": [
+  "2026-08-25",
+  "00d90187460a"
+ ],
+ "tools/content-proof.html": [
+  "2026-08-25",
+  "0e5c8729d57e"
+ ],
+ "tools/cover-letter.html": [
+  "2026-08-25",
+  "9f780a679bc3"
+ ],
+ "tools/employment-contract.html": [
+  "2026-11-17",
+  "6f1463b847dd"
+ ],
+ "tools/employment.html": [
+  "2026-11-17",
+  "c6f0cbff1d93"
+ ],
+ "tools/estimate.html": [
+  "2026-08-25",
+  "f8741f11a7c8"
+ ],
+ "tools/expense-report.html": [
+  "2026-11-23",
+  "1b585a071d2b"
+ ],
+ "tools/freelance-contract.html": [
+  "2026-08-25",
+  "266244913f3f"
+ ],
+ "tools/handover.html": [
+  "2026-08-25",
+  "4b6072bae7e2"
+ ],
+ "tools/id-photo.html": [
+  "2026-11-17",
+  "c844f04ab066"
+ ],
+ "tools/image-to-pdf.html": [
+  "2026-08-28",
+  "3bc9bb94ebd8"
+ ],
+ "tools/incident-report.html": [
+  "2026-11-23",
+  "b007a4810fcf"
+ ],
+ "tools/invoice.html": [
+  "2026-08-25",
+  "5cc97d3ef0ce"
+ ],
+ "tools/loan.html": [
+  "2026-11-27",
+  "c276955354e3"
+ ],
+ "tools/mandate.html": [
+  "2026-11-17",
+  "9bd3fd267abb"
+ ],
+ "tools/name-roman.html": [
+  "2026-11-23",
+  "d28c55853886"
+ ],
+ "tools/notice.html": [
+  "2026-08-25",
+  "ac98fc0e7b0a"
+ ],
+ "tools/order.html": [
+  "2026-08-25",
+  "b93e83b5979b"
+ ],
+ "tools/payment-pledge.html": [
+  "2026-08-25",
+  "3052d895f06b"
+ ],
+ "tools/payslip.html": [
+  "2026-08-25",
+  "d7c5d8e2af98"
+ ],
+ "tools/pdf-merge.html": [
+  "2026-11-23",
+  "da58dbd133f9"
+ ],
+ "tools/pdf-rotate.html": [
+  "2026-09-01",
+  "e2cac71689b1"
+ ],
+ "tools/pdf-split.html": [
+  "2026-11-23",
+  "25fb8d2f411b"
+ ],
+ "tools/pdf-watermark.html": [
+  "2026-08-25",
+  "c96729ca86e3"
+ ],
+ "tools/qr.html": [
+  "2026-08-25",
+  "4073be66d1b6"
+ ],
+ "tools/reason-statement.html": [
+  "2026-11-25",
+  "a34ff1202325"
+ ],
+ "tools/receipt.html": [
+  "2026-08-25",
+  "abaefe42b0b7"
+ ],
+ "tools/resignation-certificate.html": [
+  "2026-11-17",
+  "83f2e12ec7cd"
+ ],
+ "tools/resignation.html": [
+  "2026-11-17",
+  "95bf3249ccde"
+ ],
+ "tools/resume.html": [
+  "2026-08-25",
+  "0319e3e3e659"
+ ],
+ "tools/statement.html": [
+  "2026-08-25",
+  "4852428e4cd8"
+ ],
+ "tools/text-align.html": [
+  "2026-08-25",
+  "9f3ef595c0a3"
+ ],
+ "tools/travel-consent.html": [
+  "2026-08-25",
+  "2c065796ac59"
+ ]
+}

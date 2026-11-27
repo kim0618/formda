@@ -4,6 +4,7 @@ import { writeFileSync, mkdirSync, rmSync, readFileSync, cpSync } from 'node:fs'
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import vm from 'node:vm';
+import { createHash } from 'node:crypto';
 
 import { site, categories, tools, categoryBySlug } from '../data/registry.js';
 import { config } from '../data/config.js';
@@ -133,19 +134,47 @@ const searchIndex = toolEntries.concat(guideEntries);
 out('search-index.js', 'window.Formda=window.Formda||{};window.Formda.searchIndex=' + JSON.stringify(searchIndex) + ';');
 
 console.log('[6/6] sitemap + robots');
-// 도구·홈·카테고리처럼 개별 날짜가 없는 URL의 lastmod (사이트 최종 수정일).
-// 콘텐츠 리프레시 때 이 값을 올리면 전 URL의 재크롤 신호가 갱신된다.
-const SITE_MODIFIED = '2026-09-07';
+// 도구·홈·카테고리·안내 페이지의 lastmod는 페이지마다 따로 매긴다(11/27).
+// data/lastmod.json 장부에 페이지별 [날짜, 내용 지문]을 두고, 빌드 때 지문(제목+설명+<main> 보이는 글자)이
+// 바뀐 페이지만 오늘(한국 날짜)로 올린다. 공통 틀·스크립트 버전만 바뀐 건 내용 변경으로 치지 않는다.
+// 장부는 빌드가 고쳐 쓰므로 빌드 뒤 함께 커밋한다.
+const SITE_MODIFIED = '2026-09-07';   // 장부에 없는 페이지와 RSS 기본값
+const LASTMOD_FILE = join(ROOT, 'data', 'lastmod.json');
+const TODAY_KST = new Date(Date.now() + 9 * 3600e3).toISOString().slice(0, 10);
+const pageFingerprint = (rel) => {
+  const s = readFileSync(join(DIST, rel), 'utf8');
+  const t = (s.match(/<title>([\s\S]*?)<\/title>/) || [])[1] || '';
+  const d = (s.match(/<meta name="description" content="([^"]*)"/) || [])[1] || '';
+  let body = (s.match(/<main\b[\s\S]*?<\/main>/) || [s])[0];
+  body = body.replace(/<(script|style)\b[\s\S]*?<\/\1>/g, ' ').replace(/<[^>]+>/g, ' ');
+  const txt = (t + ' ' + d + ' ' + body)
+    .replace(/&#(\d+);/g, (_, n) => String.fromCharCode(+n)).replace(/&quot;/g, '"').replace(/&#39;/g, "'")
+    .replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&').replace(/\s+/g, ' ').trim();
+  return createHash('md5').update(txt).digest('hex').slice(0, 12);
+};
+let lastmodBook = {};
+try { lastmodBook = JSON.parse(readFileSync(LASTMOD_FILE, 'utf8')); } catch (e) { lastmodBook = {}; }
+let lastmodChanged = [];
+const lastmodOf = (rel) => {
+  const fp = pageFingerprint(rel), cur = lastmodBook[rel];
+  if (!cur) { lastmodBook[rel] = [TODAY_KST, fp]; lastmodChanged.push(rel); }
+  else if (cur[1] !== fp) { lastmodBook[rel] = [TODAY_KST, fp]; lastmodChanged.push(rel); }
+  return lastmodBook[rel][0];
+};
 // 가이드 허브는 최신 가이드 날짜를 lastmod로.
 const guidesLatest = guides.map((g) => g.date).sort().slice(-1)[0] || SITE_MODIFIED;
 const urls = [
-  { loc: '/', priority: '1.0', lastmod: SITE_MODIFIED },
-  ...categories.map((c) => ({ loc: `/category/${c.slug}.html`, priority: '0.7', lastmod: SITE_MODIFIED })),
-  ...tools.filter((t) => !t.stub).map((t) => ({ loc: `/tools/${t.slug}.html`, priority: '0.9', lastmod: SITE_MODIFIED })),
+  { loc: '/', priority: '1.0', lastmod: lastmodOf('index.html') },
+  ...categories.map((c) => ({ loc: `/category/${c.slug}.html`, priority: '0.7', lastmod: lastmodOf(`category/${c.slug}.html`) })),
+  ...tools.filter((t) => !t.stub).map((t) => ({ loc: `/tools/${t.slug}.html`, priority: '0.9', lastmod: lastmodOf(`tools/${t.slug}.html`) })),
   { loc: '/guides/', priority: '0.7', lastmod: guidesLatest },
   ...guides.map((g) => ({ loc: `/guides/${g.slug}.html`, priority: '0.6', lastmod: g.updated || g.date })),
-  ...['about', 'terms', 'privacy', 'contact'].map((s) => ({ loc: `/pages/${s}.html`, priority: '0.3', lastmod: SITE_MODIFIED })),
+  ...['about', 'terms', 'privacy', 'contact'].map((s) => ({ loc: `/pages/${s}.html`, priority: '0.3', lastmod: lastmodOf(`pages/${s}.html`) })),
 ];
+if (lastmodChanged.length) {
+  writeFileSync(LASTMOD_FILE, JSON.stringify(Object.fromEntries(Object.keys(lastmodBook).sort().map((k) => [k, lastmodBook[k]])), null, 1) + '\n');
+  console.log(`  lastmod 갱신 ${lastmodChanged.length}건(${TODAY_KST}): ${lastmodChanged.join(', ')}  → data/lastmod.json 함께 커밋`);
+}
 // Cloudflare Pages가 /foo.html을 /foo로 308 리다이렉트하므로(끌 수 없는 기본 동작),
 // sitemap도 리다이렉트 없이 바로 200이 나는 최종 URL(확장자 제거)로 등록한다.
 const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
