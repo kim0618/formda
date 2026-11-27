@@ -350,6 +350,19 @@
       this.setVal('agName', s.agName); this.setVal('agId', s.agId); this.setVal('agAddr', s.agAddr); this.setVal('agTel', s.agTel);
       this.setVal('relation', s.relation); this.setVal('content', s.content); this.setVal('attach', s.attach); this.setVal('lead', s.lead);
       this.setVal('prName', s.prName); this.setVal('prId', s.prId); this.setVal('prAddr', s.prAddr); this.setVal('prTel', s.prTel);
+      // 내용증명 (content-proof) 필드
+      this.setVal('subject', s.subject); this.setVal('deadline', s.deadline);
+      this.setVal('srName', s.srName); this.setVal('srId', s.srId); this.setVal('srAddr', s.srAddr); this.setVal('srTel', s.srTel);
+      this.setVal('rcName', s.rcName); this.setVal('rcId', s.rcId); this.setVal('rcAddr', s.rcAddr); this.setVal('rcTel', s.rcTel);
+      // 해외여행 동의서 (travel-consent) 필드
+      this.setVal('parentName', s.parentName); this.setVal('parentAddr', s.parentAddr); this.setVal('parentTel', s.parentTel); this.setVal('parentPassport', s.parentPassport);
+      this.setVal('childName', s.childName); this.setVal('childBirth', s.childBirth); this.setVal('childPassport', s.childPassport);
+      this.setVal('compName', s.compName); this.setVal('compRelation', s.compRelation); this.setVal('compTel', s.compTel); this.setVal('compPassport', s.compPassport);
+      this.setVal('destination', s.destination); this.setVal('lodging', s.lodging);
+      // 프리랜서 용역계약서 (contract variant 'service') 필드
+      this.setVal('coName', s.coName); this.setVal('coRegNo', s.coRegNo); this.setVal('coCeo', s.coCeo); this.setVal('coAddr', s.coAddr); this.setVal('coTel', s.coTel);
+      this.setVal('frName', s.frName); this.setVal('frRegNo', s.frRegNo); this.setVal('frAddr', s.frAddr); this.setVal('frTel', s.frTel);
+      this.setVal('scope', s.scope); this.setVal('paySchedule', s.paySchedule); this.setVal('ipNote', s.ipNote);
       // 경위 문서 (legal variant 'incident') 필드
       this.setVal('recipient', s.recipient); this.setVal('incDate', s.incDate); this.setVal('place', s.place);
       this.setVal('cause', s.cause); this.setVal('action', s.action); this.setVal('pledge', s.pledge);

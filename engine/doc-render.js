@@ -868,7 +868,8 @@
     ];
     if (s.purpose) tripRows.push(['여행 목적', esc(s.purpose)]);
     if (s.lodging) tripRows.push(['숙　소', esc(s.lodging)]);
-    return '<div class="lg-page">' +
+    // 3자 정보표가 길어 기본 여백이면 서명란이 A4 밖으로 밀린다(11/27 실측 107px 초과) → 촘촘한 배치
+    return '<div class="lg-page lg-compact lg-travel">' +
       '<div class="lg-title">' + esc(cfg.docTitle) + '</div>' +
       '<div class="lg-parties lg-parties-col">' + parent + child + comp + '</div>' +
       '<div class="lg-sec">여행 정보</div>' +

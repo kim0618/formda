@@ -47,5 +47,24 @@ eq('won 포맷', calc.won(3630000), '3,630,000 원');
 eq('cleanInt 자릿수제한', calc.cleanInt('12,345,678,901,234', 10).value, 1234567890);
 eq('esc', calc.esc('<b>"x"</b>'), '&lt;b&gt;&quot;x&quot;&lt;/b&gt;');
 
+// 예시값 → 입력칸 채우기 누락 검사 (11/27 프리랜서·내용증명·해외여행 동의서에서 입력칸은 비고 PDF엔 예시가 찍히던 버그 재발 방지)
+// 예시값에 문자열 키가 있고 그 키의 입력칸(f-키)이 폼에 있는데, app.js applyState가 그 키를 채우지 않으면 FAIL
+{
+  const app = readFileSync(join(ROOT, 'engine/app.js'), 'utf8');
+  const a = app.slice(app.indexOf('applyState: function'));
+  const body = a.slice(0, a.indexOf('\n    },\n'));
+  const form = readFileSync(join(ROOT, 'engine/form-engine.js'), 'utf8');
+  const { tools } = await import('../data/registry.js');
+  const miss = [];
+  for (const t of tools) {
+    for (const [k, v] of Object.entries(t.sample || {})) {
+      if (typeof v !== 'string' || k === 'date') continue;
+      const hasInput = form.includes("lf('" + k + "'") || form.includes('id="f-' + k + '"');
+      if (hasInput && !body.includes("'" + k + "'") && !app.includes("'f-" + k + "'")) miss.push(t.slug + '.' + k);
+    }
+  }
+  eq('예시값 입력칸 채우기 누락 0' + (miss.length ? ' (' + miss.join(', ') + ')' : ''), miss.length, 0);
+}
+
 console.log(`\n검산: ${pass} PASS / ${fail} FAIL`);
 process.exit(fail ? 1 : 0);

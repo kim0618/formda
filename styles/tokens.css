@@ -343,7 +343,7 @@ body.fd-premium .doc-url { display: none; }
 /* 입력폼 문항 블록 */
 .q-block { border: 1px solid var(--line); border-radius: 12px; padding: 12px; margin-bottom: 12px; background: #fcfcfd; }
 .q-row { display: flex; gap: 8px; margin-bottom: 8px; }
-.q-head { flex: 1; border: 1px solid var(--line); border-radius: 8px; padding: 9px 11px; font-size: 13.5px; font-weight: 600; font-family: inherit; }
+.q-head { flex: 1; min-width: 0; border: 1px solid var(--line); border-radius: 8px; padding: 9px 11px; font-size: 13.5px; font-weight: 600; font-family: inherit; }
 /* 문항 삭제 버튼: 기본 버튼 대신 입력칸과 어울리는 정돈된 사각 버튼 (호버 시 빨강) */
 .q-row .del { flex: none; width: 42px; align-self: stretch; border: 1px solid var(--line); border-radius: 8px;
   background: var(--white); color: var(--gray-soft); font-size: 17px; line-height: 1; cursor: pointer;
@@ -915,7 +915,8 @@ body.fd-premium .doc-url { display: none; }
 .guide { max-width: 840px; margin: 60px auto 0; }
 .guide-title { font-size: 24px; font-weight: 800; text-align: center; letter-spacing: -.4px; margin-bottom: 12px; }
 .guide-lead { margin: 0 auto 28px; text-align: center; color: var(--gray); font-size: 15px; line-height: 1.8; }
-.guide-cards { display: grid; gap: 16px; }   /* 세로 1열 스택 */
+.guide-cards { display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; }   /* 세로 1열 스택. minmax(0)이 없으면 카드 속 표 폭만큼 열이 넓어져 모바일 가로 넘침(11/27 급여명세서 414px) */
+.g-card { min-width: 0; }
 .g-card { background: var(--white); border: 1px solid var(--line); border-radius: 16px; padding: 24px 26px; box-shadow: var(--shadow-card); }
 .g-card-head { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
 .g-ico { flex: none; width: 40px; height: 40px; border-radius: 12px; background: var(--point-soft);
@@ -1463,3 +1464,9 @@ body.fd-modal-open { overflow: hidden; }
 .lg-compact .lg-title { font-size: 26px; margin: 0 0 10px; }
 .lg-compact .lg-amount { padding: 9px 18px; }
 .lg-compact .lg-clauses { line-height: 1.65; }
+
+/* 해외여행 동의서: 친권자·미성년자·동행인 3개 표 + 여행 정보가 한 장에 들어가도록 */
+.lg-travel .lg-parties-col { gap: 8px; }
+.lg-travel .lg-terms { margin-bottom: 12px; }
+.lg-travel .lg-terms td { padding: 6px 14px; }
+.lg-travel .lg-decl { margin: 12px 0 10px; }
